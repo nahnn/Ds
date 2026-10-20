@@ -1,0 +1,4 @@
+C:/Users/NATHAN/Documents/Github/Faculdade/Ds/Exercises/Triangle/out/build/x64-Debug/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+C:/Users/NATHAN/Documents/Github/Faculdade/Ds/Exercises/Triangle/out/build/x64-Debug/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+C:/Users/NATHAN/Documents/Github/Faculdade/Ds/Exercises/Triangle/out/build/x64-Debug/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+C:/Users/NATHAN/Documents/Github/Faculdade/Ds/Exercises/Triangle/out/build/x64-Debug/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir
