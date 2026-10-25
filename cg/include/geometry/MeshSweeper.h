@@ -34,6 +34,7 @@
 #define __MeshSweeper_h
 
 #include "geometry/TriangleMesh.h"
+#include "geometry/Polyline.h"
 
 namespace cg
 { // begin namespace cg
@@ -50,6 +51,11 @@ public:
   [[nodiscard]] static TriangleMesh* makeCone(int = 16);
   [[nodiscard]] static TriangleMesh* makeCylinder(int = 16);
   [[nodiscard]] static TriangleMesh* makeSphere(int = 16);
+  [[nodiscard]] static TriangleMesh* makeSpiral(Generatrix);
+  [[nodiscard]] static TriangleMesh* makeTranslationalTorsion(Generatrix);
+
+private:
+  static TriangleMesh* _editMeshesCache;
 
 }; // MeshSweeper
 
