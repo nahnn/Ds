@@ -51,8 +51,12 @@ public:
   [[nodiscard]] static TriangleMesh* makeCone(int = 16);
   [[nodiscard]] static TriangleMesh* makeCylinder(int = 16);
   [[nodiscard]] static TriangleMesh* makeSphere(int = 16);
-  [[nodiscard]] static TriangleMesh* makeSpiral(Generatrix);
-  [[nodiscard]] static TriangleMesh* makeTranslationalTorsion(Generatrix);
+  [[nodiscard]] 
+  static TriangleMesh* 
+  makeSpiral(Generatrix, float we, float re, size_t nes, float deh, float dew);
+  [[nodiscard]] 
+  static TriangleMesh* 
+  makeTranslationalTorsion(Generatrix, float lv, float ovw, float ovh, size_t nvs, float svb, float rv);
 
 private:
   static TriangleMesh* _editMeshesCache;
