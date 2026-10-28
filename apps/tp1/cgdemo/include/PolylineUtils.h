@@ -11,9 +11,8 @@
 namespace cg::PolylineUtils
 { // begin namespace cg::PolylineUtils
 
-using precision = float; // ?
-
 /// @brief PolylineLimits: Represents the limits of transformations of a polyline
+template<IsReal R>
 struct PolylineLimits
 {
   // --- Polyline Points ---
@@ -25,20 +24,20 @@ struct PolylineLimits
   static constexpr size_t MaxNc = 40; // max np
 
   // --- Polyline Angle ---
-  static constexpr float MinTc = 1; // min thetac
-  static constexpr float MaxTc = 360; // max thetac
+  static constexpr R MinTc = 1; // min thetac
+  static constexpr R MaxTc = 360; // max thetac
 
   // --- Scale Transform ---
-  static constexpr float MinSp = .1; // min sp
-  static constexpr float MaxSp = 5; // max sp
+  static constexpr R MinSp = .1; // min sp
+  static constexpr R MaxSp = 5; // max sp
 
   // --- Rotation Transform ---
-  static constexpr float MinTp = 0; // min thetap
-  static constexpr float MaxTp = 360; // max thetap
+  static constexpr R MinTp = 0; // min thetap
+  static constexpr R MaxTp = 360; // max thetap
 
   // --- Extrusion ---
-  static constexpr float MinEp = .1; // min ep
-  static constexpr float MaxEp = .9; // max ep
+  static constexpr R MinEp = .1; // min ep
+  static constexpr R MaxEp = .9; // max ep
 
   // --- Spiral Swap Transform ---
 

@@ -27,7 +27,7 @@ public:
   using quat = Quaternion<R>;
   using vec3 = Vector3<R>;
   using mat3 = Matrix3x3<R>;
-  using limits = PolylineUtils::PolylineLimits;
+  using limits = PolylineUtils::PolylineLimits<R>;
 
   /// @brief Default constructor
   constexpr Polyline() = default;
@@ -46,12 +46,21 @@ public:
     assert(tc >= limits::MinTc && tc <= limits::MaxTc 
       && nc >= limits::MinNc && nc <= limits::MaxNc);
     _np = tc < 360 ? nc + 1 : nc;
-    set(ep, tp, sp);
+    set(ep, tp, sp, isOpen);
+  }
+
+  auto& length() const
+  {
+    return _np;
   }
 
   void set(const float& ep, const float& tp, const float& sp);
 
+  void set(const float& tc, const size_t& nc, const float& ep, const float& tp, const float& sp, bool isOpen);
+
 private:
+  void set();
+
   index_t _np{};
   vec3 _points[2 * limits::MaxNp];
 
