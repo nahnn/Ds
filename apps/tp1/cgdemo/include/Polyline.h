@@ -46,7 +46,7 @@ public:
     assert(tc >= limits::MinTc && tc <= limits::MaxTc 
       && nc >= limits::MinNc && nc <= limits::MaxNc);
     _np = tc < 360 ? nc + 1 : nc;
-    set(ep, tp, sp, isOpen);
+    set(tc, nc, ep, tp, sp, isOpen);
   }
 
   auto& length() const
