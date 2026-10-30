@@ -8,14 +8,35 @@
 #ifndef __Spiral_h
 #define __Spiral_h
 
-#include "include/Polyline.h"
+#include "include/PolylineSweeper.h"
 #include "cg/include/geometry/TriangleMesh.h"
 
 namespace cg
 { // begin namespace cg
 
 template<IsReal R>
-class Spiral
+struct SpiralLimits
+{
+  // --- Spiral Swap Transform ---
+  // static constexpr R MinWe
+  // static constexpr R MaxWe
+
+  // static constexpr R MinRe
+  // static constexpr R MaxRe
+
+  // static constexpr size_t MinNes
+  // static constexpr size_t MaxNes
+
+  // static constexpr R MinDeh
+  // static constexpr R MinDeh
+
+  // static constexpr R MinDew
+  // static constexpr R MaxDew
+
+};
+
+template<IsReal R>
+class Spiral : public PolylineSweeper
 {
 public:
   using type = Spiral<R>;
@@ -24,22 +45,21 @@ public:
   using mat3 = Matrix3x3<R>;
   using quat = Quaternion<R>;
 
-  Spiral(poly& poly, R we, R re, size_t nes, R deh, R dew):
+  Spiral(Polyline<R>& poly, R we, R re, size_t nes, R deh, R dew):
     _we{we},
     _re{re},
     _nes{nes},
-    _deh{des},
+    _deh{deh},
     _dew{dew}
   {
-    _poly = poly;
+    // Do nothing
   }
 
-  ~Spiral();
+  ~Spiral() = default;
 
-  TriangleMesh* build();
+  TriangleMesh* build(const Polyline<R>& poly) override;
 
 private:
-  poly& _poly;
   R _we{};
   R _re{};
   size_t _nes{};
