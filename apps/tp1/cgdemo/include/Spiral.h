@@ -21,6 +21,8 @@ public:
   using type = Spiral<R>;
   using value_type = R;
   using vec3 = Vector3<R>;
+  using mat3 = Matrix3x3<R>;
+  using quat = Quaternion<R>;
 
   Spiral(poly& poly, R we, R re, size_t nes, R deh, R dew):
     _we{we},
