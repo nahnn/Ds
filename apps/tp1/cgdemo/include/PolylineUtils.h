@@ -17,7 +17,7 @@ struct PolylineLimits
 {
   // --- Polyline Points ---
   static constexpr size_t MinNp = 3; // min np
-  static constexpr size_t MaxNp = 40; // max np
+  static constexpr size_t MaxNp = 41; // max np
 
   // --- Polyline Segments ---
   static constexpr size_t MinNc = 2; // min np
@@ -40,6 +40,20 @@ struct PolylineLimits
   static constexpr R MaxEp = .9; // max ep
 
   // --- Spiral Swap Transform ---
+  static constexpr R MinWe
+  static constexpr R MaxWe
+
+  static constexpr R MinRe
+  static constexpr R MaxRe
+
+  static constexpr size_t MinNes
+  static constexpr size_t MaxNes
+
+  static constexpr R MinDeh
+  static constexpr R MinDeh
+
+  static constexpr R MinDew
+  static constexpr R MaxDew
 
   // --- Torsion Swap Transform ---
 

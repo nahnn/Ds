@@ -11,7 +11,7 @@ namespace cg
 { // begin namespace cg
 
 template<IsReal R>
-void Polyline<R>::set(const float& ep, const float& tp, const float& sp)
+void Polyline<R>::set(const R& ep, const R& tp, const R& sp)
 {
   vec3 pi;
   vec3 pi_1{0, 1, 0};
@@ -45,7 +45,7 @@ void Polyline<R>::set(const float& ep, const float& tp, const float& sp)
   {
     assert(tp >= limits::MinTp && tp <= limits::MaxTp);
 
-    auto rotTp = mat3{quat{vec3{0, 0, cg::math::toRadians(tp)}}};
+    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(tp))}}};
 
     for (index_t i = 0; i < _np; ++i)
       _points[i] = rotTp * _points[i];
@@ -58,14 +58,18 @@ void Polyline<R>::set(const float& ep, const float& tp, const float& sp)
     for (index_t i = 0; i < _np; ++i)
       _points[i] = sp * _points[i];
   }
+  
+  // bounds
+  for(index_t i = 0; i < _np; ++i)
+    _bounds.extend(_points[i]);
 }
 
 template<IsReal R>
-void Polyline<R>::set(const float& tc, const size_t& nc, const float& ep, const float& tp, const float& sp, bool isOpen) // oq fazer com isOpen?
+void Polyline<R>::set(const R& tc, const size_t& nc, const R& ep, const R& tp, const R& sp, bool isOpen) // oq fazer com isOpen?
 {
   if (tc == 360)
   {
-    auto rotMat = mat3{quat{vec3{0, 0, cg::math::toRadians(tc / _np)}}};
+    auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(tc / _np))}}};
 
     vec3 pi{static_cast<R>(cos(cg::math::toRadians(90 - tc / 2))), 
       static_cast<R>(sin(cg::math::toRadians(90 - tc / 2))), 0};
@@ -78,7 +82,7 @@ void Polyline<R>::set(const float& tc, const size_t& nc, const float& ep, const 
   }
   else
   {
-    auto rotMat = mat3{quat{vec3{0, 0, cg::math::toRadians(tc / nc)}}};
+    auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(tc / nc))}}};
     mat3 rotMatInv{rotMat[0], rotMat[1], rotMat[2]};
     rotMatInv.invert();
 
@@ -126,7 +130,7 @@ void Polyline<R>::set(const float& tc, const size_t& nc, const float& ep, const 
   {
     assert(tp >= limits::MinTp && tp <= limits::MaxTp);
 
-    auto rotTp = mat3{quat{vec3{0, 0, cg::math::toRadians(tp)}}};
+    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(tp))}}};
 
     for (index_t i = 0; i < _np; ++i)
       _points[i] = rotTp * _points[i];
@@ -139,6 +143,10 @@ void Polyline<R>::set(const float& tc, const size_t& nc, const float& ep, const 
     for (index_t i = 0; i < _np; ++i)
       _points[i] = sp * _points[i];
   }
+  
+  // bounds
+  for(index_t i = 0; i < _np; ++i)
+    _bounds.extend(_points[i]);
 }
 
 } // end namespace cg
