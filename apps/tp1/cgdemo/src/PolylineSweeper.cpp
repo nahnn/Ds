@@ -35,10 +35,10 @@ inline void setVertexArray(Vector3<R>*& to, Vector3<R>*& from, size_t total)
 }
  
 template<IsReal R>
-TriangleMesh* Spiral<R>::build()
+TriangleMesh* Spiral<R>::build(const Polyline<R>& poly)
 {
   // computing process parameters
-  auto de = (_we - _poly.width()) / 2;
+  auto de = (_we - poly.width()) / 2;
   auto te = static_cast<R>(cg::math::toRadians(_re * 360));
   auto steps = math::max<size_t>(floor(_re + .5), 1) * _nes + 1;
   auto deltaHeight = _re * _deh;
@@ -50,7 +50,7 @@ TriangleMesh* Spiral<R>::build()
   auto rotMat = mat3{quat{vec3{0, deltaAngle, 0}}};
 
   // TODO: criar malha de triângulos, ligar os pontos que já pertencem à geratriz nela
-  int nv = _poly.length();
+  int nv = poly.length();
   int nt{(2 * nv - 2) * steps};
   TriangleMesh::Data data;
 
@@ -61,7 +61,7 @@ TriangleMesh* Spiral<R>::build()
   data.triangles = new vec3[nt];
   vec3* vertCache = new vec3[nv * steps]; // deletar no fim? fazer uma cache de triângulos tbm?
 
-  vec3*& points = _poly.points();
+  vec3*& points = poly.points();
   setVertexArray<R>(data.vertices, points, nv);
   setVertexArray<R>(vertCache, points, nv);
 

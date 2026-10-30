@@ -8,14 +8,18 @@
 #ifndef __PolylineSweeper_h
 #define __PolylineSweeper_h
 
+#include "include/Polyline.h"
 #include "cg/include/geometry/MeshSweeper.h"
 
 namespace cg
 { // begin namespace cg
 
+template<IsReal R>
 class PolylineSweeper : public MeshSweeper
 {
 public:
+   virtual TriangleMesh* build(const Polyline<R>& poly) = 0;
+private:
 }; // PolylineSweeper
 
 
