@@ -8,13 +8,47 @@
 #ifndef __Polyline_h
 #define __Polyline_h
 
-#include "PolylineUtils.h"
 #include "cg/include/geometry/Bounds3.h"
 #include <cassert>
 
 namespace cg
 { // begin namespace cg
 using index_t = unsigned;
+
+/// @brief PolylineLimits: Represents the limits of transformations of a polyline
+template<IsReal R>
+struct PolylineLimits
+{
+
+  // --- Scale Transform ---
+  static constexpr R MIN_SCALEP = .1; // min scale_p
+  static constexpr R MAX_SCALEP = 5; // max scale_p
+  //OK
+
+  // --- Extrusion ---
+  static constexpr R MIN_EP = .1; // min extrusion_p
+  static constexpr R MaxEp = .9; // max e
+
+  //TODO: Colocar isso em Spiral e Torsion 
+  // --- Spiral Swap Transform ---
+  // static constexpr R MinWe
+  // static constexpr R MaxWe
+
+  // static constexpr R MinRe
+  // static constexpr R MaxRe
+
+  // static constexpr size_t MinNes
+  // static constexpr size_t MaxNes
+
+  // static constexpr R MinDeh
+  // static constexpr R MinDeh
+
+  // static constexpr R MinDew
+  // static constexpr R MaxDew
+
+  // --- Torsion Swap Transform ---
+
+}; // PolylineLimits
 
 /// @brief
 // Polyline: Class that represents the discretization of a given curve.
