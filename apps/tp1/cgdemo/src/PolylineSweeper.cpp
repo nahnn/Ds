@@ -30,8 +30,7 @@ inline void setTriangles(TriangleMesh::Triangle* t,
 template<IsReal R>
 inline void setVertexArray(Vector3<R>*& to, Vector3<R>*& from, size_t total)
 {
-  for(index_t i = 0; i < total; ++i)
-    to[i] = from[i];
+  for(index_t i = 0; i < total; ++i) to[i] = from[i];
 }
  
 template<IsReal R>
@@ -50,19 +49,19 @@ TriangleMesh* Spiral<R>::build(const Polyline<R>& poly)
   auto rotMat = mat3{quat{vec3{0, deltaAngle, 0}}};
 
   // TODO: criar malha de triângulos, ligar os pontos que já pertencem à geratriz nela
-  int nv = poly.length();
+  int nv = poly.length() * steps;
   int nt{(2 * nv - 2) * steps};
   TriangleMesh::Data data;
 
   data.vertexCount = nv;
   data.triangleCount = nt;
   data.vertices = new vec3[nv];
-  data.vertexNormals = new vec3[nv]; // n sei como deveria fazer
+  data.vertexNormals = new vec3[nv];
   data.triangles = new vec3[nt];
-  vec3* vertCache = new vec3[nv * steps]; // deletar no fim? fazer uma cache de triângulos tbm?
+  vec3* vertCache = new vec3[nv]; // deletar no fim? fazer uma cache de triângulos tbm?
 
   vec3*& points = poly.points();
-  setVertexArray<R>(data.vertices, points, nv);
+  setVertexArray<R>(data.vertices, points, poly.length());
   setVertexArray<R>(vertCache, points, nv);
 
   // computing steps
@@ -75,7 +74,9 @@ TriangleMesh* Spiral<R>::build(const Polyline<R>& poly)
       setTriangles<R>(data.triangles, i, i + 1, nv);  
     }
   
-  return new TriangleMesh{std::move(data)};
+  TriangleMesh* t = new TriangleMesh{std::move(data)};
+  t->computeNormals();
+  return t;
 }
 
 } // end namespace cg
