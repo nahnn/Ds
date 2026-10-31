@@ -8,17 +8,15 @@
 #ifndef __SpiralProxy_h
 #define __SpiralProxy_h
 
-#include "cg/include/graph/PrimitiveProxy.h"
+#include "include/PolylineProxy.h"
 
-namespace cg
-{ // begin namespace cg
+namespace cg::graph
+{ // begin namespace cg::graph
 
-class SpiralProxy : public PrimitiveProxy
+class SpiralProxy : public PolylineProxy
 {
-private:
-  Reference<TriangleMeshMapper> _mapper;
 };
 
-} // end namespace cg
+} // end namespace cg::graph
 
 #endif // __SpiralProxy_h

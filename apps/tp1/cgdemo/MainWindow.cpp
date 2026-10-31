@@ -52,6 +52,7 @@ MainWindow::buildDefaultMeshes()
   _defaultMeshes["Cylinder"] = GLGraphics3::cylinder();
   _defaultMeshes["Cone"] = GLGraphics3::cone();
   _defaultMeshes["Plane"] = GLGraphics3::quad();
+  // TODO: add polyline com algo do GLGraphics3 ou classe derivada que criarmos.
 }
 
 void
@@ -113,6 +114,9 @@ MainWindow::createObjectMenu()
       createDefaultPrimitiveObject("Cone");
     if (ImGui::MenuItem("Plane"))
       createDefaultPrimitiveObject("Plane");
+    // TODO: add para Polyline -> talvez add novo método em MainWindow.h que permita tratamento
+    // diferente para polilinhas ou talvez algo com o InspectSweepMesh. De alguma forma (ou não)
+    // ligar com o trangle mesh proxy?
     ImGui::EndMenu();
   }
 }
@@ -134,6 +138,9 @@ MainWindow::addComponentMenu(const SceneObject&)
       component = makeDefaultPrimitive("Cone");
     if (ImGui::MenuItem("Plane"))
       component = makeDefaultPrimitive("Plane");
+    // TODO: add para Polyline -> talvez add novo método em MainWindow.h que permita tratamento
+    // diferente para polilinhas ou talvez algo com o InspectSweepMesh. De alguma forma (ou não)
+    // ligar com o trangle mesh proxy?
     ImGui::EndMenu();
   }
   return component;
