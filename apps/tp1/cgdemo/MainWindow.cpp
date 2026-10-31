@@ -362,7 +362,7 @@ MainWindow::gui()
   // Inspector Window
   ImGui::SetNextWindowPos({rgt, top});
   ImGui::SetNextWindowSize({iww, awy - top});
-  inspectorWindow();
+  inspectorWindow(); // mexer aqui? especailizar funcs de janela pra essa main window ou outras funções
   // Assets Window
   ImGui::SetNextWindowPos({rgt, awy});
   ImGui::SetNextWindowSize({iww, awh});
