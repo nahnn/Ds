@@ -17,14 +17,14 @@ template<IsReal R>
 struct RegularPolygonLimits: public PolylineLimits<R>
 {
   // --- Number of Points ---
-  static constexpr int MIN_NP = 3; // min n of points
-  static constexpr int MAX_NP = 40; // max n of points
+  static constexpr size_t MIN_NP = 3; // min n of points
+  static constexpr size_t MAX_NP = 40; // max n of points
 }; // RegularPolygonLimits
 
 template<IsReal R>
 struct RegularPolygonAttrs: public PolylineAttrs<R>
 {
-  int np{3}; // number of points
+  size_t np{3}; // number of points
   
 }; // RegularPolygonAttrs
 

@@ -17,8 +17,8 @@ template<IsReal R>
 struct CircularArcLimits: public PolylineLimits<R>
 {
   // --- Line Segments ---
-  static constexpr int MIN_NC = 2; // min n of segments
-  static constexpr int MAX_NC = 40; // max n of segments
+  static constexpr size_t MIN_NC = 2; // min n of segments
+  static constexpr size_t MAX_NC = 40; // max n of segments
 
   // --- Arc Angle (degrees) ---
   static constexpr R MIN_THETAC_EXCLUSIVE = 0; // min theta_c (exclusive)
@@ -30,7 +30,7 @@ template<IsReal R>
 struct CircularArcAttrs: public PolylineAttrs<R>
 {
   R tc{30}; // arc angle (degrees)
-  int nc{4}; // number of segments
+  size_t nc{4}; // number of segments
   bool isOpen{false}; // ignored if tc == 360 (polygon, always closed)
 
 }; // CircularArcAttrs
@@ -79,7 +79,7 @@ public:
   }
 
   /// Number of points of the profile (before extrusion)
-  int npoints() const
+  size_t npoints() const
   {
     return isFullCircle() ? _attr.nc : _attr.nc + 1;
   }

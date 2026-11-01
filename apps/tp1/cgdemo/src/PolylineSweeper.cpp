@@ -5,7 +5,8 @@
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
 // Last revision: 24/10/2026
 
-#include "include/Spiral.h"
+#include "include/SpiralSweeper.h"
+#include "TorsionSweeper.h"
 
 namespace cg
 { // begin namespace cg
@@ -34,15 +35,15 @@ inline void setVertexArray(Vector3<R>*& to, Vector3<R>*& from, size_t total)
 }
  
 template<IsReal R>
-TriangleMesh* Spiral<R>::build(const Polyline<R>& poly)
+TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
 {
   // computing process parameters
-  auto de = (_we - poly.width()) / 2;
-  auto te = static_cast<R>(cg::math::toRadians(_re * 360));
-  auto steps = math::max<size_t>(floor(_re + .5), 1) * _nes + 1;
-  auto deltaHeight = _re * _deh;
+  auto de = (_attr.we - poly.width()) / 2;
+  auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
+  auto steps = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes + 1;
+  auto deltaHeight = _attr.re * _attr.deh;
   vec3 dH{0, deltaHeight, 0};
-  auto deltaWidth = _re * _dew;
+  auto deltaWidth = _attr.re * _attr.dew;
   vec3 dW{de + deltaWidth, 0, 0};
   vec3 t{dW + dH};
   auto deltaAngle = te / (steps - 1);
@@ -77,6 +78,12 @@ TriangleMesh* Spiral<R>::build(const Polyline<R>& poly)
   TriangleMesh* t = new TriangleMesh{std::move(data)};
   t->computeNormals();
   return t;
+}
+
+template<IsReal R>
+TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
+{
+  //TODO
 }
 
 } // end namespace cg
