@@ -7,23 +7,28 @@
 
 #include "include/RegularPolygon.h"
 #include "include/CircularArc.h"
+#include "include/Polyline.h"
 
 namespace cg
 { // begin namespace cg
+  
 
+//TODO: Alterar método para utilizar interface da polilinha, já que não deriva mais
 template<IsReal R>
-void RegularPolygon<R>::set()
+Polyline<R> RegularPolygon<R>::generate() const
 {
+  Polyline<R> polyline;
+
   vec3 pi;
   vec3 pi_1{0, 1, 0};
-  _points[0] = pi_1;
+  polyline[0] = pi_1;
 
   auto rotMat = mat3{quat{vec3{0, 0, 2 * (cg::math::pi<R>) /_np}}};
 
   for(index_t i = 1u; i < _np; ++i)
   {
     pi = rotMat * pi_1;
-    _points[i] = pi;
+    polyline[i] = pi;
     pi_1 = pi;
   }
 
@@ -37,7 +42,7 @@ void RegularPolygon<R>::set()
     for(index_t i = _np / 2; i < _np; ++i)
     {
       pi = rotMat * pi_1;
-      _points[i] = pi;
+      polyline[i] = pi;
       pi_1 = pi;
     }
   }
@@ -49,7 +54,7 @@ void RegularPolygon<R>::set()
     auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_tp))}}};
 
     for (index_t i = 0; i < _np; ++i)
-      _points[i] = rotTp * _points[i];
+      polyline[i] = rotTp * polyline[i];
   }
 
   if (sp != 0)
@@ -57,16 +62,19 @@ void RegularPolygon<R>::set()
     assert(sp >= limits::MIN_SCALEP && _sp <= limits::MAX_SCALEP);
 
     for (index_t i = 0; i < _np; ++i)
-      _points[i] = _sp * _points[i];
+      polyline[i] = _sp * polyline[i];
   }
   
   // bounds
   for(index_t i = 0; i < _np; ++i)
-    _bounds.extend(_points[i]);
+    _bounds.extend(polyline[i]);
+
+  return polyline;
 }
 
+//TODO: Alterar método para utilizar interface da polilinha, já que não deriva mais
 template<IsReal R>
-void CircularArc<R>::set()
+Polyline<R> CircularArc<R>::generate() const
 {
   if (_tc == 360)
   {
@@ -77,7 +85,7 @@ void CircularArc<R>::set()
 
     for (index_t i = 0; i < _np; i++)
     {
-      _points[i] = pi;
+      polyline[i] = pi;
       pi = rotMat * pi;
     }
   }
@@ -96,35 +104,35 @@ void CircularArc<R>::set()
     index_t i{}, last{_np - 1};
     for(; i < _np || i < last; i += 2)
     {
-      _points[i] = pi_1;
-      _points[last - i] = pi;
+      polyline[i] = pi_1;
+      polyline[last - i] = pi;
       pi_1 = rotMat * pi_1; // anti clock-wise
       pi = rotMatInv * pi; // clock-wise
     }
 
     if (i == last)
-      _points[static_cast<index_t>(ceil(i/2))] = vec3{0, 1, 0};
+      polyline[static_cast<index_t>(ceil(i/2))] = vec3{0, 1, 0};
   }
 
   // Transformations
   if (_ep != 0)
   {
     assert(_ep >= limits::MIN_EP && _ep <= limits::MAX_EP);
-    pi_1 = vec3{_points[0][0] - _ep, _points[0][1] - _ep, 0}; // Pi+np
-    pi = vec3{_points[last][0] + _ep, _points[last][1] + _ep, 0};
+    pi_1 = vec3{polyline[0][0] - _ep, polyline[0][1] - _ep, 0}; // Pi+np
+    pi = vec3{polyline[last][0] + _ep, polyline[last][1] + _ep, 0};
     _np *= 2;
 
     index_t j{_np / 2};
     for(; j < _np || j < last; j += 2)
     {
-      _points[j] = pi_1;
-      _points[last - j] = pi;
+      polyline[j] = pi_1;
+      polyline[last - j] = pi;
       pi_1 = rotMat * pi_1; // anti clock-wise
       pi = rotMatInv * pi; // clock-wise
     }
 
     if (j == last)
-      _points[static_cast<index_t>(ceil(j/2))] = vec3{0, 1 - _ep, 0};
+      polyline[static_cast<index_t>(ceil(j/2))] = vec3{0, 1 - _ep, 0};
   }
 
   if (_tp != 0)
@@ -134,7 +142,7 @@ void CircularArc<R>::set()
     auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_tp))}}};
 
     for (index_t i = 0; i < _np; ++i)
-      _points[i] = rotTp * _points[i];
+      polyline[i] = rotTp * polyline[i];
   }
 
   if (_sp != 0)
@@ -142,12 +150,14 @@ void CircularArc<R>::set()
     assert(_sp >= limits::MIN_SCALEP && _sp <= limits::MAX_SCALEP);
 
     for (index_t i = 0; i < _np; ++i)
-      _points[i] = _sp * _points[i];
+      polyline[i] = _sp * polyline[i];
   }
   
   // bounds
   for(index_t i = 0; i < _np; ++i)
-    _bounds.extend(_points[i]);
+    _bounds.extend(polyline[i]);
+
+  return polyline;
 }
 
 } // end namespace cg
