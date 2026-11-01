@@ -45,6 +45,8 @@ struct PolylineAttrs
   R tp{0.}; //rotation (theta)
   R ep{0.}; //extrusion
 
+  bool operator ==(const PolylineAttrs&) const = default;
+
 }; // PolylineAttrs
 
 

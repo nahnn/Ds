@@ -97,6 +97,10 @@ MainWindow::beginInitialize()
   Assets::initialize();
   Assets::meshes().insert(_defaultMeshes.begin(), _defaultMeshes.end());
   _sceneFolder = AssetFolder::New("scenes/", ".scn");
+
+  //Polyline/Sweep inspection functions
+  registerInspectFunction(inspectSpiralProxy);
+  registerInspectFunction(inspectTorsionProxy);
 }
 
 void
@@ -114,9 +118,15 @@ MainWindow::createObjectMenu()
       createDefaultPrimitiveObject("Cone");
     if (ImGui::MenuItem("Plane"))
       createDefaultPrimitiveObject("Plane");
-    // TODO: add para Polyline -> talvez add novo método em MainWindow.h que permita tratamento
-    // diferente para polilinhas ou talvez algo com o InspectSweepMesh. De alguma forma (ou não)
-    // ligar com o trangle mesh proxy?
+
+    //Sweep spiral/torsion menu
+    if (ImGui::BeginMenu("Sweep Object"))
+    {
+      if (ImGui::MenuItem("Spiral"))
+        createSpiralObject();
+      if (ImGui::MenuItem("Torsion"))
+        createTorsionObject();
+    }
     ImGui::EndMenu();
   }
 }
@@ -138,9 +148,15 @@ MainWindow::addComponentMenu(const SceneObject&)
       component = makeDefaultPrimitive("Cone");
     if (ImGui::MenuItem("Plane"))
       component = makeDefaultPrimitive("Plane");
-    // TODO: add para Polyline -> talvez add novo método em MainWindow.h que permita tratamento
-    // diferente para polilinhas ou talvez algo com o InspectSweepMesh. De alguma forma (ou não)
-    // ligar com o trangle mesh proxy?
+
+    //Sweep spiral/torsion menu
+    if (ImGui::BeginMenu("Sweep Object"))
+    {
+      if (ImGui::MenuItem("Spiral"))
+        component = makeSpiralProxy();
+      if (ImGui::MenuItem("Torsion"))
+        component = makeTorsionProxy();
+    }
     ImGui::EndMenu();
   }
   return component;
@@ -401,3 +417,204 @@ MainWindow::onResize(int width, int height)
   _image = nullptr;
   return true;
 }
+
+// Spiral/ Torsion methods
+// emulations of createPrimitiveObject()
+
+SceneObject* MainWindow::createSpiralObject()
+{
+  //create new object associated with the scene
+  auto object = SceneObject::New(*_scene);
+  object->setName("Spiral Sweep %d", ++_primitiveId);
+
+  //builds the mesh by sweep method
+  auto proxy = SpiralProxy<float>::New("Spiral Mesh");
+  proxy->build(); 
+
+  //add component and return
+  object->addComponent(proxy);
+  return object;
+}
+
+SceneObject* MainWindow::createTorsionObject()
+{
+  auto object = SceneObject::New(*_scene);
+  object->setName("Torsion Sweep %d", ++_primitiveId);
+
+  auto proxy = TorsionProxy<float>::New("Torsion Mesh");
+  proxy->build(); 
+
+  object->addComponent(proxy);
+  return object;
+}
+
+Component* MainWindow::makeSpiralProxy()
+{
+  auto proxy = SpiralProxy<float>::New("Spiral Mesh");
+  proxy->build(); // Crucial para não nascer invisível!
+  return proxy;
+}
+
+Component* MainWindow::makeTorsionProxy()
+{
+  auto proxy = TorsionProxy<float>::New("Torsion Mesh");
+  proxy->build();
+  return proxy;
+}
+
+// Inspect Polyline/Sweep methods
+
+//PolylineBase
+void MainWindow::inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
+{
+  using Limits = cg::PolylineLimits<float>;
+
+  ImGui::Text("Transformações Base");
+
+  if (ImGui::SliderFloat("Scale", &attrs.sp, Limits::MIN_SCALEP, Limits::MAX_SCALEP))
+    proxy.setPolylineDirty();
+    
+  if (ImGui::SliderFloat("Rotation", &attrs.tp, Limits::MIN_THETAP, Limits::MAX_THETAP))
+    proxy.setPolylineDirty();
+    
+  if (ImGui::SliderFloat("Extrusion", &attrs.ep, Limits::MIN_EP, Limits::MAX_EP))
+    proxy.setPolylineDirty();
+}
+
+//RegularPolygon
+void MainWindow::inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
+{
+  using Limits = cg::RegularPolygonLimits<float>;
+
+  inspectPolylineBase(attrs, proxy);
+  
+  ImGui::Separator();
+  ImGui::Text("Parâmetros do Polígono");
+
+  if (ImGui::SliderInt("Points", &attrs.np, Limits::MIN_NP, Limits::MAX_NP))
+    proxy.setPolylineDirty();
+}
+
+// CircularArc
+void MainWindow::inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
+{
+  using Limits = cg::CircularArcLimits<float>;
+
+  inspectPolylineBase(attrs, proxy);
+  
+  ImGui::Separator();
+  ImGui::Text("Parâmetros do Arco");
+
+  if (ImGui::SliderFloat("Angle", &attrs.tc, Limits::MIN_THETAC_EXCLUSIVE + 0.1f, Limits::MAX_THETAC))
+    proxy.setPolylineDirty();
+
+  if (ImGui::SliderInt("Segments", &attrs.nc, Limits::MIN_NC, Limits::MAX_NC))
+    proxy.setPolylineDirty();
+
+  if (ImGui::Checkbox("Open Arc", &attrs.isOpen))
+    proxy.setPolylineDirty();
+}
+
+// Generic Polyline Generatrix
+void MainWindow::inspectGeneratrix(cg::graph::SweepMeshProxy<float>& proxy)
+{
+  ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "=== Geratriz (2D) ===");
+  
+  if (ImGui::Combo("Generator", (int*)&proxy.activeGen, "Regular Polygon\0Circular Arc\0"))
+    proxy.setPolylineDirty();
+
+  ImGui::Separator();
+
+  //Sets the actual polyline gen type
+  if (proxy.activeGen == SweepMeshProxy<float>::PolylineGeneratorType::RegularPolygon)
+    inspectRegularPolygon(proxy.polygonAttrs, proxy);
+  else
+    inspectCircularArc(proxy.arcAttrs, proxy);
+}
+
+//Sweep Inspects
+
+void MainWindow::inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
+{
+  if (ImGui::Checkbox("Capped", &attrs.capped))
+    proxy.setSweepDirty();
+}
+
+void MainWindow::inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy)
+{
+  using Limits = cg::SpiralSweeperLimits<float>;
+
+  inspectGeneratrix(proxy);
+
+  ImGui::Separator();
+  ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "Spiral");
+
+  inspectSweeperBase(proxy.attr, proxy);
+  ImGui::Separator();
+
+  if (ImGui::SliderFloat("Initial Width (we)", &proxy.attr.we, Limits::MIN_WE_ABS, Limits::MAX_WE_ABS))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderFloat("Revolutions (re)", &proxy.attr.re, Limits::MIN_RE, Limits::MAX_RE))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderInt("Subdivs / Rev (nes)", &proxy.attr.nes, Limits::MIN_NES, Limits::MAX_NES))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderFloat("Height Inc. / Rev (dh)", &proxy.attr.dh, Limits::MIN_DELTAH, Limits::MAX_DELTAH))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderFloat("Width Inc. / Rev (dw)", &proxy.attr.dw, Limits::MIN_DELTAW, Limits::MAX_DELTAW))
+    proxy.setSweepDirty();
+
+  ImGui::Separator();
+
+  // 4. Executa o build apenas se algo foi alterado via interface e sujou as flags
+  if (ImGui::Button("Apply###ApplySpiral"))
+  {
+    proxy.build();
+  }
+}
+
+void MainWindow::inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& proxy)
+{
+  using Limits = cg::TorsionSweeperLimits<float>;
+
+  inspectGeneratrix(proxy);
+
+  ImGui::Separator();
+  ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "Torsion");
+
+  inspectSweeperBase(proxy.attr, proxy);
+  ImGui::Separator();
+
+  if (ImGui::SliderFloat("Length (lv)", &proxy.attr.lv, Limits::MIN_LV, Limits::MAX_LV))
+    proxy.setSweepDirty();
+
+  //TODO: verificar se -50 a 50 é bom mesmo
+  if (ImGui::SliderFloat("Offset Width (ow)", &proxy.attr.ow, -50.0f, 50.0f))
+    proxy.setSweepDirty();
+    
+  if (ImGui::SliderFloat("Offset Height (oh)", &proxy.attr.oh, -50.0f, 50.0f))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderInt("Subdivisions (nsv)", &proxy.attr.nsv, Limits::MIN_NSV, Limits::MAX_NSV))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderFloat("Begin Scale (sb)", &proxy.attr.sb, Limits::MIN_SCALEV, Limits::MAX_SCALEV))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderFloat("End Scale (se)", &proxy.attr.se, Limits::MIN_SCALEV, Limits::MAX_SCALEV))
+    proxy.setSweepDirty();
+
+  if (ImGui::SliderFloat("Torsion (rv)", &proxy.attr.rv, Limits::MIN_RV, Limits::MAX_RV))
+    proxy.setSweepDirty();
+
+  ImGui::Separator();
+
+  if (ImGui::Button("Apply###ApplyTorsion"))
+  {
+    proxy.build();
+  }
+}
+

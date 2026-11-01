@@ -21,8 +21,8 @@ struct TorsionSweeperLimits: public PolylineSweeperLimits<R>
   static constexpr R MAX_LV = 50; // max lv
 
   // --- Subdivisions ---
-  static constexpr size_t MIN_NSV = 1; // min nsv
-  static constexpr size_t MAX_NSV = 50; // max nsv
+  static constexpr int MIN_NSV = 1; // min nsv
+  static constexpr int MAX_NSV = 50; // max nsv
 
   // --- Scale (begin and end) ---
   static constexpr R MIN_SCALEV = .1; // min sb and se
@@ -43,7 +43,7 @@ struct TorsionSweeperAttrs: public PolylineSweeperAttrs<R>
   R lv{10}; // length
   R ow{0}; // horizontal offset
   R oh{0}; // vertical offset
-  size_t nsv{10}; // subdivisions
+  int nsv{10}; // subdivisions
   R sb{1}; // initial scale
   R se{1}; // final scale
   R rv{0}; // torsion

@@ -26,8 +26,8 @@ struct SpiralSweeperLimits: public PolylineSweeperLimits<R>
   static constexpr R MAX_RE = 20; // max re
 
   // --- Subdivisions per Revolution ---
-  static constexpr size_t MIN_NES = 3; // min nes
-  static constexpr size_t MAX_NES = 40; // max nes
+  static constexpr int MIN_NES = 3; // min nes
+  static constexpr int MAX_NES = 40; // max nes
 
   // --- Height Increment per Revolution ---
   static constexpr R MIN_DELTAH = 0; // min dh
@@ -44,7 +44,7 @@ struct SpiralSweeperAttrs: public PolylineSweeperAttrs<R>
 {
   R we{4}; // initial width
   R re{1}; // number of revolutions
-  size_t nes{16}; // subdivisions per revolution
+  int nes{16}; // subdivisions per revolution
   R dh{2}; // height increment per revolution
   R dw{2}; // width increment per revolution
 }; // SpiralSweeperAttrs

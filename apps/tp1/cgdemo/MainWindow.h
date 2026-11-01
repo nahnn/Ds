@@ -38,13 +38,18 @@
 #include "graphics/GLImage.h"
 #include "RayTracer.h"
 
-namespace cg::graph
-{ // begin namespace cg::graph
+#include "include/RegularPolygon.h"
+#include "include/CircularArc.h"
+#include "include/SweepMeshProxy.h"
 
-class HelixProxy;
-class SweepMeshProxy;
+//TODO: ver se precisa remover. Residual do repo original
+// namespace cg::graph
+// { // begin namespace cg::graph
 
-} // end namespace cg::graph
+// class HelixProxy;
+// class SweepMeshProxy;
+
+// } // end namespace cg::graph
 
 using namespace cg;
 using namespace cg::graph;
@@ -90,7 +95,6 @@ private:
   Component* addComponentMenu(const SceneObject&) override;
   void createObjectMenu() override;
 
-
   void mainMenu();
   void fileMenu();
   void viewMenu();
@@ -104,8 +108,26 @@ private:
 
   static void buildDefaultMeshes();
 
-  static void inspectHelix(SceneWindow&, HelixProxy&);
-  static void inspectSweepMesh(SceneWindow&, SweepMeshProxy&);
+  //TODO: remover, residual do repo original
+  // static void inspectHelix(SceneWindow&, HelixProxy&);
+  // static void inspectSweepMesh(SceneWindow&, SweepMeshProxy&);
+
+  //Polyline Gen Inspectors
+  static void inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectGeneratrix(SweepMeshProxy<float>& proxy);
+
+  // Main Inspectors
+  static void inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy);
+  static void inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& proxy);
+
+  SceneObject* createSpiralObject();
+  SceneObject* createTorsionObject();
+
+  Component* makeSpiralProxy();
+  Component* makeTorsionProxy();
 
 }; // MainWindow
 
