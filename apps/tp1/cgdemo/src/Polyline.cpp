@@ -23,9 +23,9 @@ Polyline<R> RegularPolygon<R>::generate() const
   vec3 pi_1{0, 1, 0};
   polyline[0] = pi_1;
 
-  auto rotMat = mat3{quat{vec3{0, 0, 2 * (cg::math::pi<R>) /_np}}};
+  auto rotMat = mat3{quat{vec3{0, 0, 2 * (cg::math::pi<R>) /_length}}};
 
-  for(index_t i = 1u; i < _np; ++i)
+  for(index_t i = 1u; i < _length; ++i)
   {
     pi = rotMat * pi_1;
     polyline[i] = pi;
@@ -33,13 +33,13 @@ Polyline<R> RegularPolygon<R>::generate() const
   }
 
   // Transformations
-  if (_ep != 0)
+  if (_attr.ep != 0)
   {
-    assert(_ep >= limits::MIN_EP && _ep <= limits::MAX_EP);
-    _np *= 2;
-    pi_1 = vec3{0, 1 - _ep, 0}; // Pi+np
+    assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
+    _length *= 2;
+    pi_1 = vec3{0, 1 - _attr.ep, 0}; // Pi+np
 
-    for(index_t i = _np / 2; i < _np; ++i)
+    for(index_t i = _length / 2; i < _length; ++i)
     {
       pi = rotMat * pi_1;
       polyline[i] = pi;
@@ -47,27 +47,26 @@ Polyline<R> RegularPolygon<R>::generate() const
     }
   }
 
-  if (_tp != 0)
+  if (_attr.tp != 0)
   {
-    assert(_tp >= limits::MIN_THETAP && _tp <= limits::MAX_THETAP);
+    assert(_attr.tp >= limits::MIN_THETAP && _attr.tp <= limits::MAX_THETAP);
 
-    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_tp))}}};
+    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tp))}}};
 
-    for (index_t i = 0; i < _np; ++i)
+    for (index_t i = 0; i < _length; ++i)
       polyline[i] = rotTp * polyline[i];
   }
 
-  if (sp != 0)
+  if (_attr.sp != 0)
   {
-    assert(sp >= limits::MIN_SCALEP && _sp <= limits::MAX_SCALEP);
+    assert(_attr.sp >= limits::MIN_SCALEP && _attr.sp <= limits::MAX_SCALEP);
 
-    for (index_t i = 0; i < _np; ++i)
-      polyline[i] = _sp * polyline[i];
+    for (index_t i = 0; i < _length; ++i)
+      polyline[i] = _attr.sp * polyline[i];
   }
   
   // bounds
-  for(index_t i = 0; i < _np; ++i)
-    _bounds.extend(polyline[i]);
+  polyline.computeBounds();
 
   return polyline;
 }
@@ -76,14 +75,16 @@ Polyline<R> RegularPolygon<R>::generate() const
 template<IsReal R>
 Polyline<R> CircularArc<R>::generate() const
 {
-  if (_tc == 360)
+  Polyline<R> polyline;
+
+  if (isFullCircle())
   {
-    auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_tc / _np))}}};
+    auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tc / _length))}}};
 
-    vec3 pi{static_cast<R>(cos(cg::math::toRadians(90 - _tc / 2))), 
-      static_cast<R>(sin(cg::math::toRadians(90 - _tc / 2))), 0};
+    vec3 pi{static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
+      static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
 
-    for (index_t i = 0; i < _np; i++)
+    for (index_t i = 0; i < _length; i++)
     {
       polyline[i] = pi;
       pi = rotMat * pi;
@@ -91,18 +92,18 @@ Polyline<R> CircularArc<R>::generate() const
   }
   else
   {
-    auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_tc / _nc))}}};
+    auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tc / _length))}}};
     mat3 rotMatInv{rotMat[0], rotMat[1], rotMat[2]};
     rotMatInv.invert();
 
-    vec3 pi{-static_cast<R>(cos(cg::math::toRadians(90 - _tc / 2))), 
-      static_cast<R>(sin(cg::math::toRadians(90 - _tc / 2))), 0};
+    vec3 pi{-static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
+      static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
       
-    vec3 pi_1{static_cast<R>(cos(cg::math::toRadians(90 - _tc / 2))), 
-      static_cast<R>(sin(cg::math::toRadians(90 - _tc / 2))), 0};
+    vec3 pi_1{static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
+      static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
 
-    index_t i{}, last{_np - 1};
-    for(; i < _np || i < last; i += 2)
+    index_t i{}, last{_length - 1};
+    for(; i < _length || i < last; i += 2)
     {
       polyline[i] = pi_1;
       polyline[last - i] = pi;
@@ -115,15 +116,15 @@ Polyline<R> CircularArc<R>::generate() const
   }
 
   // Transformations
-  if (_ep != 0)
+  if (_attr.ep != 0)
   {
-    assert(_ep >= limits::MIN_EP && _ep <= limits::MAX_EP);
-    pi_1 = vec3{polyline[0][0] - _ep, polyline[0][1] - _ep, 0}; // Pi+np
-    pi = vec3{polyline[last][0] + _ep, polyline[last][1] + _ep, 0};
-    _np *= 2;
+    assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
+    pi_1 = vec3{polyline[0][0] - _attr.ep, polyline[0][1] - _attr.ep, 0}; // Pi+np
+    pi = vec3{polyline[last][0] + _attr.ep, polyline[last][1] + _attr.ep, 0};
+    _length *= 2;
 
-    index_t j{_np / 2};
-    for(; j < _np || j < last; j += 2)
+    index_t j{_length / 2};
+    for(; j < _length || j < last; j += 2)
     {
       polyline[j] = pi_1;
       polyline[last - j] = pi;
@@ -132,30 +133,29 @@ Polyline<R> CircularArc<R>::generate() const
     }
 
     if (j == last)
-      polyline[static_cast<index_t>(ceil(j/2))] = vec3{0, 1 - _ep, 0};
+      polyline[static_cast<index_t>(ceil(j/2))] = vec3{0, 1 - _attr.ep, 0};
   }
 
-  if (_tp != 0)
+  if (_attr.tp != 0)
   {
-    assert(_tp >= limits::MIN_THETAP && _tp <= limits::MAX_THETAP);
+    assert(_attr.tp >= limits::MIN_THETAP && _attr.tp <= limits::MAX_THETAP);
 
-    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_tp))}}};
+    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tp))}}};
 
-    for (index_t i = 0; i < _np; ++i)
+    for (index_t i = 0; i < _length; ++i)
       polyline[i] = rotTp * polyline[i];
   }
 
-  if (_sp != 0)
+  if (_attr.sp != 0)
   {
-    assert(_sp >= limits::MIN_SCALEP && _sp <= limits::MAX_SCALEP);
+    assert(_attr.sp >= limits::MIN_SCALEP && _attr.sp <= limits::MAX_SCALEP);
 
-    for (index_t i = 0; i < _np; ++i)
-      polyline[i] = _sp * polyline[i];
+    for (index_t i = 0; i < _length; ++i)
+      polyline[i] = _attr.sp * polyline[i];
   }
   
   // bounds
-  for(index_t i = 0; i < _np; ++i)
-    _bounds.extend(polyline[i]);
+  polyline.computeBounds();
 
   return polyline;
 }

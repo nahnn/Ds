@@ -14,6 +14,8 @@
 #include "include/TorsionSweeper.h"
 #include "include/RegularPolygon.h"
 #include "include/CircularArc.h"
+#include <unordered_map>
+#include <functional>
 
 namespace cg::graph
 {
@@ -24,7 +26,10 @@ template<IsReal R>
 class SweepMeshProxy : public PrimitiveProxy
 {
 public:
-  enum PolylineGeneratorType { RegularPolygon, CircularArc };
+  using type = SweepMeshProxy<R>;
+  using value_type = R;
+  
+  enum PolylineGeneratorType : std::size_t { RegularPolygon, CircularArc };
 
   [[nodiscard]] const char* meshName() const
   {
@@ -52,16 +57,7 @@ public:
   {
     if (_dirtyPolyline)
     {
-      switch (activeGen)
-      {
-        case PolylineGeneratorType::RegularPolygon:
-          generatePolylineBase(_regularPolyGen, polygonAttrs);
-          break;
-          
-        case PolylineGeneratorType::CircularArc:
-          generatePolylineBase(_circularGen, arcAttrs);
-          break;
-      }
+      _creationFunctions[activeGen]();
       _dirtyPolyline = false; // Limpa a sujeira
     }
 
@@ -79,24 +75,39 @@ public:
 
   // generator attrs
   PolylineGeneratorType activeGen{PolylineGeneratorType::RegularPolygon};
-  CircularArcAttrs arcAttrs{};
-  RegularPolygonAttrs polygonAttrs{};
-
+  PolylineAttrs<R> attrs;
 
 protected:
-
   // TODO: adicionar concepts para a verificação do parametros do template
-  template <typename GeneratorType, typename AttrType>
-  void generatePolylineBase(GeneratorType& generator, const AttrType& attrs)
+  template<typename G, typename A> 
+  using CreateFunction =  std::function<void()>;
+
+  template<typename G, typename A>
+  using CreateFunctionsMap = std::unordered_map<size_t, CreateFunction<G, A>>;
+
+  template<typename G, typename A>
+  void registerCreateFunction(size_t type, CreateFunction<G, A> function)
   {
-    generator.set(attrs);
-    _polyline = generator.generate();
+    assert(function);
+    _creationFunctions[type] = (CreateFunction<G, A>)function;
+  }
+
+  template<typename G, typename A>
+  void generatePolylineBase()
+  {
+    _generator.set(dynamic_cast<A>(attrs));
+    _polyline = dynamic_cast<G>(_generator).generate();
   }
 
   SweepMeshProxy(const TriangleMesh& mesh, const std::string& meshName):
     PrimitiveProxy{*new TriangleMeshMapper{mesh}},
     _meshName{meshName}
-  {}
+  {
+    registerCreateFunction(static_cast<size_t>(PolylineGeneratorType::RegularPolygon),
+      generatePolylineBase<RegularPolygon<R>, RegularPolygonAttrs<R>>);
+    registerCreateFunction(static_cast<size_t>(PolylineGeneratorType::CircularArc), 
+      generatePolylineBase<CircularArc<R>, CircularArcAttrs<R>>);
+  }
 
   // Sweep method implemented in derived proxys
   virtual void sweep() = 0;
@@ -106,14 +117,12 @@ protected:
     mapper()->setMesh(mesh);
   }
   
+  Polyline<R> _polyline;
+  PolylineGenerator<R> _generator;
+  CreateFunctionsMap _creationFunctions;
+  std::string _meshName;
   bool _dirtyPolyline{true};
   bool _dirtySweep{true};
-
-  std::string _meshName;
-  Polyline<R> _polyline;
-
-  RegularPolygon<R> _regularPolyGen;
-  CircularArc<R> _circularGen;
 
 }; // SweepMeshProxy
 
@@ -138,8 +147,8 @@ protected:
   }
 
 private:
-  SpiralProxy(const TriangleMesh& mesh, const std::string& name)
-    : SweepMeshProxy<R>(mesh, name) 
+  SpiralProxy(const TriangleMesh& mesh, const std::string& name): 
+    SweepMeshProxy<R>{mesh, name} 
   {
     // do nothing
   }
@@ -167,8 +176,8 @@ protected:
   }
 
 private:
-  TorsionProxy(const TriangleMesh& mesh, const std::string& name)
-    : SweepMeshProxy<R>(mesh, name) 
+  TorsionProxy(const TriangleMesh& mesh, const std::string& name): 
+    SweepMeshProxy<R>{mesh, name} 
   {
     //do nothing
   }

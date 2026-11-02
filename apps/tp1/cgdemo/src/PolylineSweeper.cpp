@@ -41,15 +41,14 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   auto de = (_attr.we - poly.width()) / 2;
   auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
   auto steps = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes + 1;
-  auto deltaHeight = _attr.re * _attr.deh;
+  auto deltaHeight = _attr.re * _attr.dh;
   vec3 dH{0, deltaHeight, 0};
-  auto deltaWidth = _attr.re * _attr.dew;
+  auto deltaWidth = _attr.re * _attr.dw;
   vec3 dW{de + deltaWidth, 0, 0};
   vec3 t{dW + dH};
   auto deltaAngle = te / (steps - 1);
   auto rotMat = mat3{quat{vec3{0, deltaAngle, 0}}};
 
-  // TODO: criar malha de triângulos, ligar os pontos que já pertencem à geratriz nela
   int nv = poly.length() * steps;
   int nt{(2 * nv - 2) * steps};
   TriangleMesh::Data data;
@@ -59,11 +58,11 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   data.vertices = new vec3[nv];
   data.vertexNormals = new vec3[nv];
   data.triangles = new vec3[nt];
-  vec3* vertCache = new vec3[nv]; // deletar no fim? fazer uma cache de triângulos tbm?
+  vec3* vertCache = new vec3[nv]; // se pa que deletar no fim do método
 
   vec3*& points = poly.points();
   setVertexArray<R>(data.vertices, points, poly.length());
-  setVertexArray<R>(vertCache, points, nv);
+  setVertexArray<R>(vertCache, points, poly.length());
 
   // computing steps
   for(index_t i = 0; i < steps; ++i) // current line 
@@ -75,6 +74,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
       setTriangles<R>(data.triangles, i, i + 1, nv);  
     }
   
+  // TODO: open / closed and capped / uncapped (conectar os vértices da primeira e última linha e / ou fechar)
   TriangleMesh* t = new TriangleMesh{std::move(data)};
   t->computeNormals();
   return t;

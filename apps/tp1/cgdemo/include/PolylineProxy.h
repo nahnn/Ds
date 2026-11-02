@@ -17,50 +17,32 @@
 namespace cg::graph
 { // begin namespace cg::graph
 
-template<IsReal R>
+// TODO: add concepts
+template<IsReal R, template<typename> class PolylineAttrsType, template<typename> class PolylineGeneratorType>
 class PolylineProxy: public Component
 {
 public:
-    const Polyline& getPolyline() const { return _polyline; }
+  using type = PolylineProxy<R, PolylineAttrsType, PolylineGeneratorType>;
+  using polyline_type = Polyline<R>;
+  using attrs_type = PolylineAttrsType<R>;
+  using gen_type = PolylineGeneratorType<R>;
+  using value_type = R;
 
-    virtual void build() = 0;
+  attrs_type attr;
+
+  const Polyline& getPolyline() const { return _polyline; }
+
+  virtual void build() 
+  {
+    _generator.set(dynamic_cast<attrs_type>(attr));
+    _polyline = dynamic_cast<gen_type>(_generator).generate(); 
+  }
+
 protected:
-    Polyline<R> _polyline;
+  Polyline<R> _polyline;
+  gen_type& _generator;
+
 };
-
-//TODO: Maybe move to other file
-
-template<IsReal R>
-class RegularPolygonProxy: public PolylineProxy<R>
-{
-public:
-    RegularPolygonAttrs<R> attr;
-
-    void build() override{
-        _generator.set(attr);
-        _polyline = _generator.generate();
-    }
-
-private:
-    RegularPolygon<R>& _generator{};
-
-}; //RegularPolygonProxy
-
-template<IsReal R>
-class CircularArcProxy: public PolylineProxy<R>
-{
-public:
-    CircularArcAttrs<R> attr;
-
-    void build() override{
-        _generator.set(attr);
-        _polyline = _generator.generate();
-    }
-
-private:
-    CircularArc<R>& _generator{};
-
-}; // CircularArcProxy
 
 } // end namespace cg::graph
 

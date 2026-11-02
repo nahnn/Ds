@@ -24,7 +24,6 @@ struct RegularPolygonLimits: public PolylineLimits<R>
 template<IsReal R>
 struct RegularPolygonAttrs: public PolylineAttrs<R>
 {
-  int np{3}; // number of points
 
   bool operator ==(const RegularPolygonAttrs&) const = default;
   
@@ -54,7 +53,7 @@ public:
   }
 
   /// sets the attributes
-  void set(const attrs_type& attr)
+  void set(const attrs_type& attr) override
   {
     auto a = attr;
 

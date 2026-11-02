@@ -41,6 +41,7 @@ struct PolylineLimits
 template<IsReal R>
 struct PolylineAttrs
 {
+  int np{3}; // number of points
   R sp{1.}; //scale
   R tp{0.}; //rotation (theta)
   R ep{0.}; //extrusion
@@ -159,6 +160,7 @@ public:
   using value_type = R;
   using vec3 = Vector3<R>;
   using limits = PolylineLimits<R>;
+  using attrs_type = PolylineAttrs<R>;
 
   virtual ~PolylineGenerator() = default;
 
@@ -167,6 +169,8 @@ public:
 
   //Generates the polyline using the especif implemented method
   virtual Polyline<R> generate() const = 0;
+
+  virtual void set(const attrs_type& attr) = 0;
 
 protected:
   static void clampSet(PolylineAttrs<R>& attr)

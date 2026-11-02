@@ -61,7 +61,7 @@ public:
   }
 
   /// sets the attributes
-  void set(const attrs_type& attr)
+  void set(const attrs_type& attr) override
   {
     auto a = attr;
 

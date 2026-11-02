@@ -527,9 +527,9 @@ void MainWindow::inspectGeneratrix(cg::graph::SweepMeshProxy<float>& proxy)
 
   //Sets the actual polyline gen type
   if (proxy.activeGen == SweepMeshProxy<float>::PolylineGeneratorType::RegularPolygon)
-    inspectRegularPolygon(proxy.polygonAttrs, proxy);
+    inspectRegularPolygon((RegularPolygonAttrs<float>&)proxy.attrs, proxy);
   else
-    inspectCircularArc(proxy.arcAttrs, proxy);
+    inspectCircularArc((CircularArcAttrs<float>&)proxy.attrs, proxy);
 }
 
 //Sweep Inspects
