@@ -28,7 +28,7 @@ add_executable(cgdemo
 )
 
 # cg library (prebuilt in ../../cg/lib): includes, definitions and dependencies
-include(${CMAKE_CURRENT_LIST_DIR}/../../cg/import.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../../cg/import.cmake)
 target_link_libraries(cgdemo PRIVATE cg)
 
 # ---------------------------------------------------------------------------
