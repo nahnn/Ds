@@ -19,11 +19,11 @@ esac
 # Run from the script's folder, wherever it is called from
 cd "$(dirname "$0")"
 
-# Fail early if the cg library has not been built yet
-if [ ! -f "../../cg/lib/$CG_LIB" ]; then
-  echo "Error: ../../cg/lib/$CG_LIB not found. Build cg ($CONFIG) first."
+if [ ! -f "../../../cg/lib/$CG_LIB" ]; then
+  echo "Error: ../../../cg/lib/$CG_LIB not found. Build cg ($CONFIG) first."
   exit 1
 fi
+
 
 # Single-config generator: one build folder per configuration
 cmake -S . -B "build/$CONFIG" -DCMAKE_BUILD_TYPE="$CONFIG"
