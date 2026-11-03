@@ -21,8 +21,8 @@ rem Run from the script's folder, wherever it is called from
 cd /d "%~dp0"
 
 rem Fail early if the cg library has not been built yet
-if not exist "..\..\cg\lib\%CG_LIB%" (
-  echo Error: ..\..\cg\lib\%CG_LIB% not found. Build cg ^(%CONFIG%^) first.
+if not exist "..\..\..\cg\lib\%CG_LIB%" (
+  echo Error: ..\..\..\cg\lib\%CG_LIB% not found. Build cg ^(%CONFIG%^) first.
   exit /b 1
 )
 
