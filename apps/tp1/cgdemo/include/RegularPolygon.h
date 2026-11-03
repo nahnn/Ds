@@ -57,13 +57,6 @@ public:
     static_cast<PolylineAttrs<R>&>(_attr) = attr;
 
     this->clampSet(_attr);
-
-    /* Remove comment if needed
-    if (const auto* specific_attr = dynamic_cast<const attrs_type*>(&attr))
-    {
-      //no specific attributes
-    }
-    */
   }
 
   Polyline<R> generate() const override;
@@ -79,14 +72,15 @@ template<IsReal R>
 Polyline<R> RegularPolygon<R>::generate() const
 {
   Polyline<R> polyline;
+  auto length = polyline.setLength(_attr.np).length();
 
   vec3 pi;
   vec3 pi_1{0, 1, 0};
   polyline[0] = pi_1;
 
-  auto rotMat = mat3{quat{vec3{0, 0, 2 * (cg::math::pi<R>) /_length}}};
+  auto rotMat = mat3{quat{vec3{0, 0, 2 * (cg::math::pi<R>) / length}}};
 
-  for(index_t i = 1u; i < _length; ++i)
+  for(index_t i = 1u; i < length; ++i)
   {
     pi = rotMat * pi_1;
     polyline[i] = pi;
@@ -97,10 +91,10 @@ Polyline<R> RegularPolygon<R>::generate() const
   if (_attr.ep != 0)
   {
     assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
-    _length *= 2;
+    length = polyline.setLength(2 * length).length();
     pi_1 = vec3{0, 1 - _attr.ep, 0}; // Pi+np
 
-    for(index_t i = _length / 2; i < _length; ++i)
+    for(index_t i = length / 2; i < length; ++i)
     {
       pi = rotMat * pi_1;
       polyline[i] = pi;
@@ -114,7 +108,7 @@ Polyline<R> RegularPolygon<R>::generate() const
 
     auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tp))}}};
 
-    for (index_t i = 0; i < _length; ++i)
+    for (index_t i = 0; i < length; ++i)
       polyline[i] = rotTp * polyline[i];
   }
 
@@ -122,7 +116,7 @@ Polyline<R> RegularPolygon<R>::generate() const
   {
     assert(_attr.sp >= limits::MIN_SCALEP && _attr.sp <= limits::MAX_SCALEP);
 
-    for (index_t i = 0; i < _length; ++i)
+    for (index_t i = 0; i < length; ++i)
       polyline[i] = _attr.sp * polyline[i];
   }
   

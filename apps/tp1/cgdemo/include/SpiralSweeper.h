@@ -57,6 +57,9 @@ public:
   using type = SpiralSweeper<R>;
   using value_type = R;
   using polyline_type = Polyline<R>;
+  using vec3 = Vector3<R>;
+  using mat3 = Matrix3x3<R>;
+  using quat = Quaternion<R>;
   using limits = SpiralSweeperLimits<R>;
   using attrs_type = SpiralSweeperAttrs<R>;
 
@@ -110,6 +113,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   auto deltaAngle = te / (steps - 1);
   auto rotMat = mat3{quat{vec3{0, deltaAngle, 0}}};
 
+  // computing triangles
   int nv = poly.length() * steps;
   int nt{(2 * nv - 2) * steps};
   TriangleMesh::Data data;

@@ -84,6 +84,12 @@ public:
     return _length;
   }
 
+  void setLength(size_t length)
+  {
+    assert(length <= MAX_LENGTH);
+    _length = length;
+  }
+
   const auto& points() const
   {
     return _points;
