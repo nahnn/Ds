@@ -142,10 +142,11 @@ Polyline<R> CircularArc<R>::generate() const
   if (_attr.ep != 0)
   {
     assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
+    polyline.setExtruded(true);
     index_t last{length - 1};
+    length = polyline.setLength(2 * length).length();
     vec3 pi_1 = vec3{polyline[0][0] - _attr.ep, polyline[0][1] - _attr.ep, 0}; // Pi+np
     vec3 pi = vec3{polyline[last][0] + _attr.ep, polyline[last][1] + _attr.ep, 0};
-    length = polyline.setLength(2 * length).length();
 
     index_t j{length / 2};
     last = length - 1; 

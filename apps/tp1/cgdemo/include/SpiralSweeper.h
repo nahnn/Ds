@@ -125,24 +125,26 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   data.triangles = new vec3[nt];
   vec3* vertCache = new vec3[nv]; // se pa que deletar no fim do método
 
-  vec3*& points = poly.points();
-  setVertexArray<R>(data.vertices, points, poly.length());
-  setVertexArray<R>(vertCache, points, poly.length());
+  const auto& points = poly.points();
+  auto np = poly.isExtruded() ? poly.length() / 2 : poly.length();
+  setVertexArray<R>(data.vertices, points, np);
+  setVertexArray<R>(vertCache, points, np);
 
   // computing steps
   for(index_t i = 0; i < steps; ++i) // current line 
-    for(index_t j = 0; j < nv; ++j) // points
+    for(index_t j = 0; j < np; ++j) // points
     {
-      vec3 pi = new vec3{rotMat * vertCache[i * nv + j]}; // new point rotated
+      vec3 pi{rotMat * vertCache[i * np + j]}; // new point rotated
       pi = pi + i * t;
-      vertCache[i * nv + j] = data.vertices[i * nv + j] = pi;
-      setTriangles<R>(data.triangles, i, i + 1, nv);  
+      vertCache[i * np + j] = data.vertices[i * np + j] = pi;
+      setTriangles<R>(data.triangles, i, i + 1, np);  
     }
   
   // TODO: open / closed and capped / uncapped (conectar os vértices da primeira e última linha e / ou fechar)
-  TriangleMesh* t = new TriangleMesh{std::move(data)};
-  t->computeNormals();
-  return t;
+  delete[] vertCache;
+  TriangleMesh* tri = new TriangleMesh{std::move(data)};
+  tri->computeNormals();
+  return tri;
 }
 
 } // end namespace cg

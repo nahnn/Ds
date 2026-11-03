@@ -91,6 +91,7 @@ Polyline<R> RegularPolygon<R>::generate() const
   if (_attr.ep != 0)
   {
     assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
+    polyline.setExtruded(true);
     length = polyline.setLength(2 * length).length();
     pi_1 = vec3{0, 1 - _attr.ep, 0}; // Pi+np
 
