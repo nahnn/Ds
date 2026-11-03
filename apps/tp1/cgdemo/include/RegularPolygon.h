@@ -72,7 +72,8 @@ template<IsReal R>
 Polyline<R> RegularPolygon<R>::generate() const
 {
   Polyline<R> polyline;
-  auto length = polyline.setLength(_attr.np).length();
+  polyline.setLength(_attr.np);
+  auto length = polyline.length();
 
   vec3 pi;
   vec3 pi_1{0, 1, 0};
@@ -92,7 +93,8 @@ Polyline<R> RegularPolygon<R>::generate() const
   {
     assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
     polyline.setExtruded(true);
-    length = polyline.setLength(2 * length).length();
+    polyline.setLength(2 * length);
+    length = polyline.length();
     pi_1 = vec3{0, 1 - _attr.ep, 0}; // Pi+np
 
     for(index_t i = length / 2; i < length; ++i)

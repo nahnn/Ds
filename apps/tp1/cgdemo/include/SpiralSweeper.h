@@ -101,6 +101,7 @@ private:
 template<IsReal R>
 TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
 {
+  /*
   // computing process parameters
   auto de = (_attr.we - poly.width()) / 2;
   auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
@@ -122,7 +123,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   data.triangleCount = nt;
   data.vertices = new vec3[nv];
   data.vertexNormals = new vec3[nv];
-  data.triangles = new vec3[nt];
+  data.triangles = new TriangleMesh::Triangle[nt];;
   vec3* vertCache = new vec3[nv]; // se pa que deletar no fim do método
 
   const auto& points = poly.points();
@@ -135,7 +136,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
     for(index_t j = 0; j < np; ++j) // points
     {
       vec3 pi{rotMat * vertCache[i * np + j]}; // new point rotated
-      pi = pi + i * t;
+      pi = pi + static_cast<R>(i) * t;
       vertCache[i * np + j] = data.vertices[i * np + j] = pi;
       setTriangles<R>(data.triangles, i, i + 1, np);  
     }
@@ -145,6 +146,55 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   TriangleMesh* tri = new TriangleMesh{std::move(data)};
   tri->computeNormals();
   return tri;
+  */
+
+  const size_t np = poly.length(); // TODO: tratar polilinha extrudada
+  const size_t steps = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes + 1;
+  const R totalAngle = static_cast<R>(cg::math::toRadians(_attr.re * 360));
+  const R dAngle = totalAngle / (steps - 1);
+  const R dhStep = _attr.re * _attr.dh / (steps - 1);
+  const R dwStep = _attr.re * _attr.dw / (steps - 1);
+  const R de = (_attr.we - poly.width()) / 2;
+
+  const size_t segs = poly.isClosed() ? np : np - 1;
+  const size_t nv = np * steps;
+  const size_t nt = 2 * segs * (steps - 1);
+
+  TriangleMesh::Data data;
+  data.vertexCount = nv;
+  data.triangleCount = nt;
+  data.vertices = new vec3[nv];
+  data.vertexNormals = new vec3[nv];
+  data.triangles = new TriangleMesh::Triangle[nt];
+
+  // vertices
+  for (size_t i = 0; i < steps; ++i)
+  {
+    auto rot = mat3{quat{vec3{0, i * dAngle, 0}}};
+    for (size_t j = 0; j < np; ++j)
+    {
+      vec3 p = poly[j];
+      p[0] += de + i * dwStep;               // confira a semântica de we/dw no enunciado
+      data.vertices[i * np + j] = rot * p + vec3{0, i * dhStep, 0};
+    }
+  }
+
+  // triangles
+  size_t t = 0;
+  for (size_t i = 0; i + 1 < steps; ++i)
+    for (size_t j = 0; j < segs; ++j)
+    {
+      auto j1 = (j + 1) % np;
+      auto a = i * np + j, b = i * np + j1;
+      auto c = (i + 1) * np + j1, d = (i + 1) * np + j;
+      data.triangles[t++].setVertices(a, b, d);
+      data.triangles[t++].setVertices(b, c, d);
+    }
+
+  auto* mesh = new TriangleMesh{std::move(data)};
+  mesh->computeNormals();
+  return mesh;
+
 }
 
 } // end namespace cg

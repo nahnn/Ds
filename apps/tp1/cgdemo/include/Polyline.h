@@ -191,7 +191,8 @@ protected:
     attr.np = std::clamp(attr.np, limits::MIN_NP, limits::MAX_NP);
     attr.sp = std::clamp(attr.sp, limits::MIN_SCALEP, limits::MAX_SCALEP);
     attr.tp = std::clamp(attr.tp, limits::MIN_THETAP, limits::MAX_THETAP);
-    attr.ep = std::clamp(attr.ep, limits::MIN_EP, limits::MAX_EP);
+    if (attr.ep != 0)
+      attr.ep = std::clamp(attr.ep, limits::MIN_EP, limits::MAX_EP);
   }
 
 }; // PolylineGenerator
