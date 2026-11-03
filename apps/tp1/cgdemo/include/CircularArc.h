@@ -103,6 +103,8 @@ Polyline<R> CircularArc<R>::generate() const
   Polyline<R> polyline;
   auto length = polyline.setLength(npoints()).length();
   auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tc / length))}}};
+  mat3 rotMatInv{rotMat[0], rotMat[1], rotMat[2]};
+  rotMatInv.invert();
 
   if (isFullCircle())
   {
@@ -117,9 +119,6 @@ Polyline<R> CircularArc<R>::generate() const
   }
   else
   {
-    mat3 rotMatInv{rotMat[0], rotMat[1], rotMat[2]};
-    rotMatInv.invert();
-
     vec3 pi{-static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
       static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
       
@@ -143,11 +142,13 @@ Polyline<R> CircularArc<R>::generate() const
   if (_attr.ep != 0)
   {
     assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
+    index_t last{length - 1};
     vec3 pi_1 = vec3{polyline[0][0] - _attr.ep, polyline[0][1] - _attr.ep, 0}; // Pi+np
     vec3 pi = vec3{polyline[last][0] + _attr.ep, polyline[last][1] + _attr.ep, 0};
     length = polyline.setLength(2 * length).length();
 
-    index_t j{length / 2}, last{length - 1};
+    index_t j{length / 2};
+    last = length - 1; 
     for(; j < length || j < last; j += 2)
     {
       polyline[j] = pi_1;
