@@ -95,6 +95,12 @@ private:
 
 }; // TorsionSweeper
 
+template<IsReal R>
+TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
+{
+  //TODO
+}
+
 } // end namespace cg
 
 #endif // __TorsionSweeper_h

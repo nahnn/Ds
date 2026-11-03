@@ -24,9 +24,14 @@ using index_t = unsigned;
 template<IsReal R>
 struct PolylineLimits
 {
+  // --- Number of Points ---
+  static constexpr int MIN_NP = 3; // min n of points
+  static constexpr int MAX_NP = 40; // max n of points
+
   // --- Scale Transform ---
   static constexpr R MIN_SCALEP = .1; // min scale_p
   static constexpr R MAX_SCALEP = 5; // max scale_p
+
   // --- Rotation Transform ---
   static constexpr R MIN_THETAP = 0; // min theta_p
   static constexpr R MAX_THETAP = 360; // max theta_p
@@ -46,6 +51,8 @@ struct PolylineAttrs
   R tp{0.}; //rotation (theta)
   R ep{0.}; //extrusion
 
+
+  virtual ~PolylineAttrs() = default; //for dynamic_cast
   bool operator ==(const PolylineAttrs&) const = default;
 
 }; // PolylineAttrs
@@ -175,6 +182,7 @@ public:
 protected:
   static void clampSet(PolylineAttrs<R>& attr)
   {
+    attr.np = std::clamp(attr.np, limits::MIN_NP, limits::MAX_NP);
     attr.sp = std::clamp(attr.sp, limits::MIN_SCALEP, limits::MAX_SCALEP);
     attr.tp = std::clamp(attr.tp, limits::MIN_THETAP, limits::MAX_THETAP);
     attr.ep = std::clamp(attr.ep, limits::MIN_EP, limits::MAX_EP);

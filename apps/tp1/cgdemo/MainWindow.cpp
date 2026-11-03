@@ -126,6 +126,8 @@ MainWindow::createObjectMenu()
         createSpiralObject();
       if (ImGui::MenuItem("Torsion"))
         createTorsionObject();
+
+      ImGui::EndMenu();
     }
     ImGui::EndMenu();
   }
@@ -156,7 +158,10 @@ MainWindow::addComponentMenu(const SceneObject&)
         component = makeSpiralProxy();
       if (ImGui::MenuItem("Torsion"))
         component = makeTorsionProxy();
+
+      ImGui::EndMenu();
     }
+
     ImGui::EndMenu();
   }
   return component;
