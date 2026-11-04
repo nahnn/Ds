@@ -106,7 +106,6 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   bool closed = poly.isClosed();
   bool capped = hasCaps(poly);
   size_t length = poly.length();
-  auto np = extruded ? length / 2 : length; // points per segment
 
   auto de = (_attr.we - poly.width()) / 2;
   auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
@@ -116,7 +115,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   auto deltaWidth = _attr.re * _attr.dw;
   auto deltaAngle = te / nre;
 
-  // computing triangles
+  // initializing triangle mesh data
   int nv = length * (steps + 1);
   int nt{capped ? nv + 2 * (length - 2) : closed ? nv : nv - 2};
   TriangleMesh::Data data;
@@ -128,7 +127,6 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   data.triangles = new TriangleMesh::Triangle[nt];
 
   const auto& points = poly.points();
-  setVertexArray<R>(data.vertices, points, length);
 
   // computing vertices
   R dw = deltaWidth / nre, dh = deltaHeight / nre;
@@ -142,32 +140,55 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   }
 
   // computing triangles
-  for(index_t i = 0, upSeg = 1, curSegInit = 0, upSegInit = length;
-    i < steps;
-    ++i, ++upSeg, curSegInit = i * length, upSegInit = upSeg * length)
+  const auto& L = length; // number of points per segment
+  const auto rings = extruded ? 2 : 1; // rings per segment
+  const auto np = L / rings; // points per ring
+
+  const auto totalSteps = rings * steps;
+  for(index_t i = 0, k = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd; 
+    i < totalSteps; 
+    ++i, ++k, curSegInit += np, upSegInit += np, curSegEnd += np, upSegEnd += np)
   {
-    index_t lastSegPoint = curSegInit + length - 1;
-    for(index_t j = 0; j < length; ++j)
+    index_t pos{};
+    for(index_t j = 0; j < np - 1; ++j)
     {
       index_t curPoint = curSegInit + j;
-      if (!closed && curPoint == lastSegPoint) continue;
       auto p0 = curPoint;
       auto p1 = p0 + 1;
-      auto p2 = upSegInit + j;
-      auto p3 = p2 + 1;
+      auto p3 = upSegInit + j;
+      auto p2 = p3 + 1;
       setTriangle<R>(&data.triangles[curPoint], p0, p1, p2);
-      setTriangle<R>(&data.triangles[curPoint + 1], p1, p3, p2);
+      setTriangle<R>(&data.triangles[curPoint + 1], p0, p2, p3);
+      pos = curPoint + 1;
+    }
+
+    if (closed)
+    {
+      auto p0 = curSegEnd;
+      auto p1 = k * np;
+      auto p2 = k * L;
+      auto p3 = upSegEnd;
+      setTriangle<R>(&data.triangles[pos], p0, p1, p2);
+      setTriangle<R>(&data.triangles[pos + 1], p0, p2, p3);
     }
   }
   
   // capped
   if (capped)
   { 
-    // add mais np verts?
-    auto p0 = 0;
-    auto pn = steps * length;
-    auto ntc = length - 2; // number of triangles per cap
-    for (index_t i = 1; i < length - 1; ++i)
+    // TODO: add mais np verts
+    const auto p0 = 0;
+    const auto pn = steps * L;
+    const auto ntc = L - 2; // number of triangles per cap
+    for(index_t i = 0; i < L; ++i)
+    {
+      vec3 pi{points[i].x, points[i].y, points[i].z};
+      vec3 pni{points[(pn - L) + i].x, points[(pn - L) + i].y, points[(pn - L) + i].z};
+      points[pn + i] = pi;
+      points[pn + ntc + i] = pni;
+    }
+
+    for (index_t i = 1; i < L - 1; ++i)
     {
       auto p1 = p0 + i;
       auto p2 = p0 + i + 1;
