@@ -134,7 +134,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   setVertexArray<R>(data.vertices, points, length);
 
   // computing verts
-  for(index_t i = 0, upSeg = 1, curSegInit, upSegInit; 
+  for(index_t i = 0, upSeg = 1, curSegInit = 0, upSegInit = length; 
     i < steps; 
     ++i, ++upSeg, curSegInit = i * length, upSegInit = upSeg * length)
   {
