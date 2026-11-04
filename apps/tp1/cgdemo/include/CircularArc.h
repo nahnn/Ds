@@ -101,6 +101,7 @@ template<IsReal R>
 Polyline<R> CircularArc<R>::generate() const
 {
   Polyline<R> polyline;
+  polyline.setClosed(isFullCircle() || !_attr.isOpen);
   polyline.setLength(npoints());
   auto length = polyline.length();
   index_t last{length - 1};

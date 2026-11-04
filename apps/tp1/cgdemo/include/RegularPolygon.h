@@ -72,6 +72,7 @@ template<IsReal R>
 Polyline<R> RegularPolygon<R>::generate() const
 {
   Polyline<R> polyline;
+  polyline.setClosed(true);
   polyline.setLength(_attr.np);
   auto length = polyline.length();
 

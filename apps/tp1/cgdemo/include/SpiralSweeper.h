@@ -110,14 +110,11 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
 
   auto de = (_attr.we - poly.width()) / 2;
   auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
-  auto steps = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes + 1;
+  auto nre = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes;
+  auto steps = nre + 1;
   auto deltaHeight = _attr.re * _attr.dh;
-  vec3 dH{0, deltaHeight, 0};
   auto deltaWidth = _attr.re * _attr.dw;
-  vec3 dW{de + deltaWidth, 0, 0};
-  vec3 t{dW + dH};
-  auto deltaAngle = te / (steps - 1);
-  auto rotMat = mat3{quat{vec3{0, deltaAngle, 0}}};
+  auto deltaAngle = te / nre;
 
   // computing triangles
   int nv = length * (steps + 1);
@@ -133,17 +130,15 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   const auto& points = poly.points();
   setVertexArray<R>(data.vertices, points, length);
 
-  // computing verts
-  for(index_t i = 0, upSeg = 1, curSegInit = 0, upSegInit = length; 
-    i < steps; 
-    ++i, ++upSeg, curSegInit = i * length, upSegInit = upSeg * length)
+  // computing vertices
+  R dw = deltaWidth / nre, dh = deltaHeight / nre;
+  for(index_t k = 0; k < steps; ++k)
   {
+    auto roty = mat3{quat{vec3{0, k * deltaAngle, 0}}};
+    vec3 w{de + k * dw, 0, 0};
+    vec3 h{0, k * dh, 0};
     for(index_t j = 0; j < length; ++j)
-    {
-      vec3 pi{rotMat * data.vertices[curSegInit + j]}; // new point rotated
-      pi = pi + static_cast<R>(i) * t; // new point translated
-      data.vertices[upSegInit + j] = pi;
-    }
+      data.vertices[k*length + j] = roty * (points[j] + w) + h; // transl em x deve vir primeiro que rot e transl em y
   }
 
   // computing triangles
@@ -160,8 +155,8 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
       auto p1 = p0 + 1;
       auto p2 = upSegInit + j;
       auto p3 = p2 + 1;
-      setTriangle<R>(&data.triangles[i * length + j], p0, p1, p2);
-      setTriangle<R>(&data.triangles[i * length + j + 1], p1, p3, p2);
+      setTriangle<R>(&data.triangles[curPoint], p0, p1, p2);
+      setTriangle<R>(&data.triangles[curPoint + 1], p1, p3, p2);
     }
   }
   
