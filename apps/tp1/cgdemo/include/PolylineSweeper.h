@@ -68,24 +68,17 @@ protected:
 
 }; // PolylineSweeper
 
-void setVertices();
-void setVertexNormals();
-
 template<IsReal R>
-inline void setTriangles(TriangleMesh::Triangle* t,  
+inline void setTriangle(TriangleMesh::Triangle* t,  
   index_t i, 
   index_t j,
-  index_t np
-)
+  index_t k)
 {
-  for(index_t k = 0; k < np; ++k)
-  {
-    t->setVertices(i*k, i*k + 1, j*k);
-  }
+  t->setVertices(i, j, k);
 }
 
 template<IsReal R>
-inline void setVertexArray(Vector3<R>* to, const Vector3<R>* from, size_t total)
+inline void setVertexArray(Vector3<R>* to, const Vector3<R>* from, const size_t total)
 {
   for(index_t i = 0; i < total; ++i) to[i] = from[i];
 }

@@ -101,8 +101,13 @@ private:
 template<IsReal R>
 TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
 {
-  /*
   // computing process parameters
+  bool extruded = poly.isExtruded();
+  bool closed = poly.isClosed();
+  bool capped = hasCaps(poly);
+  size_t length = poly.length();
+  auto np = extruded ? length / 2 : length; // points per segment
+
   auto de = (_attr.we - poly.width()) / 2;
   auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
   auto steps = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes + 1;
@@ -115,86 +120,71 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   auto rotMat = mat3{quat{vec3{0, deltaAngle, 0}}};
 
   // computing triangles
-  int nv = poly.length() * steps;
-  int nt{(2 * nv - 2) * steps};
+  int nv = length * (steps + 1);
+  int nt{capped ? nv + (length - 2) : closed ? nv : nv - 2};
   TriangleMesh::Data data;
 
-  data.vertexCount = nv;
-  data.triangleCount = nt;
-  data.vertices = new vec3[nv];
-  data.vertexNormals = new vec3[nv];
-  data.triangles = new TriangleMesh::Triangle[nt];;
-  vec3* vertCache = new vec3[nv]; // se pa que deletar no fim do método
-
-  const auto& points = poly.points();
-  auto np = poly.isExtruded() ? poly.length() / 2 : poly.length();
-  setVertexArray<R>(data.vertices, points, np);
-  setVertexArray<R>(vertCache, points, np);
-
-  // computing steps
-  for(index_t i = 0; i < steps; ++i) // current line 
-    for(index_t j = 0; j < np; ++j) // points
-    {
-      vec3 pi{rotMat * vertCache[i * np + j]}; // new point rotated
-      pi = pi + static_cast<R>(i) * t;
-      vertCache[i * np + j] = data.vertices[i * np + j] = pi;
-      setTriangles<R>(data.triangles, i, i + 1, np);  
-    }
-  
-  // TODO: open / closed and capped / uncapped (conectar os vértices da primeira e última linha e / ou fechar)
-  delete[] vertCache;
-  TriangleMesh* tri = new TriangleMesh{std::move(data)};
-  tri->computeNormals();
-  return tri;
-  */
-
-  const size_t np = poly.length(); // TODO: tratar polilinha extrudada
-  const size_t steps = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes + 1;
-  const R totalAngle = static_cast<R>(cg::math::toRadians(_attr.re * 360));
-  const R dAngle = totalAngle / (steps - 1);
-  const R dhStep = _attr.re * _attr.dh / (steps - 1);
-  const R dwStep = _attr.re * _attr.dw / (steps - 1);
-  const R de = (_attr.we - poly.width()) / 2;
-
-  const size_t segs = poly.isClosed() ? np : np - 1;
-  const size_t nv = np * steps;
-  const size_t nt = 2 * segs * (steps - 1);
-
-  TriangleMesh::Data data;
   data.vertexCount = nv;
   data.triangleCount = nt;
   data.vertices = new vec3[nv];
   data.vertexNormals = new vec3[nv];
   data.triangles = new TriangleMesh::Triangle[nt];
 
-  // vertices
-  for (size_t i = 0; i < steps; ++i)
+  const auto& points = poly.points();
+  setVertexArray<R>(data.vertices, points, length);
+
+  // computing verts
+  for(index_t i = 0, upSeg = 1, curSegInit, upSegInit; 
+    i < steps; 
+    ++i, ++upSeg, curSegInit = i * length, upSegInit = upSeg * length)
   {
-    auto rot = mat3{quat{vec3{0, i * dAngle, 0}}};
-    for (size_t j = 0; j < np; ++j)
+    for(index_t j = 0; j < length; ++j)
     {
-      vec3 p = poly[j];
-      p[0] += de + i * dwStep;               // confira a semântica de we/dw no enunciado
-      data.vertices[i * np + j] = rot * p + vec3{0, i * dhStep, 0};
+      vec3 pi{rotMat * data.vertices[curSegInit + j]}; // new point rotated
+      pi = pi + static_cast<R>(i) * t; // new point translated
+      data.vertices[upSegInit + j] = pi;
     }
   }
 
-  // triangles
-  size_t t = 0;
-  for (size_t i = 0; i + 1 < steps; ++i)
-    for (size_t j = 0; j < segs; ++j)
+  // computing triangles
+  for(index_t i = 0, upSeg = 1, curSegInit = 0, upSegInit = length;
+    i < steps;
+    ++i, ++upSeg, curSegInit = i * length, upSegInit = upSeg * length)
+  {
+    index_t lastSegPoint = curSegInit + length - 1;
+    for(index_t j = 0; j < length; ++j)
     {
-      auto j1 = (j + 1) % np;
-      auto a = i * np + j, b = i * np + j1;
-      auto c = (i + 1) * np + j1, d = (i + 1) * np + j;
-      data.triangles[t++].setVertices(a, b, d);
-      data.triangles[t++].setVertices(b, c, d);
+      index_t curPoint = curSegInit + j;
+      if (!closed && curPoint == lastSegPoint) continue;
+      auto p0 = curPoint;
+      auto p1 = p0 + 1;
+      auto p2 = upSegInit + j;
+      auto p3 = p2 + 1;
+      setTriangle<R>(&data.triangles[i * length + j], p0, p1, p2);
+      setTriangle<R>(&data.triangles[i * length + j + 1], p1, p3, p2);
     }
+  }
+  
+  // capped
+  if (capped)
+  { 
+    // add mais np verts?
+    auto p0 = 0;
+    auto pn = steps * length;
+    for (index_t i = 1; i < length - 1; ++i)
+    {
+      auto p1 = p0 + i;
+      auto p2 = p0 + i + 1;
+      auto pn_1 = pn + i;
+      auto pn_2 = pn + i + 1;
+      setTriangle<R>(&data.triangles[], p0, p1, p2);
+      setTriangle<R>(&data.triangles[], pn, pn_2, pn_1);
+    }
+  }
 
   auto* mesh = new TriangleMesh{std::move(data)};
   mesh->computeNormals();
   return mesh;
-
 }
 
 } // end namespace cg
