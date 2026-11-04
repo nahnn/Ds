@@ -121,7 +121,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
 
   // computing triangles
   int nv = length * (steps + 1);
-  int nt{capped ? nv + (length - 2) : closed ? nv : nv - 2};
+  int nt{capped ? nv + 2 * (length - 2) : closed ? nv : nv - 2};
   TriangleMesh::Data data;
 
   data.vertexCount = nv;
@@ -171,14 +171,15 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
     // add mais np verts?
     auto p0 = 0;
     auto pn = steps * length;
+    auto ntc = length - 2; // number of triangles per cap
     for (index_t i = 1; i < length - 1; ++i)
     {
       auto p1 = p0 + i;
       auto p2 = p0 + i + 1;
       auto pn_1 = pn + i;
       auto pn_2 = pn + i + 1;
-      setTriangle<R>(&data.triangles[], p0, p1, p2);
-      setTriangle<R>(&data.triangles[], pn, pn_2, pn_1);
+      setTriangle<R>(&data.triangles[nt - 2 * ntc + i - 1], p0, p1, p2);
+      setTriangle<R>(&data.triangles[nt - ntc + i - 1], pn, pn_2, pn_1);
     }
   }
 
