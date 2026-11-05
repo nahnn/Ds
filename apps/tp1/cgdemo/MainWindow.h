@@ -65,7 +65,8 @@ public:
   MainWindow(int width, int height):
     SceneWindow{"Ds Demo Version 1.51", width, height}
   {
-    // do nothing
+    registerInspectFunction(inspectSpiralProxy);
+    registerInspectFunction(inspectTorsionProxy);
   }
 
 private:

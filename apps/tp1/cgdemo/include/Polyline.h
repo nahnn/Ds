@@ -49,7 +49,7 @@ struct PolylineAttrs
   int np{3}; // number of points
   R sp{1.}; //scale
   R tp{0.}; //rotation (theta)
-  R ep{0.}; //extrusion
+  R ep{0.1}; //extrusion
   bool isExtruded{false}; // attribute for ImGui
 
   virtual ~PolylineAttrs() = default; //for dynamic_cast
@@ -205,7 +205,7 @@ void PolylineGenerator<R>::transform(Polyline<R>& polyline, const PolylineAttrs<
   using mat3 = Matrix3x3<R>;
   using quat = Quaternion<R>;
 
-  if (attr.ep != 0)
+  if (attr.isExtruded)
   {
     polyline.setExtruded(true);
 

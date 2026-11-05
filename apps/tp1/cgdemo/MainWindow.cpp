@@ -52,7 +52,6 @@ MainWindow::buildDefaultMeshes()
   _defaultMeshes["Cylinder"] = GLGraphics3::cylinder();
   _defaultMeshes["Cone"] = GLGraphics3::cone();
   _defaultMeshes["Plane"] = GLGraphics3::quad();
-  // TODO: add polyline com algo do GLGraphics3 ou classe derivada que criarmos.
 }
 
 void
@@ -97,10 +96,6 @@ MainWindow::beginInitialize()
   Assets::initialize();
   Assets::meshes().insert(_defaultMeshes.begin(), _defaultMeshes.end());
   _sceneFolder = AssetFolder::New("scenes/", ".scn");
-
-  //Polyline/Sweep inspection functions
-  registerInspectFunction(inspectSpiralProxy);
-  registerInspectFunction(inspectTorsionProxy);
 }
 
 void
@@ -417,7 +412,6 @@ MainWindow::renderScene()
 bool
 MainWindow::onResize(int width, int height)
 {
-
   _viewMode = ViewMode::Editor;
   _image = nullptr;
   return true;
@@ -487,7 +481,7 @@ void MainWindow::inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy
 
   if (ImGui::SliderFloat("Extrusion", &attrs.ep, Limits::MIN_EP, Limits::MAX_EP))
     proxy.setPolylineDirty();
-    
+
   ImGui::EndDisabled();
 }
 
