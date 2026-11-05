@@ -139,7 +139,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
     vec3 w{de + k * dw, 0, 0};
     vec3 h{0, k * dh, 0};
     for(index_t j = 0; j < L; ++j)
-      data.vertices[k*L + j] = roty * (points[j] + w) + h; // transl em x deve vir primeiro que rot e transl em y
+      data.vertices[k*L + j] = roty * (points[j]) + (w + h); // transl em x deve vir primeiro que rot e transl em y
   }
 
   // computing triangles
