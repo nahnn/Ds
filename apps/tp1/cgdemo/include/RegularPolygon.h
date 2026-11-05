@@ -80,8 +80,7 @@ Polyline<R> RegularPolygon<R>::generate() const
   vec3 pi_1{0, 1, 0};
   polyline[0] = pi_1;
 
-  auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(2 * (cg::math::pi<R>) / length)}}};
-
+  auto rotMat = mat3{quat::eulerAngles(vec3{0, 0, R(360) / static_cast<R>(length)})};
   for(index_t i = 1u; i < length; ++i)
   {
     pi = rotMat * pi_1;

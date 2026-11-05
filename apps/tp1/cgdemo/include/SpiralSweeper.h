@@ -113,7 +113,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   const R bx = poly.width();
   const R we = math::max<R>(_attr.we, 2*bx);
   const auto de = (we - bx) / 2;
-  const auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
+  const auto te = static_cast<R>(_attr.re * 360);
   const index_t nre = math::max<index_t>(floor(_attr.re + R(.5)), 1) * static_cast<index_t>(_attr.nes);
   const index_t steps = nre + 1;
   const auto deltaHeight = _attr.re * _attr.dh;
@@ -135,11 +135,12 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   // computing vertices
   for(index_t k = 0; k < steps; ++k)
   {
-    auto roty = mat3{quat{vec3{0, k * deltaAngle, 0}}};
+    auto roty = mat3{quat::eulerAngles(vec3{0, k * deltaAngle, 0})};
     vec3 w{de + k * dw, 0, 0};
     vec3 h{0, k * dh, 0};
     for(index_t j = 0; j < L; ++j)
-      data.vertices[k*L + j] = roty * (points[j]) + (w + h); // transl em x deve vir primeiro que rot e transl em y
+      //data.vertices[k*L + j] = roty * (points[j]) + (w + h); // transl em x deve vir primeiro que rot e transl em y
+      data.vertices[k*L + j] = roty * (points[j] + w) + h;
   }
 
   // computing triangles

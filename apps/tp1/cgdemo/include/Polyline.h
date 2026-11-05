@@ -219,7 +219,7 @@ void PolylineGenerator<R>::transform(Polyline<R>& polyline, const PolylineAttrs<
 
   if (attr.tp != 0)
   {
-    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(attr.tp))}}};
+    auto rotTp = mat3{quat::eulerAngles(vec3{0, 0, attr.tp})};
 
     for (index_t i = 0; i < length; ++i)
       polyline[i] = rotTp * polyline[i];
