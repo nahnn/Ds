@@ -175,8 +175,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   
   // capped
   if (capped)
-  { 
-    // TODO: add mais np verts
+  {
     auto p0 = 0;
     auto pn = steps * L;
     auto ntc = L - 2; // number of triangles per cap
