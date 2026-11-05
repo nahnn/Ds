@@ -195,7 +195,40 @@ protected:
       attr.ep = std::clamp(attr.ep, limits::MIN_EP, limits::MAX_EP);
   }
 
+  static void transform(Polyline<R>& polyline, const PolylineAttrs<R>& attr);
+
 }; // PolylineGenerator
+
+template<IsReal R>
+void PolylineGenerator<R>::transform(Polyline<R>& polyline, const PolylineAttrs<R>& attr)
+{
+  using mat3 = Matrix3x3<R>;
+  using quat = Quaternion<R>;
+
+  if (attr.ep != 0)
+  {
+    polyline.setExtruded(true);
+
+    const index_t n = static_cast<index_t>(polyline.length());
+    const R f = 1 - attr.ep;
+    for(index_t i = 0; i < n; ++i)
+      polyline[n + i] = f * polyline[i];
+  }
+
+  const index_t length = static_cast<index_t>(polyline.length());
+
+  if (attr.tp != 0)
+  {
+    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(attr.tp))}}};
+
+    for (index_t i = 0; i < length; ++i)
+      polyline[i] = rotTp * polyline[i];
+  }
+
+  if (attr.sp != 1)
+    for (index_t i = 0; i < length; ++i)
+      polyline[i] = attr.sp * polyline[i];
+} 
 
 } // end namespace cg
 

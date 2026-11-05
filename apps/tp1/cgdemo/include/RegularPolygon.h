@@ -90,40 +90,8 @@ Polyline<R> RegularPolygon<R>::generate() const
   }
 
   // Transformations
-  if (_attr.ep != 0)
-  {
-    assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
-    polyline.setExtruded(true);
-    polyline.setLength(2 * length);
-    length = polyline.length();
-    pi_1 = vec3{0, 1 - _attr.ep, 0}; // Pi+np
+  PolylineGenerator<R>::transform(polyline, _attr);
 
-    for(index_t i = length / 2; i < length; ++i)
-    {
-      pi = rotMat * pi_1;
-      polyline[i] = pi;
-      pi_1 = pi;
-    }
-  }
-
-  if (_attr.tp != 0)
-  {
-    assert(_attr.tp >= limits::MIN_THETAP && _attr.tp <= limits::MAX_THETAP);
-
-    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tp))}}};
-
-    for (index_t i = 0; i < length; ++i)
-      polyline[i] = rotTp * polyline[i];
-  }
-
-  if (_attr.sp != 0)
-  {
-    assert(_attr.sp >= limits::MIN_SCALEP && _attr.sp <= limits::MAX_SCALEP);
-
-    for (index_t i = 0; i < length; ++i)
-      polyline[i] = _attr.sp * polyline[i];
-  }
-  
   // bounds
   polyline.computeBounds();
 

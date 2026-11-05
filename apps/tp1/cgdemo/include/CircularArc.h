@@ -104,84 +104,14 @@ Polyline<R> CircularArc<R>::generate() const
   polyline.setClosed(isFullCircle() || !_attr.isOpen);
   polyline.setLength(npoints());
   auto length = polyline.length();
-  index_t last{length - 1};
-  auto rotMat = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tc / length))}}};
-  mat3 rotMatInv{rotMat[0], rotMat[1], rotMat[2]};
-  rotMatInv.invert();
 
-  if (isFullCircle())
-  {
-    vec3 pi{static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
-      static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
-
-    for (index_t i = 0; i < length; i++)
-    {
-      polyline[i] = pi;
-      pi = rotMat * pi;
-    }
-  }
-  else
-  {
-    vec3 pi{-static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
-      static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
-      
-    vec3 pi_1{static_cast<R>(cos(cg::math::toRadians(90 - _attr.tc / 2))), 
-      static_cast<R>(sin(cg::math::toRadians(90 - _attr.tc / 2))), 0};
-
-    index_t i{};
-    for(; i < length || i < last; i += 2)
-    {
-      polyline[i] = pi_1;
-      polyline[last - i] = pi;
-      pi_1 = rotMat * pi_1; // anti clock-wise
-      pi = rotMatInv * pi; // clock-wise
-    }
-
-    if (i == last)
-      polyline[static_cast<index_t>(ceil(i/2))] = vec3{0, 1, 0};
-  }
-
+  const R step =  static_cast<R>(cg::math::toRadians(_attr.tc / _attr.nc));
+  const R a0 = static_cast<R>(cg::math::toRadians(90 - _attr.tc / 2));
+  for(index_t i = 0; i < length; ++i)
+    polyline[i] = vec3{static_cast<R>(cos(a0 + i * step)), static_cast<R>(sin(a0 + i * step)), 0};
+  
   // Transformations
-  if (_attr.ep != 0)
-  {
-    assert(_attr.ep >= limits::MIN_EP && _attr.ep <= limits::MAX_EP);
-    polyline.setExtruded(true);
-    vec3 pi_1 = vec3{polyline[0][0] - _attr.ep, polyline[0][1] - _attr.ep, 0}; // Pi+np
-    vec3 pi = vec3{polyline[last][0] + _attr.ep, polyline[last][1] + _attr.ep, 0};
-
-    polyline.setLength(2 * length);
-    length = polyline.length();
-    last = length - 1; 
-    index_t j{length / 2};
-    for(; j < length || j < last; j += 2)
-    {
-      polyline[j] = pi_1;
-      polyline[last - j] = pi;
-      pi_1 = rotMat * pi_1; // anti clock-wise
-      pi = rotMatInv * pi; // clock-wise
-    }
-
-    if (j == last)
-      polyline[static_cast<index_t>(ceil(j/2))] = vec3{0, 1 - _attr.ep, 0};
-  }
-
-  if (_attr.tp != 0)
-  {
-    assert(_attr.tp >= limits::MIN_THETAP && _attr.tp <= limits::MAX_THETAP);
-
-    auto rotTp = mat3{quat{vec3{0, 0, static_cast<R>(cg::math::toRadians(_attr.tp))}}};
-
-    for (index_t i = 0; i < length; ++i)
-      polyline[i] = rotTp * polyline[i];
-  }
-
-  if (_attr.sp != 0)
-  {
-    assert(_attr.sp >= limits::MIN_SCALEP && _attr.sp <= limits::MAX_SCALEP);
-
-    for (index_t i = 0; i < length; ++i)
-      polyline[i] = _attr.sp * polyline[i];
-  }
+  PolylineGenerator<R>::transform(polyline, _attr);
   
   // bounds
   polyline.computeBounds();
