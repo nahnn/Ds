@@ -99,6 +99,7 @@ template<IsReal R>
 TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
 {
   //TODO
+  return nullptr;
 }
 
 } // end namespace cg
