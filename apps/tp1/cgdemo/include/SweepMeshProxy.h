@@ -74,7 +74,7 @@ public:
 
   // generator attrs
   PolylineGeneratorType activeGen{PolylineGeneratorType::RegularPolygon};
-  PolylineAttrs<R> attrs;
+  CircularArcAttrs<R> attrs; //jeito ingênuo, fazer de outro modo
 
 protected:
   // TODO: adicionar concepts para a verificação do parametros do template
