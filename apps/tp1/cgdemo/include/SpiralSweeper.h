@@ -177,23 +177,25 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   if (capped)
   { 
     // TODO: add mais np verts
-    const auto p0 = 0;
-    const auto pn = steps * L;
-    const auto ntc = L - 2; // number of triangles per cap
+    auto p0 = 0;
+    auto pn = steps * L;
+    auto ntc = L - 2; // number of triangles per cap
     for(index_t i = 0; i < L; ++i)
     {
       vec3 pi{points[i].x, points[i].y, points[i].z};
       vec3 pni{points[(pn - L) + i].x, points[(pn - L) + i].y, points[(pn - L) + i].z};
       points[pn + i] = pi;
-      points[pn + ntc + i] = pni;
+      points[pn + L + i] = pni;
     }
 
+    p0 = pn;
+    pn = pn + L;
     for (index_t i = 1; i < L - 1; ++i)
     {
       auto p1 = p0 + i;
       auto p2 = p0 + i + 1;
-      auto pn_1 = pn + i;
-      auto pn_2 = pn + i + 1;
+      auto pn_1 = pn + L + i;
+      auto pn_2 = pn + L + i + 1;
       setTriangle<R>(&data.triangles[nt - 2 * ntc + i - 1], p0, p1, p2);
       setTriangle<R>(&data.triangles[nt - ntc + i - 1], pn, pn_2, pn_1);
     }
