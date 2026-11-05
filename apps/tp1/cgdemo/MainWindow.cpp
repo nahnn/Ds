@@ -456,7 +456,7 @@ SceneObject* MainWindow::createTorsionObject()
 Component* MainWindow::makeSpiralProxy()
 {
   auto proxy = SpiralProxy<float>::New("Spiral Mesh");
-  proxy->build(); // Crucial para não nascer invisível!
+  proxy->build();
   return proxy;
 }
 
@@ -481,9 +481,14 @@ void MainWindow::inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy
     
   if (ImGui::SliderFloat("Rotation", &attrs.tp, Limits::MIN_THETAP, Limits::MAX_THETAP))
     proxy.setPolylineDirty();
-    
+
+  ImGui::Checkbox("Habilitar Extrusão", &attrs.isExtruded);
+  ImGui::BeginDisabled(!attrs.isExtruded);
+
   if (ImGui::SliderFloat("Extrusion", &attrs.ep, Limits::MIN_EP, Limits::MAX_EP))
     proxy.setPolylineDirty();
+    
+  ImGui::EndDisabled();
 }
 
 //RegularPolygon
@@ -574,11 +579,7 @@ void MainWindow::inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& pro
 
   ImGui::Separator();
 
-  // 4. Executa o build apenas se algo foi alterado via interface e sujou as flags
-  if (ImGui::Button("Apply###ApplySpiral"))
-  {
-    proxy.build();
-  }
+  proxy.build();
 }
 
 void MainWindow::inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& proxy)
@@ -617,9 +618,6 @@ void MainWindow::inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& p
 
   ImGui::Separator();
 
-  if (ImGui::Button("Apply###ApplyTorsion"))
-  {
-    proxy.build();
-  }
+  proxy.build();
 }
 

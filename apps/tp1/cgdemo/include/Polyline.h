@@ -50,7 +50,7 @@ struct PolylineAttrs
   R sp{1.}; //scale
   R tp{0.}; //rotation (theta)
   R ep{0.}; //extrusion
-
+  bool isExtruded{false}; // attribute for ImGui
 
   virtual ~PolylineAttrs() = default; //for dynamic_cast
   bool operator ==(const PolylineAttrs&) const = default;
