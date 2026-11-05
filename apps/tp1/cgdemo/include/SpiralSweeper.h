@@ -104,26 +104,26 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   // computing process parameters
   bool extruded = poly.isExtruded();
   bool closed = poly.isClosed();
-  bool capped = hasCaps(poly);
+  bool capped = this->hasCaps(poly);
   const auto L = static_cast<index_t>(poly.length()); // number of points per segment
-  const auto rings = extruded ? 2 : 1; // rings per segment
-  const auto np = L / rings; // points per ring  
+  const index_t rings = extruded ? 2 : 1; // rings per segment
+  const index_t np = L / rings; // points per ring  
   const auto& points = poly.points();
 
   const R bx = poly.width();
   const R we = math::max<R>(_attr.we, 2*bx);
-  auto de = (we - bx) / 2;
-  auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
-  auto nre = math::max<size_t>(floor(_attr.re + .5), 1) * _attr.nes;
-  auto steps = nre + 1;
-  auto deltaHeight = _attr.re * _attr.dh;
-  auto deltaWidth = _attr.re * _attr.dw;
-  R dw = deltaWidth / nre, dh = deltaHeight / nre;
-  auto deltaAngle = te / nre;
+  const auto de = (we - bx) / 2;
+  const auto te = static_cast<R>(cg::math::toRadians(_attr.re * 360));
+  const index_t nre = math::max<index_t>(floor(_attr.re + R(.5)), 1) * static_cast<index_t>(_attr.nes);
+  const index_t steps = nre + 1;
+  const auto deltaHeight = _attr.re * _attr.dh;
+  const auto deltaWidth = _attr.re * _attr.dw;
+  const R dw = deltaWidth / nre, dh = deltaHeight / nre;
+  const auto deltaAngle = te / nre;
 
   // initializing triangle mesh data
-  int nv = L * steps + (capped ? 2 * L : 0);
-  int nt{nre * rings * (closed ? np : np - 1) * 2 + (capped ? 2 * (L - 2) : 0)};
+  const index_t nv = L * steps + (capped ? 2 * L : 0);
+  const index_t nt = nre * rings * (closed ? np : np - 1) * 2 + (capped ? 2 * (L - 2) : 0);
   TriangleMesh::Data data;
 
   data.vertexCount = nv;
@@ -143,7 +143,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   }
 
   // computing triangles
-  const auto totalSteps = rings * nre;
+  const index_t totalSteps = rings * nre;
   index_t t{};
   for(index_t i = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd; 
     i < totalSteps; 
@@ -173,18 +173,15 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   // capped
   if (capped)
   {
-    auto p0 = 0;
-    auto pn = steps * L;
+    const index_t p0 = steps * L, pn = p0 + L, lastSeg = (steps - 1) * L;
     for(index_t i = 0; i < L; ++i)
     {
       vec3 pi{data.vertices[i].x, data.vertices[i].y, data.vertices[i].z};
-      vec3 pni{data.vertices[(pn - L) + i].x, data.vertices[(pn - L) + i].y, data.vertices[(pn - L) + i].z};
-      data.vertices[pn + i] = pi;
-      data.vertices[pn + L + i] = pni;
+      vec3 pni{data.vertices[lastSeg + i].x, data.vertices[lastSeg + i].y, data.vertices[lastSeg + i].z};
+      data.vertices[p0 + i] = pi;
+      data.vertices[pn + i] = pni;
     }
 
-    p0 = pn;
-    pn = pn + L;
     for (index_t i = 1; i < L - 1; ++i)
     {
       auto p1 = p0 + i;
