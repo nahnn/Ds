@@ -476,7 +476,9 @@ void MainWindow::inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy
   if (ImGui::SliderFloat("Rotation", &attrs.tp, Limits::MIN_THETAP, Limits::MAX_THETAP))
     proxy.setPolylineDirty();
 
-  ImGui::Checkbox("Habilitar Extrusão", &attrs.isExtruded);
+  if(ImGui::Checkbox("Habilitar Extrusão", &attrs.isExtruded))
+    proxy.setPolylineDirty();
+    
   ImGui::BeginDisabled(!attrs.isExtruded);
 
   if (ImGui::SliderFloat("Extrusion", &attrs.ep, Limits::MIN_EP, Limits::MAX_EP))

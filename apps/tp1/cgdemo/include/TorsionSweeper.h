@@ -58,6 +58,9 @@ public:
   using type = TorsionSweeper<R>;
   using value_type = R;
   using polyline_type = Polyline<R>;
+  using vec3 = Vector3<R>;
+  using mat3 = Matrix3x3<R>;
+  using quat = Quaternion<R>;
   using limits = TorsionSweeperLimits<R>;
   using attrs_type = TorsionSweeperAttrs<R>;
 
@@ -95,11 +98,116 @@ private:
 
 }; // TorsionSweeper
 
+//TODO: Resolver "WINDING"
 template<IsReal R>
 TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
 {
-  //TODO
-  return nullptr;
+  const auto& points = poly.points();
+  const auto bx = poly.width();
+  const auto by = poly.height();
+  const size_t L = poly.length();
+  const bool closed = poly.isClosed();
+  const bool poly_extr = poly.isExtruded();
+
+  const size_t rings = poly_extr ? 2 : 1; // rings per segment
+  const size_t np = L / rings; // points per ring
+  const bool capped = this->hasCaps(poly);
+
+  // horizontal/vertical displacement (checked)
+  const auto ow = std::clamp<R>(_attr.ow, -bx, bx);
+  const auto oh = std::clamp<R>(_attr.oh, -by, by);
+
+  // steps
+  const size_t nsv = static_cast<size_t>(_attr.nsv);
+  const size_t steps = nsv + 1;
+  const R n = static_cast<R>(nsv);
+  const R lv_step = static_cast<R>(_attr.lv) / n;
+  const R sv_step = static_cast<R>(_attr.se - _attr.sb) / n;
+  const R sb = static_cast<R>(_attr.sb);
+  const R t_step = static_cast<R>(_attr.rv) * 360 / n; // degrees
+
+  // n vertices
+  const size_t nv = L * steps + (capped ? 2 * L : 0);
+
+  // n triangles
+  const size_t nt = nsv * rings * (closed ? np : np - 1) * 2
+    + (capped ? 2 * (L - 2) : 0);
+
+  // data initialization
+  TriangleMesh::Data data;
+
+  data.vertexCount = nv;
+  data.triangleCount = nt;
+  data.vertices = new vec3[nv];
+  data.vertexNormals = new vec3[nv];
+  data.triangles = new TriangleMesh::Triangle[nt];
+
+  // setting vertices: scale -> translation -> rotation about z
+  for(size_t k = 0; k < steps; ++k)
+  {
+    auto sv = sb + k * sv_step;
+
+    auto T = vec3{ow, oh, k * lv_step};
+    auto rotz = mat3{quat::eulerAngles(vec3{0, 0, k * t_step})};
+
+    for(size_t i = 0; i < L; ++i)
+      data.vertices[k * L + i] = rotz * (sv * points[i] + T);
+  }
+
+  // setting triangles
+  const size_t totalSteps = rings * nsv;
+  size_t t{};
+  for(size_t i = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd;
+    i < totalSteps;
+    ++i, curSegInit += np, upSegInit += np, curSegEnd += np, upSegEnd += np)
+  {
+    for(size_t j = 0; j < np - 1; ++j)
+    {
+      auto p0 = curSegInit + j;
+      auto p1 = p0 + 1;
+      auto p3 = upSegInit + j;
+      auto p2 = p3 + 1;
+      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
+      setTriangle<R>(&data.triangles[t++], p0, p2, p3);
+    }
+
+    if (closed)
+    {
+      auto p0 = curSegEnd;
+      auto p1 = curSegInit;
+      auto p2 = upSegInit;
+      auto p3 = upSegEnd;
+      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
+      setTriangle<R>(&data.triangles[t++], p0, p2, p3);
+    }
+  }
+
+  // capped
+  if (capped)
+  {
+    const size_t p0 = steps * L, pn = p0 + L, lastSeg = (steps - 1) * L;
+    for(size_t i = 0; i < L; ++i)
+    {
+      vec3 pi{data.vertices[i].x, data.vertices[i].y, data.vertices[i].z};
+      vec3 pni{data.vertices[lastSeg + i].x, data.vertices[lastSeg + i].y, data.vertices[lastSeg + i].z};
+      data.vertices[p0 + i] = pi;
+      data.vertices[pn + i] = pni;
+    }
+
+    for(size_t i = 1; i < L - 1; ++i)
+    {
+      auto p1 = p0 + i;
+      auto p2 = p0 + i + 1;
+      auto pn_1 = pn + i;
+      auto pn_2 = pn + i + 1;
+      setTriangle<R>(&data.triangles[t++], p0, p2, p1);
+      setTriangle<R>(&data.triangles[t++], pn, pn_1, pn_2);
+    }
+  }
+
+  auto* mesh = new TriangleMesh{std::move(data)};
+  mesh->computeNormals();
+  return mesh;
 }
 
 } // end namespace cg

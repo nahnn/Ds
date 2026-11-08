@@ -49,7 +49,7 @@ struct SpiralSweeperAttrs: public PolylineSweeperAttrs<R>
   R dw{2}; // width increment per revolution
 }; // SpiralSweeperAttrs
 
-
+//TODO: Resolver "WINDING"
 template<IsReal R>
 class SpiralSweeper: public PolylineSweeper<R>
 {
