@@ -1,6 +1,6 @@
 //[]---------------------------------------------------------------[]
 //|                                                                 |
-//| Copyright (C) 2022 Paulo Pagliosa.                              |
+//| Copyright (C) 2022, 2026 Paulo Pagliosa.                        |
 //|                                                                 |
 //| This software is provided 'as-is', without any express or       |
 //| implied warranty. In no event will the authors be held liable   |
@@ -25,43 +25,87 @@
 //
 // OVERVIEW: MainWindow.h
 // ========
-// Class definition for cg template window.
+// Class definition for cg demo main window.
 //
 // Author: Paulo Pagliosa
-// Last revision: 07/11/2022
+// Last revision: 07/10/2026
 
 #ifndef __MainWindow_h
 #define __MainWindow_h
 
-#include "graphics/GLRenderWindow3.h"
+#include "graph/SceneWindow.h"
+#include "graphics/AssetFolder.h"
+#include "graphics/GLImage.h"
+#include "RayTracer.h"
+
+namespace cg::graph
+{ // begin namespace cg::graph
+
+class HelixProxy;
+class SweepMeshProxy;
+
+} // end namespace cg::graph
+
+using namespace cg;
+using namespace cg::graph;
 
 
 /////////////////////////////////////////////////////////////////////
 //
-// MainWindow: template main window class
+// MainWindow: cg demo main window class
 // ==========
-class MainWindow final: public cg::GLRenderWindow3
+class MainWindow final: public SceneWindow
 {
 public:
-  MainWindow(int width, int height);
+  MainWindow(int width, int height):
+    SceneWindow{"Ds Demo Version 1.51", width, height}
+  {
+    // do nothing
+  }
 
 private:
-  using Base = cg::GLRenderWindow3;
+  AssetFolderRef _sceneFolder;
+  Reference<RayTracer> _rayTracer;
+  Reference<GLImage> _image;
+  int _maxRecursionLevel{6};
+  float _minWeight{RayTracer::minMinWeight};
 
-  // Attribute examples
-  cg::Color _lineColor;
-  cg::Color _meshColor;
-  float _radius;
-  float _speed;
-  bool _animate{true};
-  bool _showGround{true};
+  static MeshMap _defaultMeshes;
 
-  // Overridden method examples
-  void initialize() override;
-  void update() override;
+  auto makeDefaultPrimitive(const char* const meshName)
+  {
+    return makePrimitive(*_defaultMeshes[meshName], meshName);
+  }
+
+  auto createDefaultPrimitiveObject(const char* const meshName)
+  {
+    return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
+  }
+
+  void beginInitialize() override;
+  void initializeScene() override;
   void renderScene() override;
-  bool keyInputEvent(int, int, int) override;
   void gui() override;
+  bool onResize(int width, int height) override;
+  Component* addComponentMenu(const SceneObject&) override;
+  void createObjectMenu() override;
+
+
+  void mainMenu();
+  void fileMenu();
+  void viewMenu();
+  void createMenu();
+  void showOptions();
+
+  void readScene(const std::string& filename);
+  void updateRayTracerScene();
+  void openSceneCommand();
+  void saveScene();
+
+  static void buildDefaultMeshes();
+
+  //static void inspectHelix(SceneWindow&, HelixProxy&);
+  //static void inspectSweepMesh(SceneWindow&, SweepMeshProxy&);
 
 }; // MainWindow
 

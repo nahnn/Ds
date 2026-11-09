@@ -1,6 +1,6 @@
 //[]---------------------------------------------------------------[]
 //|                                                                 |
-//| Copyright (C) 2022 Paulo Pagliosa.                              |
+//| Copyright (C) 2022, 2026 Paulo Pagliosa.                        |
 //|                                                                 |
 //| This software is provided 'as-is', without any express or       |
 //| implied warranty. In no event will the authors be held liable   |
@@ -25,10 +25,10 @@
 //
 // OVERVIEW: Main.cpp
 // ========
-// Main function for cg template.
+// Main function for cg demo.
 //
 // Author: Paulo Pagliosa
-// Last revision: 07/11/2022
+// Last revision: 07/10/2026
 
 #include "graphics/Application.h"
 #include "MainWindow.h"
@@ -36,14 +36,6 @@
 int
 main(int argc, char** argv)
 {
-  puts("Ds template by Paulo Pagliosa (ppagliosa@gmail.com)\n");
-  puts("Camera controls keys:\n"
-    "(w) move forward  (s) move backward\n"
-    "(a) move left     (d) move right\n"
-    "(q) move up       (z) move down\n");
-  puts("Mouse controls:\n"
-    "(scroll wheel)    zoom\n"
-    "(middle-click)    pan\n"
-    "(Alt+right-click) rotate");
+  puts("Ds Demo Version 1.51 by Paulo Pagliosa (ppagliosa@gmail.com)\n");
   return cg::Application{new MainWindow{1280, 720}}.run(argc, argv);
 }

@@ -1,6 +1,6 @@
 //[]---------------------------------------------------------------[]
 //|                                                                 |
-//| Copyright (C) 2022 Paulo Pagliosa.                              |
+//| Copyright (C) 2022, 2026 Paulo Pagliosa.                        |
 //|                                                                 |
 //| This software is provided 'as-is', without any express or       |
 //| implied warranty. In no event will the authors be held liable   |
@@ -25,105 +25,372 @@
 //
 // OVERVIEW: MainWindow.cpp
 // ========
-// Source file for cg template window.
+// Source file for cg demo main window.
 //
 // Author: Paulo Pagliosa
-// Last revision: 07/11/2022
+// Last revision: 07/10/2026
 
+#include "graphics/Application.h"
+#include "graphics/AssetFolder.h"
+#include "reader/SceneReader.h"
+#include "SceneWriter.h"
 #include "MainWindow.h"
+#include "IconsFontAwesome7.h"
 
 
 /////////////////////////////////////////////////////////////////////
 //
 // MainWindow implementation
 // ==========
-MainWindow::MainWindow(int width, int height):
-  Base{"Ds template", width, height}
+MeshMap MainWindow::_defaultMeshes;
+
+inline void
+MainWindow::buildDefaultMeshes()
 {
-  // Put your code here. Example:
-  _lineColor = cg::Color::red;
-  _meshColor = cg::Color::blue;
-  _radius = 1;
-  _speed = 0.01f;
+  _defaultMeshes["Box"] = GLGraphics3::box();
+  _defaultMeshes["Sphere"] = GLGraphics3::sphere();
+  _defaultMeshes["Cylinder"] = GLGraphics3::cylinder();
+  _defaultMeshes["Cone"] = GLGraphics3::cone();
+  _defaultMeshes["Plane"] = GLGraphics3::quad();
 }
 
 void
-MainWindow::initialize()
+MainWindow::initializeScene()
 {
-  // Put your OpenGL initialization code here. Example:
-  Base::initialize();
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_POLYGON_OFFSET_FILL);
-  glPolygonOffset(1.0f, 1.0f);
+  auto a = (float)width() / (float)height();
+  auto s = createCameraObject(a, "Main Camera");
+
+  s->transform()->setLocalPosition({0, 0, 10});
+  s = createLightObject(Light::Type::Directional, "Directional Light");
+  s->transform()->setLocalEulerAngles({50, 30, 0});
+  createDefaultPrimitiveObject("Box");
+}
+
+inline void
+initializeFonts()
+{
+  auto fonts = ImGui::GetIO().Fonts;
+  constexpr auto alpha = "fonts/Roboto-Regular.ttf";
+  
+  fonts->AddFontFromFileTTF(Application::assetFilePath(alpha).c_str(), 16);
+
+  constexpr ImWchar iconRanges[]{ICON_MIN_FA, ICON_MAX_FA, 0};
+  constexpr auto icons = "fonts/fa-solid-900.ttf";
+  ImFontConfig fc;
+  
+  fc.MergeMode = fc.PixelSnapH = true;
+  fc.GlyphMinAdvanceX = 16.0f;
+
+  fonts->AddFontFromFileTTF(Application::assetFilePath(icons).c_str(),
+    14,
+    &fc,
+    iconRanges);
+  fonts->Build();
 }
 
 void
-MainWindow::update()
+MainWindow::beginInitialize()
 {
-  // Put your scene update code here. Example:
-  static float time{};
-
-  if (_animate)
-    _radius = 1 + cosf(_speed * (time += deltaTime()) * 0.5f);
+  initializeFonts();
+  buildDefaultMeshes();
+  Assets::initialize();
+  Assets::meshes().insert(_defaultMeshes.begin(), _defaultMeshes.end());
+  _sceneFolder = AssetFolder::New("scenes/", ".scn");
 }
 
 void
-MainWindow::renderScene()
+MainWindow::createObjectMenu()
 {
-  // Put your scene rendering code here. Example:
-  using namespace cg;
-
-  auto g3 = this->g3();
-
-  g3->setLineColor(_lineColor);
-  g3->drawArc({-4, 0, 0}, // center
-    _radius, // radius
-    {1, 0, 0}, // first point direction
-    {0, 0, 1}, // normal
-    180); // angle
-  g3->setPolygonMode(GLGraphics3::LINE);
-  g3->drawCircle({0, 0, 0}, // center
-    _radius, // radius
-    {0, 0, 1}); // normal
-  g3->setPolygonMode(GLGraphics3::FILL);
-  g3->setMeshColor(_meshColor);
-  g3->drawMesh(*g3->sphere(), // mesh
-    {4, 0, 0}, // position
-    mat3f::identity(), // rotation
-    vec3f{1, 2, 1} * _radius); // scale
-  if (_showGround)
-    g3->drawXZPlane(8, 1);
+  if (ImGui::BeginMenu("3D Object"))
+  {
+    if (ImGui::MenuItem("Box"))
+      createDefaultPrimitiveObject("Box");
+    if (ImGui::MenuItem("Sphere"))
+      createDefaultPrimitiveObject("Sphere");
+    if (ImGui::MenuItem("Cylinder"))
+      createDefaultPrimitiveObject("Cylinder");
+    if (ImGui::MenuItem("Cone"))
+      createDefaultPrimitiveObject("Cone");
+    if (ImGui::MenuItem("Plane"))
+      createDefaultPrimitiveObject("Plane");
+    ImGui::EndMenu();
+  }
 }
 
-bool
-MainWindow::keyInputEvent(int key, int action, int mods)
+Component*
+MainWindow::addComponentMenu(const SceneObject&)
 {
-  // Put your key event handler code here. Example:
-  if (action != GLFW_RELEASE && mods == GLFW_MOD_ALT)
-    switch (key)
+  Component* component = nullptr;
+
+  if (ImGui::BeginMenu("3D Object"))
+  {
+    if (ImGui::MenuItem("Box"))
+      component = makeDefaultPrimitive("Box");
+    if (ImGui::MenuItem("Sphere"))
+      component = makeDefaultPrimitive("Sphere");
+    if (ImGui::MenuItem("Cylinder"))
+      component = makeDefaultPrimitive("Cylinder");
+    if (ImGui::MenuItem("Cone"))
+      component = makeDefaultPrimitive("Cone");
+    if (ImGui::MenuItem("Plane"))
+      component = makeDefaultPrimitive("Plane");
+    ImGui::EndMenu();
+  }
+  return component;
+}
+
+void
+MainWindow::openSceneCommand()
+{
+  if (ImGui::BeginListBox("##SceneList",
+    ImVec2{180, 8 * ImGui::GetTextLineHeightWithSpacing()}))
+  {
+    for (auto& file : _sceneFolder->files())
+      if (ImGui::Selectable(file->filename().c_str()))
+      {
+        auto filename = (_sceneFolder->path() / file->name()).string();
+
+        readScene(filename);
+        ImGui::CloseCurrentPopup();
+      }
+    ImGui::EndListBox();
+  }
+}
+
+inline void
+MainWindow::updateRayTracerScene()
+{
+  if (_rayTracer)
+    _rayTracer->setScene(*scene());
+  _image = nullptr;
+}
+
+void
+MainWindow::readScene(const std::string& filename) try
+{
+  util::SceneReader reader;
+
+  reader.setInput(filename);
+  reader.execute();
+  if (reader.scene())
+  {
+    SceneWindow::setScene(*reader.scene());
+
+    auto& materials = Assets::materials();
+
+    for (const auto& [name, m] : reader.materials)
+      materials[name] = m;
+    updateRayTracerScene();
+  }
+}
+catch (const std::exception& e)
+{
+  puts(e.what());
+}
+
+void
+MainWindow::saveScene()
+{
+  if (auto name = scene()->name(); *name)
+  {
+    auto filename = std::string{name} + ".scn";
+    auto path = (_sceneFolder->path() / filename).string();
+
+    util::SceneWriter{path.c_str()}.write(*scene());
+    _sceneFolder->addFile(filename.c_str());
+  }
+}
+
+inline void
+MainWindow::fileMenu()
+{
+  if (ImGui::BeginMenu("File"))
+  {
+    if (ImGui::MenuItem("New Scene"))
     {
-      case GLFW_KEY_P:
-        _animate ^= true;
-        return true;
+      newScene();
+      updateRayTracerScene();
     }
-  return Base::keyInputEvent(key, action, mods);
+    if (ImGui::BeginMenu("Open"))
+    {
+      openSceneCommand();
+      ImGui::EndMenu();
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Save"))
+      saveScene();
+    ImGui::Separator();
+    if (ImGui::MenuItem("Exit", "Alt+F4"))
+    {
+      shutdown();
+    }
+    ImGui::EndMenu();
+  }
+}
+
+inline void
+MainWindow::viewMenu()
+{
+  if (ImGui::BeginMenu("View"))
+  {
+    ImGui::MenuItem("Hierarchy Window", nullptr, &_showHierarchy);
+    ImGui::MenuItem("Inspector Window", nullptr, &_showInspector);
+    ImGui::MenuItem("Camera Preview", nullptr, &_showPreview);
+    ImGui::MenuItem("Assets Window", nullptr, &_showAssets);
+    ImGui::MenuItem("Editor View Settings", nullptr, &_showEditorView);
+    ImGui::EndMenu();
+  }
+}
+
+inline void
+MainWindow::createMenu()
+{
+  ImGui::BeginDisabled(!editHierarchy());
+  if (ImGui::BeginMenu("Create"))
+  {
+    if (ImGui::MenuItem("Material"))
+      createMaterial();
+    ImGui::Separator();
+    createObjectMenu();
+    ImGui::EndMenu();
+  }
+  ImGui::EndDisabled();
+}
+
+inline void
+MainWindow::showOptions()
+{
+  ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
+  ImGui::showStyleSelector("Color Theme##Selector");
+  ImGui::colorEdit3("Selected Wireframe", _selectedWireframeColor[0]);
+  ImGui::colorEdit3("Selected Children Wireframe", _selectedWireframeColor[1]);
+  ImGui::PopItemWidth();
+}
+
+inline void
+MainWindow::mainMenu()
+{
+  if (ImGui::BeginMainMenuBar())
+  {
+    fileMenu();
+    createMenu();
+    viewMenu();
+    if (ImGui::BeginMenu("Ray Tracing"))
+    {
+      ImGui::DragInt("Max Recursion Level",
+        &_maxRecursionLevel,
+        1.0f,
+        0,
+        RayTracer::maxMaxRecursionLevel);
+      ImGui::DragFloat("Min Weight",
+        &_minWeight,
+        0.01f,
+        RayTracer::minMinWeight,
+        1.0f);
+      ImGui::EndMenu();
+    }
+    if (_viewMode == ViewMode::Editor)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+      if (ImGui::MenuItem(ICON_FA_PLAY))
+        _viewMode = ViewMode::Renderer;
+      ImGui::PopStyleColor();
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Run ray tracer");
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+      if (ImGui::MenuItem(ICON_FA_BACKWARD))
+      {
+        _viewMode = ViewMode::Editor;
+        _image = nullptr;
+      }
+      ImGui::PopStyleColor();
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Back to editor");
+    }
+    if (ImGui::BeginMenu("Tools"))
+    {
+      if (ImGui::BeginMenu("Options"))
+      {
+        showOptions();
+        ImGui::EndMenu();
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
 }
 
 void
 MainWindow::gui()
 {
-  // Put your gui code here. Example:
-  ImGui::SetNextWindowSize({360, 180});
-  ImGui::Begin("Template GUI");
-  ImGui::ColorEdit3("Line Color", (float*)&_lineColor);
-  ImGui::ColorEdit3("Mesh Color", (float*)&_meshColor);
-  ImGui::Separator();
-  ImGui::Checkbox("Animate", &_animate);
-  ImGui::SliderFloat("Speed", &_speed, 0.001f, 0.01f);
-  ImGui::Checkbox("Show Ground", &_showGround);
-  ImGui::Separator();
-  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-    deltaTime(),
-    ImGui::GetIO().Framerate);
-  ImGui::End();
+  mainMenu();
+  if (_viewMode == ViewMode::Renderer)
+    return;
+
+  constexpr auto evw = (float)360;
+  constexpr auto evh = (float)310;
+  constexpr auto lft = (float)0;
+  constexpr auto top = (float)23;
+  auto w = (float)width();
+  auto h = (float)height();
+  auto evy = h - evh;
+
+  // Hierarchy Window
+  ImGui::SetNextWindowPos({lft, top});
+  ImGui::SetNextWindowSize({evw, evy - top});
+  hierarchyWindow();
+  // Editor View
+  ImGui::SetNextWindowPos({lft, evy});
+  ImGui::SetNextWindowSize({evw, evh});
+  editorView();
+
+  constexpr auto iww = (float)420;
+  auto rgt = w - iww;
+  auto awh = h / 3;
+  auto awy = h - awh;
+
+  // Inspector Window
+  ImGui::SetNextWindowPos({rgt, top});
+  ImGui::SetNextWindowSize({iww, awy - top});
+  inspectorWindow();
+  // Assets Window
+  ImGui::SetNextWindowPos({rgt, awy});
+  ImGui::SetNextWindowSize({iww, awh});
+  assetWindow();
+}
+
+void
+MainWindow::renderScene()
+{
+  if (_viewMode != ViewMode::Renderer)
+    return;
+
+  auto camera = CameraProxy::current();
+
+  if (!camera)
+    camera = editor()->camera();
+  if (!_image)
+  {
+    _image = new GLImage{width(), height()};
+    if (!_rayTracer)
+      _rayTracer = new RayTracer{*scene(), *camera};
+    else
+      _rayTracer->setCamera(*camera);
+    _rayTracer->setMaxRecursionLevel(_maxRecursionLevel);
+    _rayTracer->setMinWeight(_minWeight);
+    _rayTracer->renderImage(*_image);
+  }
+  _image->draw(0, 0);
+}
+
+bool
+MainWindow::onResize(int width, int height)
+{
+
+  _viewMode = ViewMode::Editor;
+  _image = nullptr;
+  return true;
 }

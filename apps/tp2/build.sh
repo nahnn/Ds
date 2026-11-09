@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds myapp on macOS and Linux.
+# Builds cgdemo on macOS and Linux.
 # Usage: ./build.sh [Release|Debug]   (default: Release)
 # The cg library must be built first, in the same configuration.
 

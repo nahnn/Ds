@@ -1,5 +1,5 @@
 @echo off
-rem Builds myapp on Windows (Visual Studio).
+rem Builds cgdemo on Windows (Visual Studio).
 rem Usage: build.bat [Release|Debug]   (default: Release)
 rem The cg library must be built first, in the same configuration.
 
