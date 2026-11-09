@@ -1,23 +1,23 @@
 // OVERVIEW: Material.h
 // ========
-// Class definition for ShaderGenerator
+// Class definition for ShaderLanguageManager
 //
 // Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende 
 // Last revision: 09/11/2026
 
-#ifndef __ShaderGenerator_h
-#define __ShaderGenerator_h
+#ifndef __ShaderLanguageManager_h
+#define __ShaderLanguageManager_h
 
 namespace cg
 { // begin namespace cg
 
-class ShaderGenerator
+class ShaderLanguageManager
 {
 public:
 private:
 
-}; // ShaderGenerator
+}; // ShaderLanguageManager
 
 } // end namespace cg
 
-#endif // __ShaderGenerator_h
+#endif // __ShaderLanguageManager_h
