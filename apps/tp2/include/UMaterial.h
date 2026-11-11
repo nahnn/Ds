@@ -1,4 +1,4 @@
-// OVERVIEW: Material.h
+// OVERVIEW: UMaterial.h
 // ========
 // Class definition for UMaterial. U stands for universal. 
 //
@@ -24,15 +24,16 @@ public:
   using ray3 = Ray3f;
 
   /// @brief returns the color given by the direct ilumination model 
-  [[nodiscard]] Color shade(const vec3& pos, const vec3& normal, const Light& light) const; // used in rt
+  virtual Color shade(const vec3& P, const vec3& N, const Light& light) const = 0; // used in rt
 
-  // -- Secondary Ray tracing methods --
-  [[nodiscard]] bool isTransparent(const vec3& pos) const;
-  [[nodiscard]] bool isReflexive(const vec3& pos) const;
-  [[nodiscard]] Color& reflectionColor(const ray3& ray, const vec3& pos) const; // used in rt
-  [[nodiscard]] Color& refractionColor(const ray3& ray, const vec3& pos) const; // used in rt
+  // -- Secondary Ray tracing methods (all used in rt) --
+  bool isTransparent(const vec3& P) const;
+  bool isReflexive(const vec3& P) const;
+  Color& reflectionColor(const ray3& ray, const vec3& P) const;
+  Color& refractionColor(const ray3& ray, const vec3& P) const;
 
-  auto matFragmentShader() const;
+  /// @brief Returns the fragment shader code for a given material
+  virtual const char* shaderCode() const = 0;
 
 private:
 
