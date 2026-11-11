@@ -68,6 +68,7 @@ protected:
 
 }; // PolylineSweeper
 
+// -- Sweep Utils --
 
 inline void setTriangle(TriangleMesh::Triangle* t,  
   index_t i, 

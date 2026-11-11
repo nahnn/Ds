@@ -143,59 +143,32 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   }
 
   // computing triangles
+  const index_t quads = closed ? np : np - 1;
   const index_t totalSteps = rings * nre;
   index_t t{};
 
-  if(closed)
+  for(index_t i = 0, cur = 0; i < totalSteps; ++i, cur += np)
   {
-    for(index_t i = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd; 
-      i < totalSteps; 
-      ++i, curSegInit += np, upSegInit += np, curSegEnd += np, upSegEnd += np)
+    index_t up = cur + L;
+    bool inner = (rings == 2) && (i % 2 == 1);
+
+    for(index_t j = 0; j < quads; ++j)
     {
-      for(index_t j = 0; j < np - 1; ++j)
+      index_t jn = (j + 1) % np; // closed suport
+      index_t p0 = cur + j;
+      index_t p1 = cur + jn;
+      index_t p2 = up + jn;
+      index_t p3 = up + j;
+
+      if(!inner)
       {
-        auto p0 = curSegInit + j;
-        auto p1 = p0 + 1;
-        auto p3 = upSegInit + j;
-        auto p2 = p3 + 1;
         setTriangle(&data.triangles[t++], p0, p1, p2);
-        setTriangle(&data.triangles[t++], p0, p2, p3);
+        setTriangle(&data.triagles[t++], p0, p2, p3);
       }
-
-      auto u = curSegEnd;
-      auto v = curSegInit;
-      auto t = upSegInit;
-      auto w = upSegEnd;
-      setTriangle(&data.triangles[t++], u, v, t);
-      setTriangle(&data.triangles[t++], u, t, w);
-    }
-  }
-  else
-  {
-    for(index_t i = 0, curSegInit = 0, upSegInit = L; 
-      i < totalSteps; 
-      ++i, curSegInit += np, upSegInit += np)
-    {
-      for(index_t j = 0; j < np - 1; ++j)
+      else
       {
-        auto p0 = curSegInit + j;
-        auto p1 = p0 + 1;
-        auto p3 = upSegInit + j;
-        auto p2 = p3 + 1;
-        setTriangle(&data.triangles[t++], p0, p1, p2);
-        setTriangle(&data.triangles[t++], p0, p2, p3);
-      }
-    }
-
-    // extrusion changing vertex order
-    if (extruded)
-    {
-      index_t te = L;
-
-      for(index_t i = 0; i < steps; i++, te += L)
-      {
-        for(index_t j = 0; j < L; j++)
-          sweepVertexOrder(te++);
+        setTriangle(&data.triangles[t++], p1, p0, p2);
+        setTriangle(&data.triagles[t++], p0, p3, p2);
       }
     }
   }
