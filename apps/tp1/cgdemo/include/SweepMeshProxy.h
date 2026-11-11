@@ -67,6 +67,12 @@ public:
     }
   }
 
+  void setMesh(const TriangleMesh& mesh, const std::string& meshName)
+  {
+    mapper()->setMesh(mesh);
+    _meshName = meshName;
+  }
+
   Component* duplicate(const SceneObject*) const override
   {
     return nullptr; // A ser implementado, se necessário pela engine

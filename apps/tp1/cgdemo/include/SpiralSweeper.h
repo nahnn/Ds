@@ -145,31 +145,61 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   // computing triangles
   const index_t totalSteps = rings * nre;
   index_t t{};
-  for(index_t i = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd; 
-    i < totalSteps; 
-    ++i, curSegInit += np, upSegInit += np, curSegEnd += np, upSegEnd += np)
-  {
-    for(index_t j = 0; j < np - 1; ++j)
-    {
-      auto p0 = curSegInit + j;
-      auto p1 = p0 + 1;
-      auto p3 = upSegInit + j;
-      auto p2 = p3 + 1;
-      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
-      setTriangle<R>(&data.triangles[t++], p0, p2, p3);
-    }
 
-    if (closed)
+  if(closed)
+  {
+    for(index_t i = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd; 
+      i < totalSteps; 
+      ++i, curSegInit += np, upSegInit += np, curSegEnd += np, upSegEnd += np)
     {
-      auto p0 = curSegEnd;
-      auto p1 = curSegInit;
-      auto p2 = upSegInit;
-      auto p3 = upSegEnd;
-      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
-      setTriangle<R>(&data.triangles[t++], p0, p2, p3);
+      for(index_t j = 0; j < np - 1; ++j)
+      {
+        auto p0 = curSegInit + j;
+        auto p1 = p0 + 1;
+        auto p3 = upSegInit + j;
+        auto p2 = p3 + 1;
+        setTriangle(&data.triangles[t++], p0, p1, p2);
+        setTriangle(&data.triangles[t++], p0, p2, p3);
+      }
+
+      auto u = curSegEnd;
+      auto v = curSegInit;
+      auto t = upSegInit;
+      auto w = upSegEnd;
+      setTriangle(&data.triangles[t++], u, v, t);
+      setTriangle(&data.triangles[t++], u, t, w);
     }
   }
-  
+  else
+  {
+    for(index_t i = 0, curSegInit = 0, upSegInit = L; 
+      i < totalSteps; 
+      ++i, curSegInit += np, upSegInit += np)
+    {
+      for(index_t j = 0; j < np - 1; ++j)
+      {
+        auto p0 = curSegInit + j;
+        auto p1 = p0 + 1;
+        auto p3 = upSegInit + j;
+        auto p2 = p3 + 1;
+        setTriangle(&data.triangles[t++], p0, p1, p2);
+        setTriangle(&data.triangles[t++], p0, p2, p3);
+      }
+    }
+
+    // extrusion changing vertex order
+    if (extruded)
+    {
+      index_t te = L;
+
+      for(index_t i = 0; i < steps; i++, te += L)
+      {
+        for(index_t j = 0; j < L; j++)
+          sweepVertexOrder(te++);
+      }
+    }
+  }
+
   // capped
   if (capped)
   {
@@ -188,8 +218,8 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
       auto p2 = p0 + i + 1;
       auto pn_1 = pn + i;
       auto pn_2 = pn + i + 1;
-      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
-      setTriangle<R>(&data.triangles[t++], pn, pn_2, pn_1);
+      setTriangle(&data.triangles[t++], p0, p1, p2);
+      setTriangle(&data.triangles[t++], pn, pn_2, pn_1);
     }
   }
 

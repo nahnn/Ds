@@ -167,8 +167,8 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
       auto p1 = p0 + 1;
       auto p3 = upSegInit + j;
       auto p2 = p3 + 1;
-      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
-      setTriangle<R>(&data.triangles[t++], p0, p2, p3);
+      setTriangle(&data.triangles[t++], p0, p1, p2);
+      setTriangle(&data.triangles[t++], p0, p2, p3);
     }
 
     if (closed)
@@ -177,8 +177,8 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
       auto p1 = curSegInit;
       auto p2 = upSegInit;
       auto p3 = upSegEnd;
-      setTriangle<R>(&data.triangles[t++], p0, p1, p2);
-      setTriangle<R>(&data.triangles[t++], p0, p2, p3);
+      setTriangle(&data.triangles[t++], p0, p1, p2);
+      setTriangle(&data.triangles[t++], p0, p2, p3);
     }
   }
 
@@ -200,8 +200,8 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
       auto p2 = p0 + i + 1;
       auto pn_1 = pn + i;
       auto pn_2 = pn + i + 1;
-      setTriangle<R>(&data.triangles[t++], p0, p2, p1);
-      setTriangle<R>(&data.triangles[t++], pn, pn_1, pn_2);
+      setTriangle(&data.triangles[t++], p0, p2, p1);
+      setTriangle(&data.triangles[t++], pn, pn_1, pn_2);
     }
   }
 

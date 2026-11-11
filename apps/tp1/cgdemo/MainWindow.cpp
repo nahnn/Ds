@@ -526,8 +526,12 @@ void MainWindow::inspectGeneratrix(cg::graph::SweepMeshProxy<float>& proxy)
 {
   ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "=== Geratriz (2D) ===");
   
-  if (ImGui::Combo("Generator", (int*)&proxy.activeGen, "Regular Polygon\0Circular Arc\0"))
+  int gen = static_cast<int>(proxy.activeGen); // indirection to not miss on big endian
+  if (ImGui::Combo("Generator", &gen, "Regular Polygon\0Circular Arc\0"))
+  {
+    proxy.activeGen = static_cast<SweepMeshProxy<float>::PolylineGeneratorType>(gen);
     proxy.setPolylineDirty();
+  }
 
   ImGui::Separator();
 
@@ -544,6 +548,46 @@ void MainWindow::inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMes
 {
   if (ImGui::Checkbox("Capped", &attrs.capped))
     proxy.setSweepDirty();
+}
+
+// copied from scene window implementation. (didnt see any other method to do it)
+void MainWindow::inspectPrimitive(SceneWindow& window, SweepMeshProxy<float>& proxy)
+{
+  ImGui::inputText("Mesh", proxy.meshName());
+  auto editSceneObjectsFunc = steal(TagEditSceneObjects{});
+  auto inspectMaterialFunc = steal(TagInspectMaterial{});
+  if ((window.*editSceneObjectsFunc)() && ImGui::BeginDragDropTarget())
+  {
+    if (auto payload = ImGui::AcceptDragDropPayload("TriangleMesh"))
+    {
+      auto mit = *(MeshMapIterator*)payload->Data;
+      proxy.setMesh(*Assets::loadMesh(mit), mit->first);
+    }
+    ImGui::EndDragDropTarget();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("...###PrimitiveMesh"))
+    ImGui::OpenPopup("PrimitiveMeshPopup");
+  if (ImGui::BeginPopup("PrimitiveMeshPopup"))
+  {
+    if (auto& meshes = Assets::meshes(); !meshes.empty())
+    {
+      for (auto mit = meshes.begin(); mit != meshes.end(); ++mit)
+        if (ImGui::Selectable(mit->first.c_str()))
+          proxy.setMesh(*Assets::loadMesh(mit), mit->first);
+    }
+    ImGui::EndPopup();
+  }
+  ImGui::Separator();
+
+  auto mapper = proxy.mapper();
+
+  (window.*inspectMaterialFunc)(*(mapper->primitive()));
+  ImGui::Separator();
+  inspectDisplayMode(mapper->renderMode);
+  ImGui::SameLine();
+  ImGui::Checkbox("###ODM", &mapper->useObjectRenderMode);
+  proxy.actor()->visible = proxy.sceneObject()->visible();
 }
 
 void MainWindow::inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy)

@@ -68,13 +68,23 @@ protected:
 
 }; // PolylineSweeper
 
-template<IsReal R>
+
 inline void setTriangle(TriangleMesh::Triangle* t,  
   index_t i, 
   index_t j,
   index_t k)
 {
   t->setVertices(i, j, k);
+}
+
+/// @brief Given a triangle t changes the order of its vertices from (i, j,  k) to (j, i, k)
+/// @param t 
+inline void sweepVertexOrder(TriangleMesh::Triangle* t)
+{
+  int& j = t->v[1];
+  int temp = t->v[0];
+  t->v[0] = j;
+  t->v[1] = temp;
 }
 
 template<IsReal R>
