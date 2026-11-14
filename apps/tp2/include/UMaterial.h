@@ -15,7 +15,10 @@
 namespace cg
 { // begin namespace cg
 
-// TODO: attrs de materiais ou classes para materiais 
+struct UMaterialAttributes
+{
+  // empty
+}; // UMaterialAttributes
 
 class UMaterial : public Material
 {
@@ -23,8 +26,14 @@ public:
   using vec3 = vec3f;
   using ray3 = Ray3f;
 
+  UMaterial(const Color& color):
+    Material{color}
+  {
+    // do nothing
+  }
+
   /// @brief returns the color given by the direct ilumination model 
-  virtual Color shade(const vec3& P, const vec3& N, const Light& light) const = 0; // used in rt
+  virtual Color shade(const vec3& P, const vec3& N, const Light& L, const float& d) const = 0; // used in rt
 
   // -- Secondary Ray tracing methods (all used in rt) --
   bool isTransparent(const vec3& P) const;

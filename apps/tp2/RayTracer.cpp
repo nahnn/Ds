@@ -33,6 +33,7 @@
 #include "graphics/Camera.h"
 #include "utils/Stopwatch.h"
 #include "RayTracer.h"
+#include "include/UMaterial.h"
 #include <iostream>
 
 using namespace std;
@@ -376,7 +377,7 @@ RayTracer::shade(const Ray3f& ray,
 
   auto R = V - (2 * NV) * N; // reflection vector
   // Start with ambient lighting
-  auto m = primitive->material();
+  auto m = static_cast<UMaterial*>(primitive->material()); // it will be ceartainly a umat
   auto color = _scene->ambientLight * m->ambient;
   auto P = ray(hit.distance);
 
@@ -409,13 +410,9 @@ RayTracer::shade(const Ray3f& ray,
     if (shadow(lightRay))
       continue;
 
-    auto lc = light->lightColor(d);
-
-    color += lc * m->diffuse * NL;
-    if (m->shine <= 0 || (d = R.dot(L)) <= 0)
-      continue;
-    color += lc * m->spot * pow(d, m->shine);
+    color += m->shade(P, N, *light, d);
   }
+
   // Compute specular reflection
   if (m->specular != Color::black)
   {
@@ -426,6 +423,7 @@ RayTracer::shade(const Ray3f& ray,
       color += m->specular * trace(reflectionRay, level + 1, weight);
     }
   }
+
   return color;
 }
 
