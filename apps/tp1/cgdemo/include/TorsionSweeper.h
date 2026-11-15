@@ -98,7 +98,6 @@ private:
 
 }; // TorsionSweeper
 
-//TODO: Resolver "WINDING"
 template<IsReal R>
 TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
 {
@@ -154,31 +153,36 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
       data.vertices[k * L + i] = rotz * (sv * points[i] + T);
   }
 
-  // setting triangles
+  
+  // computing triangles
+  const size_t quads = closed ? np : np - 1;
   const size_t totalSteps = rings * nsv;
   size_t t{};
-  for(size_t i = 0, curSegInit = 0, upSegInit = L, curSegEnd = np - 1, upSegEnd = L + curSegEnd;
-    i < totalSteps;
-    ++i, curSegInit += np, upSegInit += np, curSegEnd += np, upSegEnd += np)
-  {
-    for(size_t j = 0; j < np - 1; ++j)
-    {
-      auto p0 = curSegInit + j;
-      auto p1 = p0 + 1;
-      auto p3 = upSegInit + j;
-      auto p2 = p3 + 1;
-      setTriangle(&data.triangles[t++], p0, p1, p2);
-      setTriangle(&data.triangles[t++], p0, p2, p3);
-    }
 
-    if (closed)
+  for(size_t i = 0, cur = 0; i < totalSteps; ++i, cur += np)
+  {
+    size_t up = cur + L;
+    bool inner = (rings == 2) && (i % 2 == 1);
+
+    for(size_t j = 0; j < quads; ++j)
     {
-      auto p0 = curSegEnd;
-      auto p1 = curSegInit;
-      auto p2 = upSegInit;
-      auto p3 = upSegEnd;
-      setTriangle(&data.triangles[t++], p0, p1, p2);
-      setTriangle(&data.triangles[t++], p0, p2, p3);
+      size_t jn = (j + 1) % np; // closed suport
+      size_t p0 = cur + j;
+      size_t p1 = cur + jn;
+      size_t p2 = up + jn;
+      size_t p3 = up + j;
+
+      // torsion grows towards +z
+      if(!inner)
+      {
+        setTriangle(&data.triangles[t++], p0, p1, p2);
+        setTriangle(&data.triangles[t++], p0, p2, p3);
+      }
+      else
+      {
+        setTriangle(&data.triangles[t++], p1, p0, p2);
+        setTriangle(&data.triangles[t++], p0, p3, p2);
+      }
     }
   }
 
@@ -204,6 +208,10 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
       setTriangle(&data.triangles[t++], pn, pn_1, pn_2);
     }
   }
+
+  const auto& tr = data.triangles[0];
+  const vec3 a = data.vertices[tr.v[0]], b = data.vertices[tr.v[1]], c = data.vertices[tr.v[2]];
+  printf("%f\n", (b - a).cross(c - a).dot(a - vec3{ow, oh, 0}));  // esperado: > 0
 
   auto* mesh = new TriangleMesh{std::move(data)};
   mesh->computeNormals();
