@@ -81,7 +81,7 @@ Polyline<R> RegularPolygon<R>::generate() const
   polyline[0] = pi_1;
 
   auto rotMat = mat3{quat::eulerAngles(vec3{0, 0, R(360) / static_cast<R>(length)})};
-  for(index_t i = 1u; i < length; ++i)
+  for(size_t i = 1u; i < length; ++i)
   {
     pi = rotMat * pi_1;
     polyline[i] = pi;

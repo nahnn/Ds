@@ -75,7 +75,8 @@ public:
 
   Component* duplicate(const SceneObject*) const override
   {
-    return nullptr; // A ser implementado, se necessário pela engine
+    //TODO
+    return nullptr;
   }
 
   // generator attrs

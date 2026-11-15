@@ -209,10 +209,6 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
     }
   }
 
-  const auto& tr = data.triangles[0];
-  const vec3 a = data.vertices[tr.v[0]], b = data.vertices[tr.v[1]], c = data.vertices[tr.v[2]];
-  printf("%f\n", (b - a).cross(c - a).dot(a - vec3{ow, oh, 0}));  // esperado: > 0
-
   auto* mesh = new TriangleMesh{std::move(data)};
   mesh->computeNormals();
   return mesh;

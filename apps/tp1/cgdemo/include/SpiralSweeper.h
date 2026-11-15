@@ -160,7 +160,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
       size_t p2 = up + jn;
       size_t p3 = up + j;
 
-      // spiral grows towards +z
+      // spiral grows towards -z
       if(inner)
       {
         setTriangle(&data.triangles[t++], p0, p1, p2);

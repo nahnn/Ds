@@ -107,7 +107,7 @@ Polyline<R> CircularArc<R>::generate() const
 
   const R step =  static_cast<R>(cg::math::toRadians(_attr.tc / _attr.nc));
   const R a0 = static_cast<R>(cg::math::toRadians(90 - _attr.tc / 2));
-  for(index_t i = 0; i < length; ++i)
+  for(size_t i = 0; i < length; ++i)
     polyline[i] = vec3{static_cast<R>(cos(a0 + i * step)), static_cast<R>(sin(a0 + i * step)), 0};
   
   // Transformations

@@ -17,7 +17,7 @@
 namespace cg
 { // begin namespace cg
 
-using index_t = unsigned;
+using size_t = unsigned;
 
 
 /// @brief PolylineLimits: Represents the limits of transformations of a polyline
@@ -138,7 +138,7 @@ public:
   void computeBounds()
   {
     _bounds.setEmpty();
-    for (index_t i = 0; i < _length; ++i)
+    for (size_t i = 0; i < _length; ++i)
       _bounds.extend(_points[i]);
   }
 
@@ -209,24 +209,24 @@ void PolylineGenerator<R>::transform(Polyline<R>& polyline, const PolylineAttrs<
   {
     polyline.setExtruded(true);
 
-    const index_t n = static_cast<index_t>(polyline.length());
+    const size_t n = static_cast<size_t>(polyline.length());
     const R f = 1 - attr.ep;
-    for(index_t i = 0; i < n; ++i)
+    for(size_t i = 0; i < n; ++i)
       polyline[n + i] = f * polyline[i];
   }
 
-  const index_t length = static_cast<index_t>(polyline.length());
+  const size_t length = static_cast<size_t>(polyline.length());
 
   if (attr.tp != 0)
   {
     auto rotTp = mat3{quat::eulerAngles(vec3{0, 0, attr.tp})};
 
-    for (index_t i = 0; i < length; ++i)
+    for (size_t i = 0; i < length; ++i)
       polyline[i] = rotTp * polyline[i];
   }
 
   if (attr.sp != 1)
-    for (index_t i = 0; i < length; ++i)
+    for (size_t i = 0; i < length; ++i)
       polyline[i] = attr.sp * polyline[i];
 } 
 

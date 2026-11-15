@@ -71,9 +71,9 @@ protected:
 // -- Sweep Utils --
 
 inline void setTriangle(TriangleMesh::Triangle* t,  
-  index_t i, 
-  index_t j,
-  index_t k)
+  size_t i, 
+  size_t j,
+  size_t k)
 {
   t->setVertices(i, j, k);
 }
@@ -91,7 +91,7 @@ inline void sweepVertexOrder(TriangleMesh::Triangle* t)
 template<IsReal R>
 inline void setVertexArray(Vector3<R>* to, const Vector3<R>* from, const size_t total)
 {
-  for(index_t i = 0; i < total; ++i) to[i] = from[i];
+  for(size_t i = 0; i < total; ++i) to[i] = from[i];
 }
 
 } // end namespace cg
