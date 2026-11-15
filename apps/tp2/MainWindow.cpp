@@ -37,7 +37,8 @@
 #include "MainWindow.h"
 #include "IconsFontAwesome7.h"
 
-
+// TODO: fazer algo pra permitir inspeção do PBR (provavelmente escrever um inspect primitive /
+// inspect material)
 /////////////////////////////////////////////////////////////////////
 //
 // MainWindow implementation

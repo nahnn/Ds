@@ -13,6 +13,7 @@
 namespace cg
 { // begin namespace cg
     
+// TODO: sobreescrever algo pra colocar os uniforms do pbr
 class USceneEditor : public SceneEditor
 {
 public:

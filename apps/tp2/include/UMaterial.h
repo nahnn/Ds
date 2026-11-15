@@ -33,7 +33,7 @@ public:
   }
 
   /// @brief returns the color given by the direct ilumination model 
-  virtual Color shade(const vec3& P, const vec3& N, const Light& L, const float& d) const = 0; // used in rt
+  virtual Color shade(const ray3&, const Intersection&, const vec3&, const Light&) = 0; // used in rt
 
   // -- Secondary Ray tracing methods (all used in rt) --
   bool isTransparent(const vec3& P) const;

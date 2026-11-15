@@ -31,9 +31,10 @@ public:
   PBRAttributes(const Color& color):
     od{color},
     os{color},
-    r{.3f},
-    m{.3f}, 
-    fd{od * math::inverse<float>(math::pi<float>)}
+    r{.3f}, // TODO: choose default
+    m{.3f}, // TODO: choose default
+    fd{od * math::inverse<float>(math::pi<float>)},
+    fs{}
   {
     k = (float)(pow(r + 1, 2) / 8);
     alpha = (float)pow(r, 2);
@@ -51,7 +52,7 @@ class PBR : public UMaterial
 {
 public:
   using type = PBR;
-  using attrs = PBRAttributes;
+  using attrs_type = PBRAttributes;
 
   PBR() = default;
 
@@ -62,7 +63,12 @@ public:
     // do nothing
   }
 
-  Color shade(const vec3& P, const vec3& N, const Light& L, const float& d) const override;
+  const attrs_type& attributes() const
+  {
+    return _attrs;
+  }
+
+  Color shade(const ray3&, const Intersection&, const vec3&, const Light&) override;
   const char* shaderCode() const override;
 
 private:
