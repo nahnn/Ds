@@ -468,7 +468,7 @@ void MainWindow::inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy
 {
   using Limits = cg::PolylineLimits<float>;
 
-  ImGui::Text("Transformações Base");
+  ImGui::Text("Base Parameters");
 
   if (ImGui::SliderFloat("Scale", &attrs.sp, Limits::MIN_SCALEP, Limits::MAX_SCALEP))
     proxy.setPolylineDirty();
@@ -476,7 +476,7 @@ void MainWindow::inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy
   if (ImGui::SliderFloat("Rotation", &attrs.tp, Limits::MIN_THETAP, Limits::MAX_THETAP))
     proxy.setPolylineDirty();
 
-  if(ImGui::Checkbox("Habilitar Extrusão", &attrs.isExtruded))
+  if(ImGui::Checkbox("Enable Extrusion", &attrs.isExtruded))
     proxy.setPolylineDirty();
     
   ImGui::BeginDisabled(!attrs.isExtruded);
@@ -493,9 +493,8 @@ void MainWindow::inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepM
   using Limits = cg::RegularPolygonLimits<float>;
 
   inspectPolylineBase(attrs, proxy);
-  
-  ImGui::Separator();
-  ImGui::Text("Parâmetros do Polígono");
+
+  ImGui::Text("Regular Polygon Parameters");
 
   if (ImGui::SliderInt("Points", &attrs.np, Limits::MIN_NP, Limits::MAX_NP))
     proxy.setPolylineDirty();
@@ -507,10 +506,9 @@ void MainWindow::inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshPro
   using Limits = cg::CircularArcLimits<float>;
 
   inspectPolylineBase(attrs, proxy);
-  
-  ImGui::Separator();
-  ImGui::Text("Parâmetros do Arco");
 
+  ImGui::Text("Regular Polygon Parameters");
+  
   if (ImGui::SliderFloat("Angle", &attrs.tc, Limits::MIN_THETAC_EXCLUSIVE + 0.1f, Limits::MAX_THETAC))
     proxy.setPolylineDirty();
 
@@ -519,13 +517,28 @@ void MainWindow::inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshPro
 
   if (ImGui::Checkbox("Open Arc", &attrs.isOpen))
     proxy.setPolylineDirty();
+  
 }
 
 // Generic Polyline Generatrix
-void MainWindow::inspectGeneratrix(cg::graph::SweepMeshProxy<float>& proxy)
+void MainWindow::inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy)
 {
-  ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "=== Geratriz (2D) ===");
-  
+  ImGui::SeparatorText("Material");
+
+  //copied from SceneWindow inspectMapper() because of encapsulation problems
+  auto mapper = proxy.mapper();
+
+  static_cast<MainWindow&>(window).inspectMaterial(*(mapper->primitive()));
+  ImGui::Separator();
+  inspectDisplayMode(mapper->renderMode);
+  ImGui::SameLine();
+  ImGui::Checkbox("###ODM", &mapper->useObjectRenderMode);
+  proxy.actor()->visible = proxy.sceneObject()->visible();
+
+  ImGui::Separator();
+
+  ImGui::SeparatorText("Polyline");
+
   int gen = static_cast<int>(proxy.activeGen); // indirection to not miss on big endian
   if (ImGui::Combo("Generator", &gen, "Regular Polygon\0Circular Arc\0"))
   {
@@ -533,71 +546,36 @@ void MainWindow::inspectGeneratrix(cg::graph::SweepMeshProxy<float>& proxy)
     proxy.setPolylineDirty();
   }
 
-  ImGui::Separator();
-
   //Sets the actual polyline gen type
   if (proxy.activeGen == SweepMeshProxy<float>::PolylineGeneratorType::RegularPolygon)
-    inspectRegularPolygon((RegularPolygonAttrs<float>&)proxy.attrs, proxy);
+    inspectRegularPolygon((RegularPolygonAttrs<float>&)proxy.genAttrs, proxy);
   else
-    inspectCircularArc((CircularArcAttrs<float>&)proxy.attrs, proxy);
+    inspectCircularArc((CircularArcAttrs<float>&)proxy.genAttrs, proxy);
+
+  ImGui::Separator();
 }
 
 //Sweep Inspects
 
 void MainWindow::inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
 {
+  //only capped if not extruded and closed
+  //TODO: add closed verification
+  ImGui::BeginDisabled(proxy.genAttrs.isExtruded);
+
   if (ImGui::Checkbox("Capped", &attrs.capped))
     proxy.setSweepDirty();
-}
 
-// copied from scene window implementation. (didnt see any other method to do it)
-void MainWindow::inspectPrimitive(SceneWindow& window, SweepMeshProxy<float>& proxy)
-{
-  ImGui::inputText("Mesh", proxy.meshName());
-  auto editSceneObjectsFunc = steal(TagEditSceneObjects{});
-  auto inspectMaterialFunc = steal(TagInspectMaterial{});
-  if ((window.*editSceneObjectsFunc)() && ImGui::BeginDragDropTarget())
-  {
-    if (auto payload = ImGui::AcceptDragDropPayload("TriangleMesh"))
-    {
-      auto mit = *(MeshMapIterator*)payload->Data;
-      proxy.setMesh(*Assets::loadMesh(mit), mit->first);
-    }
-    ImGui::EndDragDropTarget();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("...###PrimitiveMesh"))
-    ImGui::OpenPopup("PrimitiveMeshPopup");
-  if (ImGui::BeginPopup("PrimitiveMeshPopup"))
-  {
-    if (auto& meshes = Assets::meshes(); !meshes.empty())
-    {
-      for (auto mit = meshes.begin(); mit != meshes.end(); ++mit)
-        if (ImGui::Selectable(mit->first.c_str()))
-          proxy.setMesh(*Assets::loadMesh(mit), mit->first);
-    }
-    ImGui::EndPopup();
-  }
-  ImGui::Separator();
-
-  auto mapper = proxy.mapper();
-
-  (window.*inspectMaterialFunc)(*(mapper->primitive()));
-  ImGui::Separator();
-  inspectDisplayMode(mapper->renderMode);
-  ImGui::SameLine();
-  ImGui::Checkbox("###ODM", &mapper->useObjectRenderMode);
-  proxy.actor()->visible = proxy.sceneObject()->visible();
+  ImGui::EndDisabled();
 }
 
 void MainWindow::inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy)
 {
   using Limits = cg::SpiralSweeperLimits<float>;
 
-  inspectGeneratrix(proxy);
+  inspectGeneratrix(window, proxy);
 
-  ImGui::Separator();
-  ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "Spiral");
+  ImGui::SeparatorText("Spiral");
 
   inspectSweeperBase(proxy.attr, proxy);
   ImGui::Separator();
@@ -626,10 +604,9 @@ void MainWindow::inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& p
 {
   using Limits = cg::TorsionSweeperLimits<float>;
 
-  inspectGeneratrix(proxy);
+  inspectGeneratrix(window, proxy);
 
-  ImGui::Separator();
-  ImGui::TextColored({0.0f, 1.0f, 0.0f, 1.0f}, "Torsion");
+  ImGui::SeparatorText("Torsion");
 
   inspectSweeperBase(proxy.attr, proxy);
   ImGui::Separator();

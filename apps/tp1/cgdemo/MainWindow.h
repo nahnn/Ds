@@ -118,11 +118,10 @@ private:
   static void inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
   static void inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
   static void inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
-  static void inspectGeneratrix(SweepMeshProxy<float>& proxy);
+  static void inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy);
 
   // Main Inspectors
   static void inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
-  static void inspectPrimitive(SceneWindow& window, SweepMeshProxy<float>& proxy);
   static void inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy);
   static void inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& proxy);
 
@@ -133,32 +132,5 @@ private:
   Component* makeTorsionProxy();
 
 }; // MainWindow
-
-// stealling method so the main window methods can access scene window methods (for mat editing purposes)
-// M stands for the function address, Tag is the type that will be steal
-template<typename Tag, typename Tag::type M>
-struct Thief
-{
-  friend typename Tag::type steal(Tag) { return M; }
-};
-
-// defining the methods to steal from SceneWindow
-// steal editScene objects
-struct TagEditSceneObjects
-{
-  typedef bool (SceneWindow::*type)() const;
-  friend type steal(TagEditSceneObjects);
-};
-
-// steal inspectMaterial
-struct TagInspectMaterial
-{
-  typedef void (SceneWindow::*type)(Primitive&) const;
-  friend type steal(TagInspectMaterial);
-};
-
-// explicit instantiation: forces the compiler to map method adresses
-template struct Thief<TagEditSceneObjects, &SceneWindow::editSceneObjects>;
-template struct Thief<TagInspectMaterial, &SceneWindow::inspectMaterial>;
 
 #endif // __MainWindow_h

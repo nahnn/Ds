@@ -80,7 +80,7 @@ public:
 
   // generator attrs
   PolylineGeneratorType activeGen{PolylineGeneratorType::RegularPolygon};
-  CircularArcAttrs<R> attrs; //jeito ingênuo, fazer de outro modo
+  CircularArcAttrs<R> genAttrs; //jeito ingênuo, fazer de outro modo
 
 protected:
   // TODO: adicionar concepts para a verificação do parametros do template
@@ -99,7 +99,7 @@ protected:
   {
     G generator;
 
-    generator.set(attrs);
+    generator.set(genAttrs);
     _polyline = generator.generate();
   }
 
