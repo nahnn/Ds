@@ -15,34 +15,52 @@ namespace cg
 { // begin namespace cg
 
 Color
-PBR::shade(const ray3& ray, const Intersection& hit, const vec3& N, const Light& light)
+PBR::shade(const ray3& ray, const Intersection& hit, const vec3& N, const Light& light) const
 {
-  Color color{};
-
   vec3 L; // bold Ll
   float d;
 
   const auto& V = ray.direction;
   const auto P = ray(hit.distance);
+  auto NL = N.dot(L);
+  auto NV = N.dot(V);
 
   light.lightVector(P, L, d);
   auto lc = light.lightColor(d); // Ll in italic
 
   // calculating BRDF
   auto Hl = (L + V).versor();
-  vec3 fresnel = vec3{_attrs.os} + (vec3{1, 1, 1} - vec3{_attrs.os}) * powf(1 - L.dot(Hl), 5);
-  float g1L = N.dot(L) * math::inverse(N.dot(L) * (1 - _attrs.k) + _attrs.k);
-  float g1V = N.dot(V) * math::inverse(N.dot(V) * (1 - _attrs.k) + _attrs.k);
+  Color fresnel = _attrs.os + (Color::white -_attrs.os) * powf(1 - L.dot(Hl), 5);
+  float g1L = NL * math::inverse(NL * (1 - _attrs.k) + _attrs.k);
+  float g1V = NV * math::inverse(NV * (1 - _attrs.k) + _attrs.k);
   float G = g1L * g1V;
   float D = powf(_attrs.alpha, 2) * math::inverse(
     math::pi<float> * powf(powf(N.dot(Hl), 2) * (powf(_attrs.alpha, 2) - 1) + 1, 2));
   
-  vec3 fs{fresnel * G * D * math::inverse(4 * (-N.dot(L)) * (-N.dot(V)))};
-  _attrs.fs.setRGB(fs.x, fs.y, fs.z, 1.0); // shade deveria ser const? fs deveria se alterar?
-  _attrs.f = _attrs.fd + _attrs.fs;
+  Color f{BRDF(fresnel * G * D * math::inverse(4 * (-NL) * (-NV)))}; // BRDF
 
-  color = lc * N.dot(L) * _attrs.f;
-  return color;
+  return lc * f * NL;
+}
+
+inline Color
+PBR::computeSpecular(float NV) const
+{
+  Color F0{(1 - _attrs.m) * attrs_type::minOs * Color::white + _attrs.m * _attrs.os};
+  Color c0{-1, -0.0275, -0.572, 0.022}, c1{1, 0.0425, 1.04, -0.04};
+  Color k{_attrs.r * c0 + c1};
+  float a{math::min(powf(k.x, 2), powf(2, -9.28 * NV)) * k.x + k.y};
+  float A{-1.04 * a + k.z};
+  float B{1.04 * a + k.w};
+
+  return A * F0 + B * Color::white;
+}
+
+inline Color
+PBR::BRDF(Color s) const
+{
+  Color fd{_attrs.od * math::inverse<float>(math::pi<float>)}; // Diffuse BRDF
+  Color fs{s.x, s.y, s.z, 1.0}; // Specular BRDF
+  return fd + fs;
 }
 
 const char*

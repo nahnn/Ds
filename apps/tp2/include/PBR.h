@@ -13,7 +13,6 @@
 namespace cg
 { // begin namespace cg 
 
-// TODO: fazer com que metalic influencie Os
 struct PBRAttributes : public UMaterialAttributes
 {
 public:
@@ -25,20 +24,17 @@ public:
   float k{}; // roughness constant
   float alpha{}; // roughness constant
   float m; // metalic
-  Color f; // BRDF
-  Color fd; // Diffuse BRDF
-  Color fs; // Specular BRDF
 
-  PBRAttributes(const Color& color):
+  PBRAttributes(const Color& color, float metalic = .3, float roughness = .3):
     od{color},
-    os{color},
-    r{.3f}, // TODO: choose default
-    m{.3f}, // TODO: choose default
-    fd{od * math::inverse<float>(math::pi<float>)},
-    fs{}
+    os{},
+    r{roughness},
+    m{metalic}
   {
-    k = (float)(pow(r + 1, 2) / 8);
-    alpha = (float)pow(r, 2);
+    float v = 1 - metalic;
+    os = v > minOs ? Color{v, v, v} : Color{minOs, minOs, minOs};
+    k = powf(r + 1, 2) / 8;
+    alpha = powf(r, 2);
   }
 
   PBRAttributes(PBRAttributes&& other) noexcept = default;
@@ -112,8 +108,10 @@ public:
     return _attrs;
   }
 
-  Color shade(const ray3&, const Intersection&, const vec3&, const Light&) override;
+  Color shade(const ray3&, const Intersection&, const vec3&, const Light&) const override;
   const char* shaderCode() const override;
+  Color computeSpecular(float) const override;
+  Color BRDF(Color) const;
 
 private:
   PBRAttributes _attrs;

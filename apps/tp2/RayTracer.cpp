@@ -378,7 +378,7 @@ RayTracer::shade(const Ray3f& ray,
   auto R = V - (2 * NV) * N; // reflection vector
   // Start with ambient lighting
   auto m = static_cast<UMaterial*>(primitive->material()); // it will be ceartainly a umat
-  auto color = _scene->ambientLight * m->ambient * math::pi<float>; // todo: tirar ambients?
+  auto color = _scene->ambientLight * m->ambient * math::pi<float>; // todo: tirar ambients? tirar pi?
   auto P = ray(hit.distance);
 
   // Compute the direct lighting
@@ -412,9 +412,10 @@ RayTracer::shade(const Ray3f& ray,
 
     color += m->shade(ray, hit, N, *light);
   }
+  color *= math::pi<float>;
 
   // Compute specular reflection
-  if (m->specular != Color::black)
+  if (m->computeSpecular(NV) != Color::black) // TODO: Mudar verificação
   {
     weight *= maxRGB(m->specular);
     if (weight > _minWeight && level < _maxRecursionLevel)

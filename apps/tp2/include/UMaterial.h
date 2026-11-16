@@ -42,13 +42,14 @@ public:
 
   // -- Ray Tracing --
   /// @brief returns the color given by the direct ilumination model 
-  virtual Color shade(const ray3&, const Intersection&, const vec3&, const Light&) = 0; // used in rt
+  virtual Color shade(const ray3&, const Intersection&, const vec3&, const Light&) const = 0; // used in rt
 
   // Secondary Ray tracing
   bool isTransparent(const vec3& P) const;
   bool isReflexive(const vec3& P) const;
   Color& reflectionColor(const ray3& ray, const vec3& P) const;
   Color& refractionColor(const ray3& ray, const vec3& P) const;
+  virtual Color computeSpecular(float) const = 0;
 
   // -- Shading Language --
   /// @brief Returns the fragment shader code for a given material
