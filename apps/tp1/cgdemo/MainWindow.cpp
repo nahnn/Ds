@@ -427,7 +427,7 @@ SceneObject* MainWindow::createSpiralObject()
   object->setName("Spiral Sweep %d", ++_primitiveId);
 
   //builds the mesh by sweep method
-  auto proxy = SpiralProxy<float>::New("Spiral Mesh");
+  auto proxy = SpiralProxy<float>::New("SpiralMesh");
   proxy->build(); 
 
   //add component and return
@@ -440,7 +440,7 @@ SceneObject* MainWindow::createTorsionObject()
   auto object = SceneObject::New(*_scene);
   object->setName("Torsion Sweep %d", ++_primitiveId);
 
-  auto proxy = TorsionProxy<float>::New("Torsion Mesh");
+  auto proxy = TorsionProxy<float>::New("TorsionMesh");
   proxy->build(); 
 
   object->addComponent(proxy);
@@ -449,14 +449,14 @@ SceneObject* MainWindow::createTorsionObject()
 
 Component* MainWindow::makeSpiralProxy()
 {
-  auto proxy = SpiralProxy<float>::New("Spiral Mesh");
+  auto proxy = SpiralProxy<float>::New("SpiralMesh");
   proxy->build();
   return proxy;
 }
 
 Component* MainWindow::makeTorsionProxy()
 {
-  auto proxy = TorsionProxy<float>::New("Torsion Mesh");
+  auto proxy = TorsionProxy<float>::New("TorsionMesh");
   proxy->build();
   return proxy;
 }
@@ -555,6 +555,32 @@ void MainWindow::inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& p
   ImGui::Separator();
 }
 
+void MainWindow::inspectSweepObjWrite(SweepMeshProxy<float>& proxy)
+{
+  ImGui::SeparatorText("Save .OBJ");
+
+  char name[64];
+
+  snprintf(name, sizeof(name), "%s", proxy.meshName());
+  if (ImGui::InputText("Mesh name", name, sizeof(name)))
+    proxy.setMeshName(name);
+
+  if (ImGui::Button("Save .OBJ"))
+    ImGui::OpenPopup(proxy.saveOBJ() ? "OBJ saved" : "OBJ error");
+
+  if (ImGui::BeginPopup("OBJ saved"))
+  {
+    ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Saved %s.obj", proxy.meshName());
+    ImGui::EndPopup();
+  }
+  if (ImGui::BeginPopup("OBJ error"))
+  {
+    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Could not save (name: letters, digits, '_' or '-')");
+    ImGui::EndPopup();
+  }
+  ImGui::Separator();
+}
+
 //Sweep Inspects
 
 void MainWindow::inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
@@ -597,6 +623,8 @@ void MainWindow::inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& pro
 
   ImGui::Separator();
 
+  inspectSweepObjWrite(proxy);
+
   proxy.build();
 }
 
@@ -634,6 +662,8 @@ void MainWindow::inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& p
     proxy.setSweepDirty();
 
   ImGui::Separator();
+
+  inspectSweepObjWrite(proxy);
 
   proxy.build();
 }

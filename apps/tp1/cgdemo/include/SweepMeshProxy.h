@@ -16,6 +16,9 @@
 #include "CircularArc.h"
 #include <unordered_map>
 #include <functional>
+#include "SweepMeshWriter.h"
+#include <string>
+#include "graphics/Application.h"
 
 namespace cg::graph
 {
@@ -77,6 +80,22 @@ public:
   {
     //TODO
     return nullptr;
+  }
+
+  void setMeshName(const std::string& name)
+  {
+    _meshName = name;
+  }
+
+  bool saveOBJ() const
+  {
+    if (!SweepMeshWriter::isValidName(_meshName))
+      return false;
+
+    const auto relative = "meshes/" + _meshName + ".obj";
+    const auto path = Application::assetFilePath(relative.c_str());
+
+    return SweepMeshWriter::writeOBJ(*mapper()->mesh(), path.c_str());
   }
 
   // generator attrs

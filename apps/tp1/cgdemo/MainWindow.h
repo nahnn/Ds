@@ -125,6 +125,9 @@ private:
   static void inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy);
   static void inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& proxy);
 
+  // Mesh OBJ Inspectors
+  static void inspectSweepObjWrite(SweepMeshProxy<float>& proxy);
+
   SceneObject* createSpiralObject();
   SceneObject* createTorsionObject();
 
