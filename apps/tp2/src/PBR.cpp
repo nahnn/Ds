@@ -15,19 +15,13 @@ namespace cg
 { // begin namespace cg
 
 Color
-PBR::shade(const ray3& ray, const Intersection& hit, const vec3& N, const Light& light) const
+PBR::shade(const vec3& N, // Normal 
+  const vec3& V, // DOP
+  const vec3& L, // Light vector
+  const float NV, // dot product N . V
+  const float NL, // dot product N . L 
+  const Color& lc) const // light color
 {
-  vec3 L; // bold Ll
-  float d;
-
-  const auto& V = ray.direction;
-  const auto P = ray(hit.distance);
-  auto NL = N.dot(L);
-  auto NV = N.dot(V);
-
-  light.lightVector(P, L, d);
-  auto lc = light.lightColor(d); // Ll in italic
-
   // calculating BRDF
   auto Hl = (L + V).versor();
   Color fresnel = _attrs.os + (Color::white -_attrs.os) * powf(1 - L.dot(Hl), 5);

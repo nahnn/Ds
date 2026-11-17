@@ -388,7 +388,7 @@ RayTracer::shade(const Ray3f& ray,
     if (!light->isTurnedOn())
       continue;
 
-    vec3f L;
+    vec3f L; // Bold Ll
     float d;
 
     // If the point P is out of the light range (for finite
@@ -410,7 +410,8 @@ RayTracer::shade(const Ray3f& ray,
     if (shadow(lightRay))
       continue;
 
-    color += m->shade(ray, hit, N, *light);
+    auto lc = light->lightColor(d); // Ll in italic
+    color += m->shade(N, V, L, NV, NL, lc);
   }
   color *= math::pi<float>;
 

@@ -108,7 +108,7 @@ public:
     return _attrs;
   }
 
-  Color shade(const ray3&, const Intersection&, const vec3&, const Light&) const override;
+  Color shade(const vec3&, const vec3&, const vec3&, const float, const float, const Color&) const override;
   const char* shaderCode() const override;
   Color computeSpecular(float) const override;
   Color BRDF(Color) const;
