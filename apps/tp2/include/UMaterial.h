@@ -49,7 +49,7 @@ public:
   bool isReflexive(const vec3& P) const;
   Color& reflectionColor(const ray3& ray, const vec3& P) const;
   Color& refractionColor(const ray3& ray, const vec3& P) const;
-  virtual Color computeSpecular(float) const = 0;
+  virtual Color specularReflectionColor(float) const = 0;
 
   // -- Shading Language --
   /// @brief Returns the fragment shader code for a given material

@@ -16,7 +16,7 @@ namespace cg
 struct PBRAttributes : public UMaterialAttributes
 {
 public:
-  static float constexpr minOs = .05;
+  static Color constexpr minOs{.04, .04, .04, 1};
 
   Color od; // diffuse refletion color
   Color os; // specular refletion color
@@ -25,14 +25,12 @@ public:
   float alpha{}; // roughness constant
   float m; // metalic
 
-  PBRAttributes(const Color& color, float metalic = .3, float roughness = .3):
-    od{color},
-    os{},
+  PBRAttributes(const Color& Od, const Color& Os, float metalic = .3, float roughness = .3):
+    od{(1 - metalic) * Od},
+    os{(1 - metalic) * minOs * Color::white + metalic * Os},
     r{roughness},
     m{metalic}
   {
-    float v = 1 - metalic;
-    os = v > minOs ? Color{v, v, v} : Color{minOs, minOs, minOs};
     k = powf(r + 1, 2) / 8;
     alpha = powf(r, 2);
   }
@@ -69,7 +67,14 @@ public:
 
   PBR(const Color& color):
     UMaterial{color},
-    _attrs{color}
+    _attrs{color, color}
+  {
+    // do nothing
+  }
+
+  PBR(const Color& Od, const Color& Os, float metalic = .3, float roughness = .3):
+    UMaterial{},
+    _attrs{Od, Os, metalic, roughness}
   {
     // do nothing
   }
@@ -110,7 +115,7 @@ public:
 
   Color shade(const vec3&, const vec3&, const vec3&, const float, const float, const Color&) const override;
   const char* shaderCode() const override;
-  Color computeSpecular(float) const override;
+  Color specularReflectionColor(float) const override;
   Color BRDF(Color) const;
 
 private:

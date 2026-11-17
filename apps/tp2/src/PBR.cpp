@@ -14,7 +14,7 @@ using namespace cg;
 namespace cg
 { // begin namespace cg
 
-Color
+Color // TODO: might be inline
 PBR::shade(const vec3& N, // Normal 
   const vec3& V, // DOP
   const vec3& L, // Light vector
@@ -37,16 +37,16 @@ PBR::shade(const vec3& N, // Normal
 }
 
 inline Color
-PBR::computeSpecular(float NV) const
+PBR::specularReflectionColor(float NV) const
 {
-  Color F0{(1 - _attrs.m) * attrs_type::minOs * Color::white + _attrs.m * _attrs.os};
+  Color F0{_attrs.os};
   Color c0{-1, -0.0275, -0.572, 0.022}, c1{1, 0.0425, 1.04, -0.04};
   Color k{_attrs.r * c0 + c1};
   float a{math::min(powf(k.x, 2), powf(2, -9.28 * NV)) * k.x + k.y};
   float A{-1.04 * a + k.z};
   float B{1.04 * a + k.w};
 
-  return A * F0 + B * Color::white;
+  return math::clamp(A * F0 + B * Color::white, attrs_type::minOs, Color::white);
 }
 
 inline Color
@@ -75,10 +75,10 @@ PBR::shaderCode() const
 
   struct MaterialProps // TODO: alterar
   {
-    vec4 Oa; // ambient color
     vec4 Od; // diffuse color
     vec4 Os; // specular spot color
-    float shine; // specular shininess exponent
+    float r; // roughness
+    float m; // metalic
   };
 
   struct LineProps
@@ -95,6 +95,7 @@ PBR::shaderCode() const
   //uniform vec4 backFaceColor;
   uniform int projectionType; // PERSPECTIVE/PARALLEL
   uniform vec4 ambientLight;
+  uniform vec4 minOs; // min Os value 
   uniform int lightCount;
   uniform LightProps lights[8];
   uniform MaterialProps material;
@@ -111,20 +112,17 @@ PBR::shaderCode() const
 
     if (useVertexColors != 0)
     {
-      const float ka = 0.4;
-      const float kd = 0.6;
-
-      m.Oa = ka * g_color;
-      m.Od = kd * g_color;
-      m.Os = material.Os;
-      m.shine = material.shine;
+      m.Od = (1 - material.m) * material.Od * (g_color);
+      m.Os = (1 - material.m) * minOs * vec4(1, 1, 1, 1) + material.m * material.Os;
+      m.r = material.r;
+      m.m = material.m;
     }
     else
     {
-      m.Oa = material.Oa;
       m.Od = useTexture != 0 ? texture(sampler, g_uv) : material.Od;
       m.Os = material.Os;
-      m.shine = material.shine;
+      m.r = material.r;
+      m.m = material.m;
     }
     return m;
   }
@@ -181,7 +179,7 @@ PBR::shaderCode() const
     return lights[i].color * f;
   }
 
-  vec4 phong(vec3 P, vec3 N) // TODO: alterar
+  vec4 PBR(vec3 P, vec3 N) // TODO: alterar
   {
     MaterialProps m = materialProps();
     vec3 V = projectionType == 0 ?
@@ -195,7 +193,7 @@ PBR::shaderCode() const
       N *= -1;
 
     vec3 R = reflect(V, N);
-    vec4 color = ambientLight * m.Oa;
+    vec4 color = vec4(0, 0, 0, 0);
 
     for (int i = 0; i < lightCount; i++)
     {
@@ -205,10 +203,22 @@ PBR::shaderCode() const
       {
         vec4 I = lightColor(i, d);
 
-        color += I * m.Od * max(dot(N, L), 0);
-        color += I * m.Os * pow(max(dot(R, L), 0), m.shine);
+        // PBR color
+        float k = pow(m.r + 1, 2) / 8;
+        float alpha = pow(m.r, 2);
+        vec3 Hl = normalize(L + V);
+        vec4 fresnel = m.Os + (vec4(1,1,1,1) - m.Os) * pow(1 - dot(Hl, L), 5);
+        float g1L = dot(N, L) / (dot(N, L) * (1 - k) + k);
+        float g1V = dot(N, V) / (dot(N, V) * (1 - k) + k);
+        float g = g1L * g1V;
+        float d = pow(alpha, 2) / PI * pow(pow(dot(N, Hl), 2) * (pow(alpha, 2) - 1) + 1, 2);
+        vec4 fd = m.Od / PI;
+        vec4 fs = fresnel * g * d / (4 * -dot(N, L) * -dot(N, V));
+        vec4 f = fd + fs;
+        color += I * f * -dot(N, L);
       }
     }
+    color *= PI;
     return min(color, vec4(1));
   }
 
@@ -236,7 +246,7 @@ PBR::shaderCode() const
 
   void main() // TODO: alterar
   {
-    vec4 color = phong(g_position, normalize(g_normal));
+    vec4 color = PBR(g_position, normalize(g_normal));
     fragmentColor = hiddenLinesFlag != 0 ? mixLineColor(color) : color;
   }
 )glsl";
