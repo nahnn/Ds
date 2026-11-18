@@ -29,6 +29,7 @@ public:
     _pbr.setShader(GL_GEOMETRY_SHADER, geometryShader);
     _pbr.setShader(GL_FRAGMENT_SHADER, PBR::fragmentShader()).use();
     initUniformLocations();
+    GLSL::Program::setUniform(_lineWidthLoc, 0.5f);
     GLSL::Program::setCurrent(cp);
   }
 

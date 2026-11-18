@@ -11,6 +11,37 @@ namespace cg
 { // begin namespace cg
 
 void
+USceneEditor::initUniformLocations()
+{
+  _mvMatrixLoc = _pbr.uniformLocation("mvMatrix");
+  _normalMatrixLoc = _pbr.uniformLocation("normalMatrix");
+  _mvpMatrixLoc = _pbr.uniformLocation("mvpMatrix");
+  _viewportMatrixLoc = _pbr.uniformLocation("viewportMatrix");
+  _projectionTypeLoc = _pbr.uniformLocation("projectionType");
+  _lightCountLoc = _pbr.uniformLocation("lightCount");
+  for (int i = 0; i < maxLights; ++i)
+  {
+    auto loc = [&](const char* field)
+    {
+      char name[32];
+      snprintf(name, sizeof name, "lights[%d].%s", i, field);
+      return _pbr.uniformLocation(name);
+    };
+    _lightLocs[i] = {loc("type"), loc("color"), loc("position"),
+      loc("direction"), loc("falloff"), loc("range"), loc("angle")};
+  }
+  _OdLoc = _pbr.uniformLocation("material.Od");
+  _OsLoc = _pbr.uniformLocation("material.Os");
+  _rLoc = _pbr.uniformLocation("material.r");
+  _mLoc = _pbr.uniformLocation("material.m");
+  _lineWidthLoc = _pbr.uniformLocation("line.width");
+  _lineColorLoc = _pbr.uniformLocation("line.color");
+  _hiddenLinesLoc = _pbr.uniformLocation("hiddenLinesFlag");
+  _useTextureLoc = _pbr.uniformLocation("useTexture");
+  _useVertexColorsLoc = _pbr.uniformLocation("useVertexColors");
+}
+
+void
 USceneEditor::beginRender()
 {
   SceneEditor::beginRender();
@@ -34,7 +65,7 @@ USceneEditor::beginRender()
 void
 USceneEditor::renderLights()
 {
- SceneEditor::renderLights();
+  SceneEditor::renderLights();
 
   auto cam = camera();
   int n = 0;
@@ -121,13 +152,16 @@ USceneEditor::renderActors()
       drawBounds(prim->bounds());
     }
 }
+
 void 
 USceneEditor::drawPBR(const Primitive& p, const PBR& material)
 {
   auto mesh = p.tesselate();
+  if (!mesh) return;
+
   auto m = glMesh(mesh);
-  if (!m)
-    return;
+  if (!m) return;
+  
   m->bind();
 
   auto cam = camera();

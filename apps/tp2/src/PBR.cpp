@@ -101,7 +101,6 @@ PBR::fragmentShader()
   //uniform vec4 backFaceColor;
   uniform int projectionType; // PERSPECTIVE/PARALLEL
   uniform vec4 ambientLight;
-  uniform vec4 minOs; // min Os value 
   uniform int lightCount;
   uniform LightProps lights[8];
   uniform MaterialProps material;
@@ -111,26 +110,21 @@ PBR::fragmentShader()
   uniform int useTexture;
   uniform int useVertexColors;
   layout(location = 0) out vec4 fragmentColor;
+  const vec4 minOs = vec4(.04, .04, .04, 1);
 
   MaterialProps materialProps()
   {
-    MaterialProps m;
+    MaterialProps p;  
 
-    if (useVertexColors != 0)
-    {
-      m.Od = (1 - material.m) * material.Od * (g_color);
-      m.Os = (1 - material.m) * minOs * vec4(1, 1, 1, 1) + material.m * material.Os;
-      m.r = material.r;
-      m.m = material.m;
-    }
-    else
-    {
-      m.Od = useTexture != 0 ? texture(sampler, g_uv) : material.Od;
-      m.Os = material.Os;
-      m.r = material.r;
-      m.m = material.m;
-    }
-    return m;
+    vec4 base = useVertexColors != 0 ? g_color :
+    useTexture != 0 ? texture(sampler, g_uv) : material.Od;
+    p.Od = (1 - material.m) * base;
+    p.Os = mix(minOs, material.Os, material.m); // (1-m)*smin + m*Os
+    p.r = material.r;
+    p.m = material.m;
+    return p;
+
+    return p;
   }
 
   bool lightVector(int i, vec3 P, out vec3 L, out float d)
@@ -223,7 +217,7 @@ PBR::fragmentShader()
         vec4 F = m.Os + (vec4(1,1,1,1) - m.Os) * pow(1 - LH, 5);
         float G = -NL / (-NL * (1 - k) + k) * NV / (NV * (1 - k) + k);
         float D = a2 / (PI * pow(NH * NH * (a2 - 1) + 1, 2));
-        vec4 f = m.Od / PI + F * G * D / (4 * NL * NV);
+        vec4 f = m.Od / PI + F * G * D / (4 * NL * -NV);
         color += I * f * NL;
       }
     }
