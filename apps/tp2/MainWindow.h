@@ -82,7 +82,9 @@ private:
   {
     return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
   }
-  
+
+  SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
+
   SceneEditor* makeEditor(SceneBase& scene) override
   {
     return new USceneEditor{scene};

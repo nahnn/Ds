@@ -45,6 +45,26 @@
 // ==========
 MeshMap MainWindow::_defaultMeshes;
 
+SceneObject* 
+MainWindow::createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName)
+{
+  auto object = SceneObject::New(*_scene);
+
+  object->setName("%s %d", meshName.c_str(), ++_primitiveId);
+  object->addComponent(makePrimitive(mesh, meshName));
+    
+  // TODO: naive way
+  for(auto c : object->components())
+    if (auto proxy = dynamic_cast<PrimitiveProxy*>(c))
+    {
+      proxy->actor()->mapper()->primitive()->
+      setMaterial(new PBR{Color{1.f, .71f, .29f}, Color{1.f, .71f, .29f}, 1.0f, 0.3f}); // gold
+      break;
+    }
+        
+  return object;
+}
+
 inline void
 MainWindow::buildDefaultMeshes()
 {
