@@ -180,6 +180,7 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material)
   GLSL::Program::setUniformMat3(_normalMatrixLoc, mat3f{cam->worldToCameraMatrix()} * p.normalMatrix());
 
   setMaterial(material);
+  // TODO: perhaps draw normals and bounds
   GLSL::Program::setUniform(_hiddenLinesLoc, (int)(renderMode() == ShadedWithEdges));
   GLSL::Program::setUniform(_useTextureLoc, 0);
   GLSL::Program::setUniform(_useVertexColorsLoc, (int)useVertexColors());

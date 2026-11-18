@@ -82,7 +82,7 @@ private:
   {
     return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
   }
-
+  
   SceneEditor* makeEditor(SceneBase& scene) override
   {
     return new USceneEditor{scene};
