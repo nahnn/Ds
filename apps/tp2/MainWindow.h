@@ -37,6 +37,7 @@
 #include "graphics/AssetFolder.h"
 #include "graphics/GLImage.h"
 #include "RayTracer.h"
+#include "include/USceneEditor.h"
 
 namespace cg::graph
 { // begin namespace cg::graph
@@ -80,6 +81,11 @@ private:
   auto createDefaultPrimitiveObject(const char* const meshName)
   {
     return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
+  }
+
+  SceneEditor* makeEditor(SceneBase& scene) override
+  {
+    return new USceneEditor{scene};
   }
 
   void beginInitialize() override;

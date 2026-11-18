@@ -9,17 +9,30 @@
 #define __USceneEditor_h
 
 #include "SceneEditor.h"
+#include "PBR.h"
 
 namespace cg
 { // begin namespace cg
     
-// TODO: sobreescrever algo pra colocar os uniforms do pbr
 class USceneEditor : public SceneEditor
 {
 public:
-  void render() override;
+  USceneEditor(const SceneBase& scene) // compila vs + gs + pbr::shader code? 
+  {
+
+  }
+
+protected:
+  void beginRender() override;
+  void renderLights() override;
+  void renderActors() override;
 
 private:
+  GLSL::Program _pbr{"PBR"};
+
+  void initUniformLocations();
+  bool drawPBR(const Primitive&, const PBR&);
+  void restoreBaseProgram() { GLSL::Program::setCurrent(&program()); }
 
 }; // USceneEditor
 

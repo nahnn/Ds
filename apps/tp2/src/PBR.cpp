@@ -194,6 +194,7 @@ PBR::shaderCode() const
 
     vec3 R = reflect(V, N);
     vec4 color = vec4(0, 0, 0, 0);
+    const float PI = 3.14159265;
 
     for (int i = 0; i < lightCount; i++)
     {
@@ -211,9 +212,9 @@ PBR::shaderCode() const
         float g1L = dot(N, L) / (dot(N, L) * (1 - k) + k);
         float g1V = dot(N, V) / (dot(N, V) * (1 - k) + k);
         float g = g1L * g1V;
-        float d = pow(alpha, 2) / PI * pow(pow(dot(N, Hl), 2) * (pow(alpha, 2) - 1) + 1, 2);
+        float D = pow(alpha, 2) / (PI * pow(pow(dot(N, Hl), 2) * (pow(alpha, 2) - 1) + 1, 2));
         vec4 fd = m.Od / PI;
-        vec4 fs = fresnel * g * d / (4 * -dot(N, L) * -dot(N, V));
+        vec4 fs = fresnel * g * D / (4 * -dot(N, L) * -dot(N, V));
         vec4 f = fd + fs;
         color += I * f * -dot(N, L);
       }
