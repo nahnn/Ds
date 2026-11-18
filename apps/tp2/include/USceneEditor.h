@@ -1,4 +1,4 @@
-// OVERVIEW: Material.h
+// OVERVIEW: USceneEditor.h
 // ========
 // Class definition for USceneEditor. U stands for universal. 
 //
@@ -8,8 +8,10 @@
 #ifndef __USceneEditor_h
 #define __USceneEditor_h
 
-#include "SceneEditor.h"
+#include "graphics/SceneEditor.h"
 #include "PBR.h"
+#include "Shaders.h"
+#include <vector>
 
 namespace cg
 { // begin namespace cg
@@ -17,9 +19,17 @@ namespace cg
 class USceneEditor : public SceneEditor
 {
 public:
-  USceneEditor(const SceneBase& scene) // compila vs + gs + pbr::shader code? 
+  USceneEditor(const SceneBase& scene):
+    SceneEditor{scene}
   {
+    // setting shaders
+    auto cp = GLSL::Program::current();
 
+    _pbr.setShader(GL_VERTEX_SHADER, vertexShader);
+    _pbr.setShader(GL_GEOMETRY_SHADER, geometryShader);
+    _pbr.setShader(GL_FRAGMENT_SHADER, PBR::fragmentShader()).use();
+    initUniformLocations();
+    GLSL::Program::setCurrent(cp);
   }
 
 protected:
@@ -28,10 +38,18 @@ protected:
   void renderActors() override;
 
 private:
+  struct LightLoc { GLint type, color, position, direction, falloff, range, angle; };
+
   GLSL::Program _pbr{"PBR"};
+  GLint _mvMatrixLoc, _normalMatrixLoc, _mvpMatrixLoc, _viewportMatrixLoc, _projectionTypeLoc;
+  GLint _lightCountLoc;
+  LightLoc _lightLocs[maxLights];
+  GLint _OdLoc, _OsLoc, _rLoc, _mLoc;
+  GLint _lineWidthLoc, _lineColorLoc, _hiddenLinesLoc, _useTextureLoc, _useVertexColorsLoc;
+  std::vector<std::pair<Primitive*, PBR*>> _pbrQueue; // TODO: método potencialmente caro (reformular)
 
   void initUniformLocations();
-  bool drawPBR(const Primitive&, const PBR&);
+  void drawPBR(const Primitive&, const PBR&);
   void restoreBaseProgram() { GLSL::Program::setCurrent(&program()); }
 
 }; // USceneEditor

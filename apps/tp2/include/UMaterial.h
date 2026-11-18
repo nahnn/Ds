@@ -8,9 +8,9 @@
 #ifndef __UMaterial_h
 #define __UMaterial_h
 
-#include "Material.h"
-#include "Light.h"
-#include "Intersection.h"
+#include "graphics/Material.h"
+#include "graphics/Light.h"
+#include "geometry/Intersection.h"
 
 namespace cg
 { // begin namespace cg
