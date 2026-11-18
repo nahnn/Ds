@@ -16,7 +16,7 @@ namespace cg
 struct PBRAttributes : public UMaterialAttributes
 {
 public:
-  static Color constexpr minOs{.04, .04, .04, 1};
+  static Color constexpr minOs{.04f, .04f, .04f, 1.f};
 
   Color od; // diffuse refletion color
   Color os; // specular refletion color
