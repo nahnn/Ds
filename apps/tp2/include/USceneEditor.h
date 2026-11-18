@@ -33,6 +33,8 @@ public:
     GLSL::Program::setCurrent(cp);
   }
 
+  void setMaterial(const PBR&);
+
 protected:
   void beginRender() override;
   void renderLights() override;

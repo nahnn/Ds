@@ -13,6 +13,7 @@ namespace cg
 void
 USceneEditor::initUniformLocations()
 {
+  // getting the location of those variables on glsl program
   _mvMatrixLoc = _pbr.uniformLocation("mvMatrix");
   _normalMatrixLoc = _pbr.uniformLocation("normalMatrix");
   _mvpMatrixLoc = _pbr.uniformLocation("mvpMatrix");
@@ -46,6 +47,7 @@ USceneEditor::beginRender()
 {
   SceneEditor::beginRender();
 
+  // setting viewport dimentions
   GLint v[4];
   glGetIntegerv(GL_VIEWPORT, v);
   float w = v[2] / 2.0f, h = v[3] / 2.0f;
@@ -55,6 +57,7 @@ USceneEditor::beginRender()
   vp[2].set(0, 0, 1, 0);
   vp[3].set(v[0] + w, v[1] + h, 0, 0);
 
+  // putting the program in use and setting current program uniforms
   _pbr.use();
   GLSL::Program::setUniformMat4(_viewportMatrixLoc, vp);
   GLSL::Program::setUniform(_projectionTypeLoc, (int)camera()->projectionType());
@@ -67,6 +70,7 @@ USceneEditor::renderLights()
 {
   SceneEditor::renderLights();
 
+  // putting program in use
   auto cam = camera();
   int n = 0;
 
@@ -76,6 +80,7 @@ USceneEditor::renderLights()
     if (!light->isTurnedOn())
       continue;
 
+    // setting lights uniforms to the current in use program
     auto& loc = _lightLocs[n];
     bool inCam = light->flags.isSet(Light::Camera);
 
@@ -91,7 +96,9 @@ USceneEditor::renderLights()
     if (++n == maxLights)
       break;
   }
-  if (n == 0)   // mesma luz padrão da base: pontual, branca, na câmera
+
+  // registers a single light if none was in the scene
+  if (n == 0)
   {
     GLSL::Program::setUniform(_lightLocs[0].type, 1);
     GLSL::Program::setUniformVec4(_lightLocs[0].color, vec4f{1, 1, 1, 0});
@@ -108,7 +115,7 @@ USceneEditor::renderActors()
 {
   _pbrQueue.clear();
 
-  // Passada 1: tudo que NÃO é PBR, exatamente como GLRenderer::renderActors
+  // First pass: rendering 
   for (auto actor : _scene->actors())
   {
     if (!actor->isVisible())
@@ -122,9 +129,10 @@ USceneEditor::renderActors()
 
     if (auto pbr = prim ? dynamic_cast<PBR*>(prim->material()) : nullptr)
     {
-      _pbrQueue.emplace_back(prim, pbr);   // adia para a passada 2
+      _pbrQueue.emplace_back(prim, pbr);
       continue;
     }
+
     if (!mapper->render(*this))
     {
       if (prim)
@@ -136,15 +144,15 @@ USceneEditor::renderActors()
       drawBounds(mapper->bounds());
     }
   }
+
   if (_pbrQueue.empty())
     return;
 
-  // Passada 2: objetos PBR com o _pbr
+  // second pass: every primitive which was able to have its mat to be converted in PBR 
   _pbr.use();
   for (auto [prim, pbr] : _pbrQueue)
     drawPBR(*prim, *pbr);
-  restoreBaseProgram();   // endRender() → end() depende disso
-
+  restoreBaseProgram();
   if (flags.isSet(DrawBounds))
     for (auto [prim, pbr] : _pbrQueue)
     {
@@ -171,16 +179,22 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material)
   GLSL::Program::setUniformMat4(_mvpMatrixLoc, cam->projectionMatrix() * mv);
   GLSL::Program::setUniformMat3(_normalMatrixLoc, mat3f{cam->worldToCameraMatrix()} * p.normalMatrix());
 
-  const auto& a = material.attributes();
+  setMaterial(material);
+  GLSL::Program::setUniform(_hiddenLinesLoc, (int)(renderMode() == ShadedWithEdges));
+  GLSL::Program::setUniform(_useTextureLoc, 0);
+  GLSL::Program::setUniform(_useVertexColorsLoc, (int)useVertexColors());
+  glDrawElements(GL_TRIANGLES, mesh->triangleCount() * 3, GL_UNSIGNED_INT, nullptr);
+}
+
+void
+USceneEditor::setMaterial(const PBR& mat)
+{
+  const auto& a = mat.attributes();
 
   GLSL::Program::setUniformVec4(_OdLoc, a.od);
   GLSL::Program::setUniformVec4(_OsLoc, a.os);
   GLSL::Program::setUniform(_rLoc, a.r);
   GLSL::Program::setUniform(_mLoc, a.m);
-  GLSL::Program::setUniform(_hiddenLinesLoc, (int)(renderMode() == ShadedWithEdges));
-  GLSL::Program::setUniform(_useTextureLoc, 0);
-  GLSL::Program::setUniform(_useVertexColorsLoc, (int)useVertexColors());
-  glDrawElements(GL_TRIANGLES, mesh->triangleCount() * 3, GL_UNSIGNED_INT, nullptr);
 }
 
 } // end namespace cg
