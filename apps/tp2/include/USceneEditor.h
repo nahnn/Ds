@@ -19,7 +19,7 @@ namespace cg
 class USceneEditor : public SceneEditor
 {
 public:
-  USceneEditor(const SceneBase& scene):
+  USceneEditor(SceneBase& scene):
     SceneEditor{scene}
   {
     // setting shaders

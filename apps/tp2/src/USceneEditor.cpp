@@ -40,7 +40,7 @@ USceneEditor::renderLights()
   int n = 0;
 
   _pbr.use();
-  for (auto& light : _scene->lights())
+  for (auto light : _scene->lights())
   {
     if (!light->isTurnedOn())
       continue;

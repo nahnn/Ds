@@ -417,14 +417,14 @@ RayTracer::shade(const Ray3f& ray,
   color *= math::pi<float>;
 
   // Compute specular reflection
-  auto Or = m->specularReflectionColor(NV);
+  auto Or = m->specularReflectionColor(-NV);
   if (Or != PBRAttributes::minOs) // TODO: Mudar verificação ?
   {
     weight *= maxRGB(Or);
     if (weight > _minWeight && level < _maxRecursionLevel)
     {
       auto reflectionRay = Ray3f{P + R * rt_eps(), R};
-      color += m->specular * trace(reflectionRay, level + 1, weight);
+      color += Or * trace(reflectionRay, level + 1, weight);
     }
   }
 
