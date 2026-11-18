@@ -87,7 +87,7 @@ private:
   SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
   Material* createMaterial();
 
-  SceneEditor* makeEditor(SceneBase& scene) override
+  cg::SceneEditor* makeEditor(SceneBase& scene) override
   {
     return new USceneEditor{scene};
   }

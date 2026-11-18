@@ -41,7 +41,7 @@ PBR::specularReflectionColor(float NV) const
   Color F0{_attrs.os};
   Color c0{-1.0f, -0.0275f, -0.572f, 0.022f}, c1{1.0f, 0.0425f, 1.04f, -0.04f};
   Color k{_attrs.r * c0 + c1};
-  float a{math::min(powf(k.x, 2), powf(2, -9.28 * NV)) * k.x + k.y};
+  float a{math::min(powf(k.x, 2), powf(2.f, -9.28f * NV)) * k.x + k.y};
   float A{-1.04f * a + k.z};
   float B{1.04f * a + k.w};
 
