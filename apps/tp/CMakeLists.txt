@@ -26,6 +26,8 @@ add_executable(cgdemo
   reader/SceneReader.cpp
   reader/Scope.cpp
   src/SweepMeshWriter.cpp
+  src/PBR.cpp
+  src/USceneEditor.cpp
 )
 
 # cg library (prebuilt in ../../cg/lib): includes, definitions and dependencies

@@ -19,8 +19,8 @@ esac
 # Run from the script's folder, wherever it is called from
 cd "$(dirname "$0")"
 
-if [ ! -f "../../../cg/lib/$CG_LIB" ]; then
-  echo "Error: ../../../cg/lib/$CG_LIB not found. Build cg ($CONFIG) first."
+if [ ! -f "../../cg/lib/$CG_LIB" ]; then
+  echo "Error: ../../cg/lib/$CG_LIB not found. Build cg ($CONFIG) first."
   exit 1
 fi
 
