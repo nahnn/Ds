@@ -30,6 +30,9 @@ add_executable(cgdemo
   src/USceneEditor.cpp
 )
 
+target_include_directories(cgdemo PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include)
+
 # cg library (prebuilt in ../../cg/lib): includes, definitions and dependencies
 include(${CMAKE_CURRENT_LIST_DIR}/../../cg/import.cmake)
 target_link_libraries(cgdemo PRIVATE cg)
