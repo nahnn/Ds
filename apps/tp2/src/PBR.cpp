@@ -23,7 +23,7 @@ PBR::shade(const vec3& N, // Normal
   const Color& lc) const // light color
 {
   // calculating BRDF
-  auto Hl = (L + V).versor();
+  auto Hl = (L - V).versor();
   Color fresnel = _attrs.os + (Color::white -_attrs.os) * powf(1 - L.dot(Hl), 5);
   float G = -NL * math::inverse(-NL * (1 - _attrs.k) + _attrs.k) * NV * math::inverse(NV * (1 - _attrs.k) + _attrs.k);
   float NH = N.dot(Hl);
@@ -118,8 +118,8 @@ PBR::fragmentShader()
 
     vec4 base = useVertexColors != 0 ? g_color :
     useTexture != 0 ? texture(sampler, g_uv) : material.Od;
-    p.Od = (1 - material.m) * base;
-    p.Os = mix(minOs, material.Os, material.m); // (1-m)*smin + m*Os
+    p.Od = base; // (1 - m) * od before setting uniform
+    p.Os = material.Os; // (1-m)*smin + m*Os before setting uniform
     p.r = material.r;
     p.m = material.m;
     return p;
@@ -208,7 +208,7 @@ PBR::fragmentShader()
         float NL = dot(N, L);
         if (NL <= 0) continue; // behind surface
         float NV = max(dot(N, V), -1e4);
-        vec3 Hl = normalize(L + V);
+        vec3 Hl = normalize(L - V);
         float LH = max(dot(L, Hl), 0);
         float NH = max(dot(N, Hl), 0);
         float k = pow(m.r + 1, 2) / 8;
