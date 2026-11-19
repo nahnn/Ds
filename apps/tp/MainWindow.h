@@ -89,6 +89,10 @@ private:
     return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
   }
 
+  TriangleMeshProxy* makePrimitive(const TriangleMesh& mesh, const std::string& meshName);
+  SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
+  Material* createMaterial();
+
   void beginInitialize() override;
   void initializeScene() override;
   void renderScene() override;
