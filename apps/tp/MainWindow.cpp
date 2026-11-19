@@ -36,13 +36,50 @@
 #include "SceneWriter.h"
 #include "MainWindow.h"
 #include "IconsFontAwesome7.h"
-
+#include "include/PBR.h"
 
 /////////////////////////////////////////////////////////////////////
 //
 // MainWindow implementation
 // ==========
 MeshMap MainWindow::_defaultMeshes;
+
+static PBR*
+newPBR()
+{
+  auto& map = Assets::materials();
+  auto mat = new PBR{Color{1.f, .71f, .29f}, Color{1.f, .71f, .29f}, 1.0f, 0.3f}; // gold
+
+  mat->setName("PBR %d", int(map.size()));
+  map.emplace(mat->name(), mat);
+  return mat;
+}
+
+SceneObject* 
+MainWindow::createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName)
+{
+  auto object = SceneObject::New(*_scene);
+
+  object->setName("%s %d", meshName.c_str(), ++_primitiveId);
+  object->addComponent(makePrimitive(mesh, meshName));
+
+  return object;
+}
+
+TriangleMeshProxy*
+MainWindow::makePrimitive(const TriangleMesh& mesh, const std::string& meshName)
+{
+  auto proxy = SceneObjectBuilder::makePrimitive(mesh, meshName);
+  proxy->mapper()->primitive()->setMaterial(newPBR());
+
+  return proxy;
+}
+
+Material*
+MainWindow::createMaterial()
+{
+  return newPBR();
+}
 
 inline void
 MainWindow::buildDefaultMeshes()
