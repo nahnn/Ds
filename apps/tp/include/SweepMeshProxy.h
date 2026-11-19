@@ -44,6 +44,11 @@ public:
     return ((TriangleMeshMapper*)PrimitiveProxy::mapper());
   }
 
+  const Polyline<R>& polyline() const 
+  { 
+    return _polyline; 
+  }
+
   void setPolylineDirty() 
   { 
     _dirtyPolyline = true; 
@@ -103,7 +108,7 @@ public:
   CircularArcAttrs<R> genAttrs; //jeito ingênuo, fazer de outro modo
 
 protected:
-  // TODO: adicionar concepts para a verificação do parametros do template
+
   using CreateFunction =  std::function<void()>;
 
   using CreateFunctionsMap = std::unordered_map<size_t, CreateFunction>;

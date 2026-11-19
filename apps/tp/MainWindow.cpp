@@ -652,10 +652,17 @@ void MainWindow::inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& pro
   if (ImGui::SliderInt("Subdivs / Rev (nes)", &proxy.attr.nes, Limits::MIN_NES, Limits::MAX_NES))
     proxy.setSweepDirty();
 
-  if (ImGui::SliderFloat("Height Inc. / Rev (dh)", &proxy.attr.dh, Limits::MIN_DELTAH, Limits::MAX_DELTAH))
+  const float bx = proxy.polyline().width();
+  const float by = proxy.polyline().height();
+
+  //dynamic mins for delta
+  float min_dh = (proxy.attr.re > 1.0f) ? by : Limits::MIN_DELTAH;
+  float min_dw = (proxy.attr.re > 1.0f) ? bx : Limits::MIN_DELTAW;
+
+  if (ImGui::SliderFloat("Height Inc. / Rev (dh)", &proxy.attr.dh, min_dh, Limits::MAX_DELTAH))
     proxy.setSweepDirty();
 
-  if (ImGui::SliderFloat("Width Inc. / Rev (dw)", &proxy.attr.dw, Limits::MIN_DELTAW, Limits::MAX_DELTAW))
+  if (ImGui::SliderFloat("Width Inc. / Rev (dw)", &proxy.attr.dw, min_dw, Limits::MAX_DELTAW))
     proxy.setSweepDirty();
 
   ImGui::Separator();
@@ -679,11 +686,13 @@ void MainWindow::inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& p
   if (ImGui::SliderFloat("Length (lv)", &proxy.attr.lv, Limits::MIN_LV, Limits::MAX_LV))
     proxy.setSweepDirty();
 
-  //TODO: verificar se -50 a 50 é bom mesmo
-  if (ImGui::SliderFloat("Offset Width (ow)", &proxy.attr.ow, -50.0f, 50.0f))
+  const float bx = proxy.polyline().width();
+  const float by = proxy.polyline().height();
+
+  if (ImGui::SliderFloat("Offset Width (ow)", &proxy.attr.ow, -bx, bx))
     proxy.setSweepDirty();
     
-  if (ImGui::SliderFloat("Offset Height (oh)", &proxy.attr.oh, -50.0f, 50.0f))
+  if (ImGui::SliderFloat("Offset Height (oh)", &proxy.attr.oh, -by, by))
     proxy.setSweepDirty();
 
   if (ImGui::SliderInt("Subdivisions (nsv)", &proxy.attr.nsv, Limits::MIN_NSV, Limits::MAX_NSV))
