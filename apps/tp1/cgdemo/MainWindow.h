@@ -1,0 +1,139 @@
+//[]---------------------------------------------------------------[]
+//|                                                                 |
+//| Copyright (C) 2022, 2026 Paulo Pagliosa.                        |
+//|                                                                 |
+//| This software is provided 'as-is', without any express or       |
+//| implied warranty. In no event will the authors be held liable   |
+//| for any damages arising from the use of this software.          |
+//|                                                                 |
+//| Permission is granted to anyone to use this software for any    |
+//| purpose, including commercial applications, and to alter it and |
+//| redistribute it freely, subject to the following restrictions:  |
+//|                                                                 |
+//| 1. The origin of this software must not be misrepresented; you  |
+//| must not claim that you wrote the original software. If you use |
+//| this software in a product, an acknowledgment in the product    |
+//| documentation would be appreciated but is not required.         |
+//|                                                                 |
+//| 2. Altered source versions must be plainly marked as such, and  |
+//| must not be misrepresented as being the original software.      |
+//|                                                                 |
+//| 3. This notice may not be removed or altered from any source    |
+//| distribution.                                                   |
+//|                                                                 |
+//[]---------------------------------------------------------------[]
+//
+// OVERVIEW: MainWindow.h
+// ========
+// Class definition for cg demo main window.
+//
+// Author: Paulo Pagliosa
+// Last revision: 07/10/2026
+
+#ifndef __MainWindow_h
+#define __MainWindow_h
+
+#include "graph/SceneWindow.h"
+#include "graphics/AssetFolder.h"
+#include "graphics/GLImage.h"
+#include "RayTracer.h"
+
+#include "include/RegularPolygon.h"
+#include "include/CircularArc.h"
+#include "include/SweepMeshProxy.h"
+
+//TODO: ver se precisa remover. Residual do repo original
+// namespace cg::graph
+// { // begin namespace cg::graph
+
+// class HelixProxy;
+// class SweepMeshProxy;
+
+// } // end namespace cg::graph
+
+using namespace cg;
+using namespace cg::graph;
+
+
+/////////////////////////////////////////////////////////////////////
+//
+// MainWindow: cg demo main window class
+// ==========
+class MainWindow final: public SceneWindow
+{
+public:
+  MainWindow(int width, int height):
+    SceneWindow{"Ds Demo Version 1.51", width, height}
+  {
+    registerInspectFunction(inspectSpiralProxy);
+    registerInspectFunction(inspectTorsionProxy);
+    registerInspectFunction(inspectPrimitive);
+  }
+
+private:
+  AssetFolderRef _sceneFolder;
+  Reference<RayTracer> _rayTracer;
+  Reference<GLImage> _image;
+  int _maxRecursionLevel{6};
+  float _minWeight{RayTracer::minMinWeight};
+
+  static MeshMap _defaultMeshes;
+
+  auto makeDefaultPrimitive(const char* const meshName)
+  {
+    return makePrimitive(*_defaultMeshes[meshName], meshName);
+  }
+
+  auto createDefaultPrimitiveObject(const char* const meshName)
+  {
+    return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
+  }
+
+  void beginInitialize() override;
+  void initializeScene() override;
+  void renderScene() override;
+  void gui() override;
+  bool onResize(int width, int height) override;
+  Component* addComponentMenu(const SceneObject&) override;
+  void createObjectMenu() override;
+
+  void mainMenu();
+  void fileMenu();
+  void viewMenu();
+  void createMenu();
+  void showOptions();
+
+  void readScene(const std::string& filename);
+  void updateRayTracerScene();
+  void openSceneCommand();
+  void saveScene();
+
+  static void buildDefaultMeshes();
+
+  //TODO: remover, residual do repo original
+  // static void inspectHelix(SceneWindow&, HelixProxy&);
+  // static void inspectSweepMesh(SceneWindow&, SweepMeshProxy&);
+
+  //Polyline Gen Inspectors
+  static void inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy);
+
+  // Main Inspectors
+  static void inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectSpiralProxy(SceneWindow& window, SpiralProxy<float>& proxy);
+  static void inspectTorsionProxy(SceneWindow& window, TorsionProxy<float>& proxy);
+
+  // Mesh OBJ Inspectors
+  static void inspectSweepObjWrite(SweepMeshProxy<float>& proxy);
+
+  SceneObject* createSpiralObject();
+  SceneObject* createTorsionObject();
+
+  Component* makeSpiralProxy();
+  Component* makeTorsionProxy();
+
+}; // MainWindow
+
+#endif // __MainWindow_h
