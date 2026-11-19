@@ -38,14 +38,19 @@ PBR::shade(const vec3& N, // Normal
 }
 
 Color
-PBR::specularReflectionColor(float NV) const
+PBR::specularReflectionColor(float cosPhi) const
 {
   Color F0{_attrs.os};
-  Color c0{-1.0f, -0.0275f, -0.572f, 0.022f}, c1{1.0f, 0.0425f, 1.04f, -0.04f};
-  Color k{_attrs.r * c0 + c1};
-  float a{math::min(powf(k.x, 2), powf(2.f, -9.28f * -NV)) * k.x + k.y}; // -NV because cos(phi) = -NV
-  float A{-1.04f * a + k.z};
-  float B{1.04f * a + k.w};
+  float r = _attrs.r;
+
+  float k1{-r + 1.f};
+  float k2{-0.0275f * r + 0.0425f};
+  float k3{-0.572f * r + 1.04f};
+  float k4{0.022f * r - 0.04f};
+
+  float a{math::min(k1 * k1, powf(2.f, -9.28f * cosPhi)) * k1 + k2}; // cos(phi) = -NV
+  float A{-1.04f * a + k3};
+  float B{1.04f * a + k4};
 
   return A * F0 + B * Color::white;
 }
