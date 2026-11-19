@@ -33,6 +33,7 @@
 #include "graphics/Camera.h"
 #include "utils/Stopwatch.h"
 #include "RayTracer.h"
+#include "UMaterial.h"
 #include <iostream>
 
 using namespace std;
@@ -376,8 +377,8 @@ RayTracer::shade(const Ray3f& ray,
 
   auto R = V - (2 * NV) * N; // reflection vector
   // Start with ambient lighting
-  auto m = primitive->material();
-  auto color = _scene->ambientLight * m->ambient;
+  auto m = static_cast<UMaterial*>(primitive->material()); // it will be ceartainly a umat
+  Color color{};
   auto P = ray(hit.distance);
 
   // Compute the direct lighting
@@ -387,7 +388,7 @@ RayTracer::shade(const Ray3f& ray,
     if (!light->isTurnedOn())
       continue;
 
-    vec3f L;
+    vec3f L; // Bold Ll
     float d;
 
     // If the point P is out of the light range (for finite
@@ -409,23 +410,23 @@ RayTracer::shade(const Ray3f& ray,
     if (shadow(lightRay))
       continue;
 
-    auto lc = light->lightColor(d);
-
-    color += lc * m->diffuse * NL;
-    if (m->shine <= 0 || (d = R.dot(L)) <= 0)
-      continue;
-    color += lc * m->spot * pow(d, m->shine);
+    auto lc = light->lightColor(d); // Ll in italic
+    color += m->shade(N, V, L, NV, NL, lc);
   }
+  color *= math::pi<float>;
+
   // Compute specular reflection
-  if (m->specular != Color::black)
+  auto Or = m->specularReflectionColor(-NV);
+  if (Or != Color::black)
   {
-    weight *= maxRGB(m->specular);
+    weight *= maxRGB(Or);
     if (weight > _minWeight && level < _maxRecursionLevel)
     {
       auto reflectionRay = Ray3f{P + R * rt_eps(), R};
-      color += m->specular * trace(reflectionRay, level + 1, weight);
+      color += Or * trace(reflectionRay, level + 1, weight);
     }
   }
+
   return color;
 }
 
