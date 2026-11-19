@@ -22,7 +22,7 @@ public:
   USceneEditor(SceneBase& scene):
     SceneEditor{scene}
   {
-    // setting shaders
+    // setting vs, gs and fs
     auto cp = GLSL::Program::current();
 
     _pbr.setShader(GL_VERTEX_SHADER, vertexShader);

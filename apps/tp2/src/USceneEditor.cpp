@@ -57,7 +57,7 @@ USceneEditor::beginRender()
   vp[2].set(0, 0, 1, 0);
   vp[3].set(v[0] + w, v[1] + h, 0, 0);
 
-  // putting the program in use and setting current program uniforms
+  // putting the program in use and setting current program basic uniforms
   _pbr.use();
   GLSL::Program::setUniformMat4(_viewportMatrixLoc, vp);
   GLSL::Program::setUniform(_projectionTypeLoc, (int)camera()->projectionType());
@@ -175,10 +175,12 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material)
   auto cam = camera();
   auto mv = cam->worldToCameraMatrix() * p.localToWorldMatrix();
 
+  // setting basic uniforms
   GLSL::Program::setUniformMat4(_mvMatrixLoc, mv);
   GLSL::Program::setUniformMat4(_mvpMatrixLoc, cam->projectionMatrix() * mv);
   GLSL::Program::setUniformMat3(_normalMatrixLoc, mat3f{cam->worldToCameraMatrix()} * p.normalMatrix());
 
+  // setting material uniforms
   setMaterial(material);
   // TODO: perhaps draw normals and bounds
   GLSL::Program::setUniform(_hiddenLinesLoc, (int)(renderMode() == ShadedWithEdges));
