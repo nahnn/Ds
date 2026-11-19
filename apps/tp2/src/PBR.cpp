@@ -17,9 +17,9 @@ namespace cg
 Color // TODO: might be inline
 PBR::shade(const vec3& N, // Normal 
   const vec3& V, // DOP
-  const vec3& L, // Light vector
+  const vec3& L, // Light vector (direction: P to Light)
   const float NV, // dot product N . V
-  const float NL, // dot product N . L 
+  const float NL, // dot product N . L (NL > 0)
   const Color& lc) const // light color
 {
   // calculating BRDF
