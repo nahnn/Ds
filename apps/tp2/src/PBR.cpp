@@ -16,16 +16,17 @@ namespace cg
 
 Color // TODO: might be inline
 PBR::shade(const vec3& N, // Normal 
-  const vec3& V, // DOP
+  const vec3& V, // Ray Direction
   const vec3& L, // Light vector (direction: P to Light)
-  const float NV, // dot product N . V
+  const float NV, // dot product N . V (NV < 0)
   const float NL, // dot product N . L (NL > 0)
   const Color& lc) const // light color
 {
   // calculating BRDF
   auto Hl = (L - V).versor();
   Color fresnel = _attrs.os + (Color::white -_attrs.os) * powf(1 - L.dot(Hl), 5);
-  float G = -NL * math::inverse(-NL * (1 - _attrs.k) + _attrs.k) * NV * math::inverse(NV * (1 - _attrs.k) + _attrs.k);
+  float G = NL * math::inverse(NL * (1 - _attrs.k) + _attrs.k) 
+    * -NV * math::inverse(-NV * (1 - _attrs.k) + _attrs.k); // G [0,1] w/ NL > 0 and NV > 0
   float NH = N.dot(Hl);
   float a2 = powf(_attrs.alpha, 2);
   float D = a2 * math::inverse(math::pi<float> * powf(NH * NH * (a2 - 1) + 1, 2));
@@ -215,7 +216,7 @@ PBR::fragmentShader()
         float alpha = pow(m.r, 2);
         float a2 = max(pow(m.r, 4), 1e-6);
         vec4 F = m.Os + (vec4(1,1,1,1) - m.Os) * pow(1 - LH, 5);
-        float G = -NL / (-NL * (1 - k) + k) * NV / (NV * (1 - k) + k);
+        float G = NL / (NL * (1 - k) + k) * -NV / (-NV * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
         float D = a2 / (PI * pow(NH * NH * (a2 - 1) + 1, 2));
         vec4 f = m.Od / PI + F * G * D / (4 * NL * -NV);
         color += I * f * NL;
