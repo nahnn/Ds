@@ -38,6 +38,9 @@
 #include "graphics/GLImage.h"
 #include "RayTracer.h"
 
+#include <functional>
+#include <map>
+
 #include "include/sweep/RegularPolygon.h"
 #include "include/sweep/CircularArc.h"
 #include "include/sweep/SweepMeshProxy.h"
@@ -66,9 +69,16 @@ public:
   MainWindow(int width, int height):
     SceneWindow{"Ds Demo Version 1.51", width, height}
   {
+    //PBR Primitive Material
+    registerInspectFunction(inspectPrimitivePBR);
+
+    //Polyline Generators
+    registerPolyGenInspector<RegularPolygon<float>>(PolyGenType::RegularPolygon, inspectRegularPolygon);
+    registerPolyGenInspector<CircularArc<float>>(PolyGenType::CircularArc, inspectCircularArc);
+
+    //Sweep
     registerInspectFunction(inspectSpiralProxy);
     registerInspectFunction(inspectTorsionProxy);
-    registerInspectFunction(inspectPrimitivePBR);
   }
 
 private:
@@ -113,9 +123,32 @@ private:
 
   //===== Adapted Functions for Sweep and PBR implementation =====
 
-  SceneEditor* makeEditor(SceneBase& scene) override { return new USceneEditor{scene}; }
+  using PolyGenProxy = PolylineGeneratorProxy<float>;
+  using PolyGenType = PolyGenProxy::GenType;
+
+  //Inspectors for polylines
+  using PolyGenInspector = std::function<void(PolyGenProxy&, SweepMeshProxy<float>&)>;
+
+  //map for different polylines
+  inline static std::map<PolyGenType, PolyGenInspector> _polyGenInspectors;
+
+  template <typename G, typename F>
+  static void registerPolyGenInspector(PolyGenType type, F inspect)
+  {
+    _polyGenInspectors[type] =
+      [inspect](PolyGenProxy& g, SweepMeshProxy<float>& p)
+      {
+        inspect(static_cast<G&>(g.activeGen()).attributes(), p);
+      };
+  }
+
+  static void inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
+  static void inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy);
 
   //to inspect PBR works
+  SceneEditor* makeEditor(SceneBase& scene) override { return new USceneEditor{scene}; }
   TriangleMeshProxy* makePrimitive(const TriangleMesh& mesh, const std::string& meshName);
   SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
   Material* createMaterial();
@@ -124,12 +157,6 @@ private:
   static void inspectPrimitivePBR(SceneWindow&, TriangleMeshProxy&);
   static void inspectMaterialPBR(SceneWindow&, Primitive&);
   static void inspectMaterialPBR(Material&);
-
-  //Polyline Gen Inspectors
-  static void inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
-  static void inspectRegularPolygon(RegularPolygonAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
-  static void inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
-  static void inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy);
 
   // Main Inspectors
   static void inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy);

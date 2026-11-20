@@ -3,7 +3,7 @@
 // Class definition for SweepMeshProxy.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 30/10/2026
+// Last revision: 18/11/2026
 
 #ifndef __SweepMeshProxy_h
 #define __SweepMeshProxy_h
@@ -14,26 +14,24 @@
 #include "TorsionSweeper.h"
 #include "RegularPolygon.h"
 #include "CircularArc.h"
-#include <unordered_map>
-#include <functional>
 #include "SweepMeshWriter.h"
 #include <string>
 #include "graphics/Application.h"
+#include "PolylineGeneratorProxy.h"
+
 
 namespace cg::graph
 {
 
 /// @brief SweepMeshProxy implementation.
-//TODO: Essa é uma implementação extremamente ingenua. Pensar em uma forma melhor de fazer isso.
 template<IsReal R>
 class SweepMeshProxy : public PrimitiveProxy
 {
 public:
   using type = SweepMeshProxy<R>;
   using value_type = R;
+  using PolyGenProxy = PolylineGeneratorProxy<R>;
   
-  enum class PolylineGeneratorType : std::size_t { RegularPolygon, CircularArc };
-
   [[nodiscard]] const char* meshName() const
   {
     return _meshName.c_str();
@@ -44,15 +42,37 @@ public:
     return ((TriangleMeshMapper*)PrimitiveProxy::mapper());
   }
 
-  const Polyline<R>& polyline() const 
-  { 
-    return _polyline; 
+  const PolyGenProxy& polyGen() const
+  {
+    return _polyGenProxy;
+  }
+
+  PolyGenProxy& polyGen()
+  {
+    return _polyGenProxy;
+  }
+
+  /// @brief Current generatrix (built polyline)
+  const Polyline<R>& polyline() const
+  {
+    return _polyGenProxy.polyline();
+  }
+
+  /// @brief Common attributes of the active polyline generator
+  const PolylineAttrs<R>& genAttrs() const
+  {
+    return _polyGenProxy.activeGen().attributes();
   }
 
   void setPolylineDirty() 
   { 
-    _dirtyPolyline = true; 
+    _polyGenProxy.setDirty(); 
     _dirtySweep = true; // if polyline changes, sweep changes
+  }
+
+  const bool isDirty() const 
+  {
+    return _dirtySweep;
   }
 
   void setSweepDirty() 
@@ -62,10 +82,10 @@ public:
 
   virtual void build()
   {
-    if (_dirtyPolyline)
+    if (_polyGenProxy.isDirty())
     {
-      _creationFunctions[static_cast<size_t>(activeGen)]();
-      _dirtyPolyline = false;
+      _polyGenProxy.build();
+      _dirtySweep = true;
     }
 
     if (_dirtySweep)
@@ -103,44 +123,13 @@ public:
     return SweepMeshWriter::writeOBJ(*mapper()->mesh(), path.c_str());
   }
 
-  // generator attrs
-  PolylineGeneratorType activeGen{PolylineGeneratorType::RegularPolygon};
-  CircularArcAttrs<R> genAttrs; //jeito ingênuo, fazer de outro modo
-
 protected:
-
-  using CreateFunction =  std::function<void()>;
-
-  using CreateFunctionsMap = std::unordered_map<size_t, CreateFunction>;
-
-  void registerCreateFunction(size_t type, CreateFunction function)
-  {
-    assert(function);
-    _creationFunctions[type] = function;
-  }
-
-  template<typename G, typename A>
-  void generatePolylineBase()
-  {
-    G generator;
-
-    generator.set(genAttrs);
-    _polyline = generator.generate();
-  }
 
   SweepMeshProxy(const TriangleMesh& mesh, const std::string& meshName):
     PrimitiveProxy{*new TriangleMeshMapper{mesh}},
     _meshName{meshName}
   {
-    registerCreateFunction(
-      static_cast<size_t>(PolylineGeneratorType::RegularPolygon),
-      [this]() { this->generatePolylineBase<RegularPolygon<R>, RegularPolygonAttrs<R>>(); }
-    );
-
-    registerCreateFunction(
-      static_cast<size_t>(PolylineGeneratorType::CircularArc), 
-      [this]() { this->generatePolylineBase<CircularArc<R>, CircularArcAttrs<R>>(); }
-    );
+    //do nothing
   }
 
   // Sweep method implemented in derived proxys
@@ -150,11 +139,9 @@ protected:
   {
     mapper()->setMesh(mesh);
   }
-  
-  Polyline<R> _polyline;
-  CreateFunctionsMap  _creationFunctions;
+
+  PolylineGeneratorProxy<R> _polyGenProxy;
   std::string _meshName;
-  bool _dirtyPolyline{true};
   bool _dirtySweep{true};
 
 }; // SweepMeshProxy
@@ -167,17 +154,15 @@ public:
 
   [[nodiscard]] static auto New(const std::string& name = "Spiral")
   {
-    RegularPolygon<R> polyGen;
-    auto initialPolyline = polyGen.generate();
 
-    SpiralSweeper<R> sweeper; // Instância que será guardada
-    auto initialMesh = sweeper.sweep(initialPolyline);
+    PolylineGeneratorProxy<R> gen;
+
+    SpiralSweeper<R> sweeper;
+    auto initialMesh = sweeper.sweep(gen.polyline());
 
     auto proxy = new SpiralProxy{*initialMesh, name};
     
     proxy->_sweeper = sweeper;
-    proxy->_polyline = initialPolyline;
-    proxy->_dirtyPolyline = false; 
     proxy->_dirtySweep = false;
 
     return proxy;
@@ -187,7 +172,7 @@ protected:
   void sweep() override
   {
     _sweeper.set(attr);
-    this->setMesh(*_sweeper.sweep(this->_polyline));
+    this->setMesh(*_sweeper.sweep(this->_polyGenProxy.polyline()));
   }
 
 private:
@@ -209,17 +194,15 @@ public:
 
   [[nodiscard]] static auto New(const std::string& name = "Torsion")
   {
-    RegularPolygon<R> polyGen;
-    auto initialPolyline = polyGen.generate();
+
+    PolylineGeneratorProxy<R> gen;
 
     TorsionSweeper<R> sweeper;
-    auto initialMesh = sweeper.sweep(initialPolyline);
+    auto initialMesh = sweeper.sweep(gen.polyline());
 
     auto proxy = new TorsionProxy{*initialMesh, name};
     
     proxy->_sweeper = sweeper;
-    proxy->_polyline = initialPolyline;
-    proxy->_dirtyPolyline = false;
     proxy->_dirtySweep = false;
 
     return proxy;
@@ -229,7 +212,7 @@ protected:
   void sweep() override
   {
     _sweeper.set(attr);
-    this->setMesh(*_sweeper.sweep(this->_polyline));
+    this->setMesh(*_sweeper.sweep(this->_polyGenProxy.polyline()));
   }
 
 private:

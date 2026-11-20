@@ -59,6 +59,11 @@ public:
     return _attr;
   }
 
+  attrs_type& attributes() override 
+  {
+    return _attr; 
+  }
+
   /// sets the attributes
   void set(const PolylineAttrs<R>& attr) override
   {
