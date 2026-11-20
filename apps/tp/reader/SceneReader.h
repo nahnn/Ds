@@ -28,7 +28,8 @@
 // Class definition for scene reader.
 //
 // Author: Paulo Pagliosa
-// Last revision: 01/11/2025
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #ifndef __SceneReader_h
 #define __SceneReader_h
