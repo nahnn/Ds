@@ -1,0 +1,126 @@
+// OVERVIEW: sweep_torsion.scn
+// ========
+// Test scene: torsion sweeps.
+// Front row: straight square prism (reference), twisted (rotation 1),
+// tapered (scale 1 to 0.2) and offset profile (offset 1, 0).
+// Back row: length 10, subdivisions 1 with rotation 1, open arc and
+// extruded triangle with rotation -1.
+//
+// Editor: the reference is a straight capped prism; the twisted one turns
+// around its axis; the tapered one ends in a small square; the offset one
+// twists around an axis outside the profile. The coarse one shows the
+// twist with a single segment; the open arc and the extruded triangle have
+// no caps.
+// Ray tracing: same meshes.
+
+include "../colors.inc"
+
+material "Teal" { diffuse rgb(0, 0.6, 0.6) specular White metallic 0 roughness 0.3 }
+material "Silver" { diffuse Silver specular Silver metallic 1 roughness 0.25 }
+
+scene
+{
+  environment
+  {
+    background DarkGray
+    ambient Gray
+  }
+
+  object "Camera"
+  {
+    define pos <0, 14, 28>
+
+    transform
+    {
+      position pos
+      rotation axes(pos - <0, 3, 0>, <0, 1, 0>)
+    }
+    camera { perspective angle 45 }
+  }
+
+  object "Light"
+  {
+    transform { rotation <-50, 30, 0> }
+    light { directional }
+  }
+
+  object "Reference"
+  {
+    transform { position <-9, 0, 5> }
+    torsion "Reference" material "Teal"
+    {
+      polyline { regularPolygon points 4 }
+      capped length 5
+    }
+  }
+
+  object "Twisted"
+  {
+    transform { position <-3, 0, 5> }
+    torsion "Twisted" material "Teal"
+    {
+      polyline { regularPolygon points 4 }
+      capped length 5 subdivisions 20 rotation 1
+    }
+  }
+
+  object "Tapered"
+  {
+    transform { position <3, 0, 5> }
+    torsion "Tapered" material "Teal"
+    {
+      polyline { regularPolygon points 4 }
+      capped length 5 scale vec2(1, 0.2)
+    }
+  }
+
+  object "Offset"
+  {
+    transform { position <9, 0, 5> }
+    torsion "Offset" material "Teal"
+    {
+      polyline { regularPolygon points 4 scale 0.5 }
+      capped length 5 subdivisions 20 offset vec2(1, 0) rotation 1
+    }
+  }
+
+  object "Long"
+  {
+    transform { position <-9, 0, -5> }
+    torsion "Long" material "Silver"
+    {
+      polyline { regularPolygon points 5 scale 0.7 }
+      capped length 10 subdivisions 20 rotation 0.5
+    }
+  }
+
+  object "Coarse"
+  {
+    transform { position <-3, 0, -5> }
+    torsion "Coarse" material "Silver"
+    {
+      polyline { regularPolygon points 4 }
+      capped length 5 subdivisions 1 rotation 1
+    }
+  }
+
+  object "Arc"
+  {
+    transform { position <3, 0, -5> }
+    torsion "Arc" material "Silver"
+    {
+      polyline { circularArc angle 270 segments 12 open }
+      capped length 5 subdivisions 20 rotation 1
+    }
+  }
+
+  object "Extruded"
+  {
+    transform { position <9, 0, -5> }
+    torsion "Extruded" material "Silver"
+    {
+      polyline { regularPolygon points 3 extrusion 0.5 }
+      capped length 5 subdivisions 20 rotation -1
+    }
+  }
+}
