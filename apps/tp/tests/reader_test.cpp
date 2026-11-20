@@ -99,7 +99,7 @@ testLightsAndCamera()
   auto r = read(R"(
 scene
 {
-  object "Cam" { camera { parallel height 7 depth <1,50> } }
+  object "Cam" { camera { parallel height 7 depth vec2(1,50) } }
   object "Dir" { light { directional } }
   object "Spot" { light { spot color rgb(1,0,0) angle 30 range 10 falloff 2 } }
 })");
@@ -136,7 +136,7 @@ scene
     torsion "T"
     {
       polyline { circularArc angle 90 segments 6 open }
-      length 5 scale <1, 0.5> rotation 1
+      length 5 scale vec2(1, 0.5) rotation 1
     }
   }
 })");
