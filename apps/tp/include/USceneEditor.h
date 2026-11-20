@@ -15,7 +15,7 @@
 
 namespace cg
 { // begin namespace cg
-    
+
 class USceneEditor : public SceneEditor
 {
 public:
@@ -42,6 +42,7 @@ protected:
 
 private:
   struct LightLoc { GLint type, color, position, direction, falloff, range, angle; };
+  struct PBRItem { Primitive* primitive; PBR* pbr; RenderMode mode; };
 
   GLSL::Program _pbr{"PBR"};
   GLint _mvMatrixLoc, _normalMatrixLoc, _mvpMatrixLoc, _viewportMatrixLoc, _projectionTypeLoc;
@@ -49,10 +50,10 @@ private:
   LightLoc _lightLocs[maxLights];
   GLint _OdLoc, _OsLoc, _rLoc, _mLoc;
   GLint _lineWidthLoc, _lineColorLoc, _hiddenLinesLoc, _useTextureLoc, _useVertexColorsLoc;
-  std::vector<std::pair<Primitive*, PBR*>> _pbrQueue; // TODO: método potencialmente caro (reformular)
+  std::vector<PBRItem> _pbrQueue; // TODO: método potencialmente caro (reformular)
 
   void initUniformLocations();
-  void drawPBR(const Primitive&, const PBR&);
+  void drawPBR(const Primitive&, const PBR&, RenderMode);
   void restoreBaseProgram() { GLSL::Program::setCurrent(&program()); }
 
 }; // USceneEditor

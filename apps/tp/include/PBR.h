@@ -42,6 +42,11 @@ public:
     return !operator==(other);
   }
 
+  Color diffuseColor() const { return (1 - m) * od; }
+  Color f0() const { return (1 - m) * minOs * Color::white + m * os; }
+  float k() const { return powf(r + 1, 2) / 8; }
+  float alpha() const { return r * r; }
+
 private:
   void clampAttrs()
   {
