@@ -35,8 +35,8 @@
 #include "graph/PrimitiveProxy.h"
 #include "graphics/Assets.h"
 #include "SceneWriter.h"
-#include "PBR.h"
-#include "SweepMeshProxy.h"
+#include "include/pbr/PBR.h"
+#include "include/sweep/SweepMeshProxy.h"
 
 namespace cg::util
 { // begin namespace cg::util

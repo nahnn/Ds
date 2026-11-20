@@ -36,7 +36,7 @@
 #include "graph/SceneObjectBuilder.h"
 #include "graphics/Assets.h"
 #include "ReaderBase.h"
-#include "PBR.h"
+#include "include/pbr/PBR.h"
 
 namespace cg::util
 { // begin namespace cg::util

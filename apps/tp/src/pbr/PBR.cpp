@@ -5,7 +5,7 @@
 // Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende 
 // Last revision: 14/11/2026
 
-#include "../include/PBR.h"
+#include "include/pbr/PBR.h"
 #include "RayTracer.h"
 
 using namespace cg;

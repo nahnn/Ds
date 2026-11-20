@@ -36,7 +36,7 @@
 #include "SceneWriter.h"
 #include "MainWindow.h"
 #include "IconsFontAwesome7.h"
-#include "include/PBR.h"
+#include "include/pbr/PBR.h"
 
 /////////////////////////////////////////////////////////////////////
 //

@@ -38,10 +38,10 @@
 #include "graphics/GLImage.h"
 #include "RayTracer.h"
 
-#include "include/RegularPolygon.h"
-#include "include/CircularArc.h"
-#include "include/SweepMeshProxy.h"
-#include "include/USceneEditor.h"
+#include "include/sweep/RegularPolygon.h"
+#include "include/sweep/CircularArc.h"
+#include "include/sweep/SweepMeshProxy.h"
+#include "include/pbr/USceneEditor.h"
 
 //TODO: ver se precisa remover. Residual do repo original
 // namespace cg::graph

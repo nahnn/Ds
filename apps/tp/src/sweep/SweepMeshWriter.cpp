@@ -5,7 +5,7 @@
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
 // Last revision: 30/10/2026
 
-#include "../include/SweepMeshWriter.h"
+#include "include/sweep/SweepMeshWriter.h"
 #include <filesystem>
 #include <algorithm>
 
