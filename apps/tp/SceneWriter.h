@@ -28,7 +28,8 @@
 // Class definition for scene writer.
 //
 // Author: Paulo Pagliosa
-// Last revision: 06/10/2026
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #ifndef __SceneWriter_h
 #define __SceneWriter_h

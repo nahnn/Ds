@@ -3,7 +3,7 @@
 // Class definition for polyline sweepers (base class).
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 31/10/2026
+// Last revision: 20/11/2026
 
 #ifndef __PolylineSweeper_h
 #define __PolylineSweeper_h
@@ -81,8 +81,8 @@ protected:
 
 // -- Sweep Utils --
 
-inline void setTriangle(TriangleMesh::Triangle* t,  
-  size_t i, 
+inline void setTriangle(TriangleMesh::Triangle* t,
+  size_t i,
   size_t j,
   size_t k)
 {
@@ -90,7 +90,7 @@ inline void setTriangle(TriangleMesh::Triangle* t,
 }
 
 /// Given a triangle t changes the order of its vertices from (i, j,  k) to (j, i, k)
-/// @param t 
+/// @param t
 inline void sweepVertexOrder(TriangleMesh::Triangle* t)
 {
   int& j = t->v[1];

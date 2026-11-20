@@ -3,7 +3,7 @@
 // Class definition for circular arcs (polylines).
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 31/10/2026
+// Last revision: 20/11/2026
 
 #ifndef __CircularArc_h
 #define __CircularArc_h
@@ -73,9 +73,9 @@ public:
     return _attr;
   }
 
-  attrs_type& attributes() override 
+  attrs_type& attributes() override
   {
-    return _attr; 
+    return _attr;
   }
 
   /// sets the attributes
@@ -128,10 +128,10 @@ Polyline<R> CircularArc<R>::generate() const
   const R a0 = static_cast<R>(cg::math::toRadians(90 - _attr.tc / 2));
   for(size_t i = 0; i < length; ++i)
     polyline[i] = vec3{static_cast<R>(cos(a0 + i * step)), static_cast<R>(sin(a0 + i * step)), 0};
-  
+
   // Transformations
   PolylineGenerator<R>::transform(polyline, _attr);
-  
+
   // bounds
   polyline.computeBounds();
 

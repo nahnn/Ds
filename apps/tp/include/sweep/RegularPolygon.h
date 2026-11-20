@@ -3,7 +3,7 @@
 // Class definition for regular polygons (polylines).
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 31/10/2026
+// Last revision: 20/11/2026
 
 #ifndef __RegularPolygon_h
 #define __RegularPolygon_h
@@ -21,7 +21,7 @@ namespace cg
 template<IsReal R>
 struct RegularPolygonLimits: public PolylineLimits<R>
 {
-  
+
 }; // RegularPolygonLimits
 
 
@@ -34,7 +34,7 @@ struct RegularPolygonAttrs: public PolylineAttrs<R>
 {
   // no specific attributes
   bool operator ==(const RegularPolygonAttrs&) const = default;
-  
+
 }; // RegularPolygonAttrs
 
 
@@ -64,9 +64,9 @@ public:
     return _attr;
   }
 
-  attrs_type& attributes() override 
-  { 
-    return _attr; 
+  attrs_type& attributes() override
+  {
+    return _attr;
   }
 
   /// sets the attributes

@@ -28,7 +28,8 @@
 // Class definition for cg demo main window.
 //
 // Author: Paulo Pagliosa
-// Last revision: 07/10/2026
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #ifndef __MainWindow_h
 #define __MainWindow_h

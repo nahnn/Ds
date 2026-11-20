@@ -28,7 +28,8 @@
 // Class definition for simple ray tracer.
 //
 // Author: Paulo Pagliosa
-// Last revision: 04/09/2026
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #ifndef __RayTracer_h
 #define __RayTracer_h

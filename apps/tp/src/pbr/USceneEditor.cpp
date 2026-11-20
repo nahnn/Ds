@@ -1,9 +1,9 @@
 // OVERVIEW: USceneEditor
 // ========
-// Class implementation for USceneEditor. 
+// Class implementation for USceneEditor.
 //
-// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende 
-// Last revision: 17/11/2026
+// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #include "include/pbr/USceneEditor.h"
 #include "graphics/TriangleMeshMapper.h"
@@ -119,7 +119,7 @@ USceneEditor::renderActors()
 {
   _pbrQueue.clear();
 
-  // First pass: rendering 
+  // First pass: rendering
   for (auto actor : _scene->actors())
   {
     if (!actor->isVisible())
@@ -155,7 +155,7 @@ USceneEditor::renderActors()
   if (_pbrQueue.empty())
     return;
 
-  // second pass: every primitive which was able to have its mat to be converted in PBR 
+  // second pass: every primitive which was able to have its mat to be converted in PBR
   _pbr.use();
   for (auto [prim, pbr, mode] : _pbrQueue)
   {
@@ -176,7 +176,7 @@ USceneEditor::renderActors()
     }
 }
 
-void 
+void
 USceneEditor::drawPBR(const Primitive& p, const PBR& material, RenderMode mode)
 {
   auto mesh = p.tesselate();
@@ -184,7 +184,7 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material, RenderMode mode)
 
   auto m = glMesh(mesh);
   if (!m) return;
-  
+
   m->bind();
 
   auto cam = camera();

@@ -3,7 +3,7 @@
 // Class definition for translational sweepers with torsion.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 31/10/2026
+// Last revision: 20/11/2026
 
 #ifndef __TorsionSweeper_h
 #define __TorsionSweeper_h
@@ -38,7 +38,7 @@ struct TorsionSweeperLimits: public PolylineSweeperLimits<R>
   static constexpr R MAX_RV = 2; // max rv
 
   // ow (-bx..bx) and oh (-by..by) checked  in sweep()
-  // 
+  //
 
 }; // TorsionSweeperLimits
 
@@ -57,7 +57,7 @@ struct TorsionSweeperAttrs: public PolylineSweeperAttrs<R>
   R sb{1}; // initial scale
   R se{1}; // final scale
   R rv{0}; // torsion
-  
+
 }; // TorsionSweeperAttrs
 
 
@@ -167,7 +167,7 @@ TriangleMesh* TorsionSweeper<R>::sweep(const Polyline<R>& poly) const
       data.vertices[k * L + i] = rotz * (sv * points[i] + T);
   }
 
-  
+
   // computing triangles
   const size_t quads = closed ? np : np - 1;
   const size_t totalSteps = rings * nsv;

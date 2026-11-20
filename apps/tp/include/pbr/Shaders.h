@@ -2,8 +2,8 @@
 // ========
 // Class definition for general shaders
 //
-// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende 
-// Last revision: 09/11/2026
+// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #ifndef __Shaders_h
 #define __Shaders_h

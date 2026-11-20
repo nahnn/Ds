@@ -3,7 +3,7 @@
 // Class definition for spiral sweepers.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 31/10/2026
+// Last revision: 20/11/2026
 
 #ifndef __SpiralSweeper_h
 #define __SpiralSweeper_h
@@ -121,7 +121,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   bool capped = this->hasCaps(poly);
   const auto L = static_cast<size_t>(poly.length()); // number of points per segment
   const size_t rings = extruded ? 2 : 1; // rings per segment
-  const size_t np = L / rings; // points per ring  
+  const size_t np = L / rings; // points per ring
   const auto& points = poly.points();
 
   const R bx = poly.width();

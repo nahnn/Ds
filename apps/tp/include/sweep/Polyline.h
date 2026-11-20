@@ -3,7 +3,7 @@
 // Class definition for polylines.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 31/10/2026
+// Last revision: 20/11/2026
 
 #ifndef __Polyline_h
 #define __Polyline_h
@@ -239,7 +239,7 @@ void PolylineGenerator<R>::transform(Polyline<R>& polyline, const PolylineAttrs<
   if (attr.sp != 1)
     for (size_t i = 0; i < length; ++i)
       polyline[i] = attr.sp * polyline[i];
-} 
+}
 
 } // end namespace cg
 

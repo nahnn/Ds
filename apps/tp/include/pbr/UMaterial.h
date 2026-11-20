@@ -1,9 +1,9 @@
 // OVERVIEW: UMaterial.h
 // ========
-// Class definition for UMaterial. U stands for universal. 
+// Class definition for UMaterial. U stands for universal.
 //
-// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende 
-// Last revision: 09/11/2026
+// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #ifndef __UMaterial_h
 #define __UMaterial_h
@@ -51,7 +51,7 @@ public:
   UMaterial& operator =(UMaterial&&) noexcept = default;
 
   // -- Ray Tracing --
-  /// returns the color given by the direct illumination model 
+  /// returns the color given by the direct illumination model
   virtual Color shade(const vec3&, const vec3&, const vec3&, const float, const float, const Color&) const = 0; // used in rt
 
   // Secondary Ray tracing

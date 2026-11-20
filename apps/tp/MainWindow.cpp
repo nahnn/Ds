@@ -28,7 +28,8 @@
 // Source file for cg demo main window.
 //
 // Author: Paulo Pagliosa
-// Last revision: 07/10/2026
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #include "graphics/Application.h"
 #include "graphics/AssetFolder.h"

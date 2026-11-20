@@ -3,7 +3,7 @@
 // Class definition for SweepMeshProxy.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 30/10/2026
+// Last revision: 20/11/2026
 
 
 #ifndef __SweepMeshWriter_h

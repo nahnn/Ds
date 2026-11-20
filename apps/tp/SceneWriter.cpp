@@ -28,7 +28,8 @@
 // Source file for scene writer.
 //
 // Author: Paulo Pagliosa
-// Last revision: 08/01/2026
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #include "graph/CameraProxy.h"
 #include "graph/LightProxy.h"

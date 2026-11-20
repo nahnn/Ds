@@ -3,7 +3,7 @@
 // Class definition for SweepMeshProxy.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 18/11/2026
+// Last revision: 20/11/2026
 
 #ifndef __SweepMeshProxy_h
 #define __SweepMeshProxy_h
@@ -34,7 +34,7 @@ public:
   using type = SweepMeshProxy<R>;
   using value_type = R;
   using PolyGenProxy = PolylineGeneratorProxy<R>;
-  
+
   [[nodiscard]] const char* meshName() const
   {
     return _meshName.c_str();
@@ -67,19 +67,19 @@ public:
     return _polyGenProxy.activeGen().attributes();
   }
 
-  void setPolylineDirty() 
-  { 
-    _polyGenProxy.setDirty(); 
+  void setPolylineDirty()
+  {
+    _polyGenProxy.setDirty();
     _dirtySweep = true; // if polyline changes, sweep changes
   }
 
-  const bool isDirty() const 
+  const bool isDirty() const
   {
     return _dirtySweep;
   }
 
-  void setSweepDirty() 
-  { 
+  void setSweepDirty()
+  {
     _dirtySweep = true;
   }
 
@@ -174,7 +174,7 @@ public:
     auto initialMesh = sweeper.sweep(gen.polyline());
 
     auto proxy = new SpiralProxy{*initialMesh, name};
-    
+
     proxy->_sweeper = sweeper;
     proxy->_dirtySweep = false;
 
@@ -198,8 +198,8 @@ protected:
   }
 
 private:
-  SpiralProxy(const TriangleMesh& mesh, const std::string& name): 
-    SweepMeshProxy<R>{mesh, name} 
+  SpiralProxy(const TriangleMesh& mesh, const std::string& name):
+    SweepMeshProxy<R>{mesh, name}
   {
     // do nothing
   }
@@ -227,7 +227,7 @@ public:
     auto initialMesh = sweeper.sweep(gen.polyline());
 
     auto proxy = new TorsionProxy{*initialMesh, name};
-    
+
     proxy->_sweeper = sweeper;
     proxy->_dirtySweep = false;
 
@@ -251,8 +251,8 @@ protected:
   }
 
 private:
-  TorsionProxy(const TriangleMesh& mesh, const std::string& name): 
-    SweepMeshProxy<R>{mesh, name} 
+  TorsionProxy(const TriangleMesh& mesh, const std::string& name):
+    SweepMeshProxy<R>{mesh, name}
   {
     // do nothing
   }

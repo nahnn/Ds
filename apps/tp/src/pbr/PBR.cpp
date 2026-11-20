@@ -1,9 +1,9 @@
 // OVERVIEW: PBR.h
 // ========
-// Class implementation for PBR Material. 
+// Class implementation for PBR Material.
 //
-// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende 
-// Last revision: 14/11/2026
+// Author: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #include "include/pbr/PBR.h"
 #include "RayTracer.h"
@@ -15,7 +15,7 @@ namespace cg
 { // begin namespace cg
 
 Color // TODO: might be inline
-PBR::shade(const vec3& N, // Normal 
+PBR::shade(const vec3& N, // Normal
   const vec3& V, // Ray Direction
   const vec3& L, // Light vector (direction: P to Light)
   const float NV, // dot product N . V (NV <= 0)
@@ -35,7 +35,7 @@ PBR::shade(const vec3& N, // Normal
   Color fresnel = os + (Color::white - os) * powf(1 - lh, 5);
   float G = nl * math::inverse(nl * (1 - k) + k)  * nv * math::inverse(nv * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
   float D = a2 * math::inverse(math::pi<float> * powf(nh * nh * (a2 - 1) + 1, 2));
-  
+
   Color f{BRDF(fresnel * G * D * math::inverse(4 * nl * nv))}; // BRDF
 
   return lc * f * nl;
@@ -126,7 +126,7 @@ PBR::fragmentShader()
 
   MaterialProps materialProps()
   {
-    MaterialProps p;  
+    MaterialProps p;
 
     vec4 base = useVertexColors != 0 ? g_color :
     useTexture != 0 ? texture(sampler, g_uv) : material.Od;

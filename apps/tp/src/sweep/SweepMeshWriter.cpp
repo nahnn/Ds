@@ -3,7 +3,7 @@
 // implementation for SweepMeshProxy.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 30/10/2026
+// Last revision: 20/11/2026
 
 #include "include/sweep/SweepMeshWriter.h"
 #include <filesystem>
@@ -22,7 +22,7 @@ void writeMeshData(FILE* file, const TriangleMesh& mesh)
 
     fprintf(file, "# Wavefront OBJ: %d vertices, %d triangles\n",
         data.vertexCount, data.triangleCount);
-    
+
     for (int i = 0; i < data.vertexCount; ++i)
     {
         const auto& v = data.vertices[i];
@@ -37,7 +37,7 @@ void writeMeshData(FILE* file, const TriangleMesh& mesh)
 
         fprintf(file, "vn %.9g %.9g %.9g\n", n.x, n.y, n.z);
         }
-    
+
     for (int i = 0; i < data.triangleCount; ++i)
     {
         const int a = data.triangles[i].v[0] + 1;
@@ -82,7 +82,7 @@ SweepMeshWriter::writeOBJ(const TriangleMesh& mesh, const char* filename)
     printf("Writing Wavefront OBJ file %s...\n", filename);
     writeMeshData(file, mesh);
 
-    const bool ok = !ferror(file); 
+    const bool ok = !ferror(file);
     return (fclose(file) == 0) && ok;
 }
 

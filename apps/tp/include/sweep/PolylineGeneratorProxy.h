@@ -3,7 +3,7 @@
 // Class definition for SweepMeshProxy.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
-// Last revision: 18/11/2026
+// Last revision: 20/11/2026
 
 #ifndef __PolylineGeneratorProxy_h
 #define __PolylineGeneratorProxy_h
@@ -31,7 +31,7 @@ public:
 
     struct PolyGenEntry
     {
-        const char* name;                        
+        const char* name;
         std::unique_ptr<PolyGen> generator;
     };
 
@@ -57,22 +57,22 @@ public:
         return *this;
     }
 
-    GenType activeGenType() const { 
-        return _activeGenType; 
+    GenType activeGenType() const {
+        return _activeGenType;
     }
 
-    const PolyGenMap& entries() const 
-    { 
-        return _entries; 
+    const PolyGenMap& entries() const
+    {
+        return _entries;
     }
 
-    PolyGen& activeGen() 
-    { 
-        return *_entries.at(_activeGenType).generator; 
+    PolyGen& activeGen()
+    {
+        return *_entries.at(_activeGenType).generator;
     }
 
-    const PolyGen& activeGen() const 
-    { 
+    const PolyGen& activeGen() const
+    {
         return *_entries.at(_activeGenType).generator;
     }
 
@@ -86,9 +86,9 @@ public:
         _dirtyPoly = true;
     }
 
-    const Polyline<R>& polyline() const 
-    { 
-        return _polyline; 
+    const Polyline<R>& polyline() const
+    {
+        return _polyline;
     }
 
     const bool isDirty() const
@@ -96,9 +96,9 @@ public:
         return _dirtyPoly;
     }
 
-    void setDirty() 
+    void setDirty()
     {
-        _dirtyPoly = true; 
+        _dirtyPoly = true;
     }
 
     void build()
