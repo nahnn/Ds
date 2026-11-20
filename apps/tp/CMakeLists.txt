@@ -85,7 +85,11 @@ if(TP_TESTS)
   set(sweep_test_SRCS)
   set(pbr_test_SRCS src/pbr/PBR.cpp)
   set(writer_test_SRCS src/sweep/SweepMeshWriter.cpp)
-  foreach(t sweep_test pbr_test writer_test)
+  set(reader_test_SRCS src/pbr/PBR.cpp src/sweep/SweepMeshWriter.cpp
+    reader/AbstractParser.cpp reader/Buffer.cpp reader/ErrorHandler.cpp
+    reader/Expression.cpp reader/FileBuffer.cpp reader/ReaderBase.cpp
+    reader/SceneReader.cpp reader/Scope.cpp)
+  foreach(t sweep_test pbr_test writer_test reader_test)
     add_executable(${t} tests/${t}.cpp ${${t}_SRCS})
     target_include_directories(${t} PRIVATE
       ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include)
