@@ -104,7 +104,10 @@ USceneEditor::renderLights()
     GLSL::Program::setUniform(_lightLocs[0].type, 1);
     GLSL::Program::setUniformVec4(_lightLocs[0].color, vec4f{1, 1, 1, 0});
     GLSL::Program::setUniformVec3(_lightLocs[0].position, vec3f{0});
+    GLSL::Program::setUniformVec3(_lightLocs[0].direction, vec3f{0, 0, -1});
+    GLSL::Program::setUniform(_lightLocs[0].falloff, (int)Light::Falloff::Constant);
     GLSL::Program::setUniform(_lightLocs[0].range, 0.0f);
+    GLSL::Program::setUniform(_lightLocs[0].angle, 0.0f);
     n = 1;
   }
   GLSL::Program::setUniform(_lightCountLoc, n);
