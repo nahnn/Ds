@@ -83,13 +83,54 @@ MainWindow::createMaterial()
   return newPBR();
 }
 
+//PBR inspect 
 void
-MainWindow::inspectMaterial(Primitive& primitive)
+MainWindow::inspectPrimitivePBR(SceneWindow& window, TriangleMeshProxy& proxy)
+{
+  // copy from SceneWindow (static_cast need because of encapsulation)
+  ImGui::inputText("Mesh", proxy.meshName());
+  if (static_cast<MainWindow&>(window).editSceneObjects() && ImGui::BeginDragDropTarget())
+  {
+    if (auto payload = ImGui::AcceptDragDropPayload("TriangleMesh"))
+    {
+      auto mit = *(MeshMapIterator*)payload->Data;
+      proxy.setMesh(*Assets::loadMesh(mit), mit->first);
+    }
+    ImGui::EndDragDropTarget();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("...###PrimitiveMesh"))
+    ImGui::OpenPopup("PrimitiveMeshPopup");
+  if (ImGui::BeginPopup("PrimitiveMeshPopup"))
+  {
+    if (auto& meshes = Assets::meshes(); !meshes.empty())
+    {
+      for (auto mit = meshes.begin(); mit != meshes.end(); ++mit)
+        if (ImGui::Selectable(mit->first.c_str()))
+          proxy.setMesh(*Assets::loadMesh(mit), mit->first);
+    }
+    ImGui::EndPopup();
+  }
+  ImGui::Separator();
+
+  auto mapper = proxy.mapper();
+
+  MainWindow::inspectMaterialPBR(window, *(mapper->primitive()));
+  ImGui::Separator();
+  inspectDisplayMode(mapper->renderMode);
+  ImGui::SameLine();
+  ImGui::Checkbox("###ODM", &mapper->useObjectRenderMode);
+  proxy.actor()->visible = proxy.sceneObject()->visible();
+}
+
+void
+MainWindow::inspectMaterialPBR(SceneWindow& window, Primitive& primitive)
 { // copy from SceneWindow
   auto material = primitive.material();
 
   ImGui::inputText("Material", material->name());
-  if (editSceneObjects() && ImGui::BeginDragDropTarget())
+  //cast because of encapsulation
+  if (static_cast<MainWindow&>(window).editSceneObjects() && ImGui::BeginDragDropTarget())
   {
     if (auto payload = ImGui::AcceptDragDropPayload("Material"))
     {
@@ -100,18 +141,25 @@ MainWindow::inspectMaterial(Primitive& primitive)
     }
     ImGui::EndDragDropTarget();
   }
-  inspectMaterial(*material);
+
+  // guardrails
+  auto pbr = dynamic_cast<PBR*>(material);
+  if(!pbr)
+    SceneWindowBase::inspectMaterial(*material);
+
+  inspectMaterialPBR(*material);
 }
 
 void
-MainWindow::inspectMaterial(Material& material)
+MainWindow::inspectMaterialPBR(Material& material)
 { // TODO: generalizar pra UMat
+
   auto& mat = static_cast<PBR&>(material);
 
   ImGui::colorEdit3("Diffuse", mat.attrs.od);
   ImGui::colorEdit3("Specular", mat.attrs.os); // TODO: clampar
-  ImGui::DragFloat("metalic", &mat.attrs.m, 1, 0, 1);
-  ImGui::DragFloat("roughness", &mat.attrs.r, 1, 0, 1);
+  ImGui::SliderFloat("Metallic", &mat.attrs.m, 0.f, 1.f);
+  ImGui::SliderFloat("Roughness", &mat.attrs.r, 0.05f, 1.f);
 }
 
 // --- Default Methods ---
@@ -501,7 +549,7 @@ SceneObject* MainWindow::createSpiralObject()
   //builds the mesh by sweep method
   auto proxy = SpiralProxy<float>::New("SpiralMesh");
   proxy->build(); 
-  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
+  proxy->mapper()->primitive()->setMaterial(newPBR());
 
   //add component and return
   object->addComponent(proxy);
@@ -515,7 +563,7 @@ SceneObject* MainWindow::createTorsionObject()
 
   auto proxy = TorsionProxy<float>::New("TorsionMesh");
   proxy->build(); 
-  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
+  proxy->mapper()->primitive()->setMaterial(newPBR());
 
   object->addComponent(proxy);
   return object;
@@ -525,7 +573,7 @@ Component* MainWindow::makeSpiralProxy()
 {
   auto proxy = SpiralProxy<float>::New("SpiralMesh");
   proxy->build();
-  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
+  proxy->mapper()->primitive()->setMaterial(newPBR());
   return proxy;
 }
 
@@ -533,7 +581,7 @@ Component* MainWindow::makeTorsionProxy()
 {
   auto proxy = TorsionProxy<float>::New("TorsionMesh");
   proxy->build();
-  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
+  proxy->mapper()->primitive()->setMaterial(newPBR());
   return proxy;
 }
 
@@ -604,7 +652,7 @@ void MainWindow::inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& p
   //copied from SceneWindow inspectMapper() because of encapsulation problems
   auto mapper = proxy.mapper();
 
-  static_cast<MainWindow&>(window).inspectMaterial(*(mapper->primitive()));
+  MainWindow::inspectMaterialPBR(window, *(mapper->primitive()));
   ImGui::Separator();
   inspectDisplayMode(mapper->renderMode);
   ImGui::SameLine();

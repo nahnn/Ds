@@ -41,6 +41,7 @@
 #include "include/RegularPolygon.h"
 #include "include/CircularArc.h"
 #include "include/SweepMeshProxy.h"
+#include "include/USceneEditor.h"
 
 //TODO: ver se precisa remover. Residual do repo original
 // namespace cg::graph
@@ -67,7 +68,7 @@ public:
   {
     registerInspectFunction(inspectSpiralProxy);
     registerInspectFunction(inspectTorsionProxy);
-    registerInspectFunction(inspectPrimitive);
+    registerInspectFunction(inspectPrimitivePBR);
   }
 
 private:
@@ -88,13 +89,6 @@ private:
   {
     return createPrimitiveObject(*_defaultMeshes[meshName], meshName);
   }
-
-  TriangleMeshProxy* makePrimitive(const TriangleMesh& mesh, const std::string& meshName);
-  SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
-  Material* createMaterial();
-
-  void inspectMaterial(Primitive&);
-  void inspectMaterial(Material&);
 
   void beginInitialize() override;
   void initializeScene() override;
@@ -117,9 +111,19 @@ private:
 
   static void buildDefaultMeshes();
 
-  //TODO: remover, residual do repo original
-  // static void inspectHelix(SceneWindow&, HelixProxy&);
-  // static void inspectSweepMesh(SceneWindow&, SweepMeshProxy&);
+  //===== Adapted Functions for Sweep and PBR implementation =====
+
+  SceneEditor* makeEditor(SceneBase& scene) override { return new USceneEditor{scene}; }
+
+  //to inspect PBR works
+  TriangleMeshProxy* makePrimitive(const TriangleMesh& mesh, const std::string& meshName);
+  SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
+  Material* createMaterial();
+
+  //to inspect PBR works
+  static void inspectPrimitivePBR(SceneWindow&, TriangleMeshProxy&);
+  static void inspectMaterialPBR(SceneWindow&, Primitive&);
+  static void inspectMaterialPBR(Material&);
 
   //Polyline Gen Inspectors
   static void inspectPolylineBase(PolylineAttrs<float>& attrs, SweepMeshProxy<float>& proxy);
