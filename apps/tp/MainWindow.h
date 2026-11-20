@@ -93,6 +93,9 @@ private:
   SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
   Material* createMaterial();
 
+  void inspectMaterial(Primitive&);
+  void inspectMaterial(Material&);
+
   void beginInitialize() override;
   void initializeScene() override;
   void renderScene() override;

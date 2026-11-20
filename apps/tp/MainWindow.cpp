@@ -44,6 +44,8 @@
 // ==========
 MeshMap MainWindow::_defaultMeshes;
 
+// --- PBR and redefining methods ---
+
 static PBR*
 newPBR()
 {
@@ -80,6 +82,39 @@ MainWindow::createMaterial()
 {
   return newPBR();
 }
+
+void
+MainWindow::inspectMaterial(Primitive& primitive)
+{ // copy from SceneWindow
+  auto material = primitive.material();
+
+  ImGui::inputText("Material", material->name());
+  if (editSceneObjects() && ImGui::BeginDragDropTarget())
+  {
+    if (auto payload = ImGui::AcceptDragDropPayload("Material"))
+    {
+      auto mit = *(MaterialMapIterator*)payload->Data;
+
+      assert(mit->second);
+      primitive.setMaterial(material = mit->second);
+    }
+    ImGui::EndDragDropTarget();
+  }
+  inspectMaterial(*material);
+}
+
+void
+MainWindow::inspectMaterial(Material& material)
+{ // TODO: generalizar pra UMat
+  auto& mat = static_cast<PBR&>(material);
+
+  ImGui::colorEdit3("Diffuse", mat.attrs.od);
+  ImGui::colorEdit3("Specular", mat.attrs.os); // TODO: clampar
+  ImGui::DragFloat("metalic", &mat.attrs.m, 1, 0, 1);
+  ImGui::DragFloat("roughness", &mat.attrs.r, 1, 0, 1);
+}
+
+// --- Default Methods ---
 
 inline void
 MainWindow::buildDefaultMeshes()
@@ -466,6 +501,7 @@ SceneObject* MainWindow::createSpiralObject()
   //builds the mesh by sweep method
   auto proxy = SpiralProxy<float>::New("SpiralMesh");
   proxy->build(); 
+  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
 
   //add component and return
   object->addComponent(proxy);
@@ -479,6 +515,7 @@ SceneObject* MainWindow::createTorsionObject()
 
   auto proxy = TorsionProxy<float>::New("TorsionMesh");
   proxy->build(); 
+  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
 
   object->addComponent(proxy);
   return object;
@@ -488,6 +525,7 @@ Component* MainWindow::makeSpiralProxy()
 {
   auto proxy = SpiralProxy<float>::New("SpiralMesh");
   proxy->build();
+  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
   return proxy;
 }
 
@@ -495,6 +533,7 @@ Component* MainWindow::makeTorsionProxy()
 {
   auto proxy = TorsionProxy<float>::New("TorsionMesh");
   proxy->build();
+  proxy->actor()->mapper()->primitive()->setMaterial(newPBR());
   return proxy;
 }
 

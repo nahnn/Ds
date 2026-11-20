@@ -23,13 +23,15 @@ PBR::shade(const vec3& N, // Normal
   const Color& lc) const // light color
 {
   // calculating BRDF
+  Color os{(1 - attrs.m) * attrs_type::minOs * Color::white + attrs.m * attrs.os}; // TODO: change?
+  float k{powf(attrs.r + 1, 2) / 8}; // roughness constant
+  float alpha{powf(attrs.r, 2)}; // roughness constant
   auto Hl = (L - V).versor();
   float nv = math::max<float>(-NV, 1e-4);
-  Color fresnel = _attrs.os + (Color::white -_attrs.os) * powf(1 - L.dot(Hl), 5);
-  float G = NL * math::inverse(NL * (1 - _attrs.k) + _attrs.k) 
-    * nv * math::inverse(nv * (1 - _attrs.k) + _attrs.k); // G [0,1] w/ NL > 0 and NV > 0
+  Color fresnel = os + (Color::white - os) * powf(1 - L.dot(Hl), 5);
+  float G = NL * math::inverse(NL * (1 - k) + k)  * nv * math::inverse(nv * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
   float NH = N.dot(Hl);
-  float a2 = powf(_attrs.alpha, 2);
+  float a2 = powf(alpha, 2);
   float D = a2 * math::inverse(math::pi<float> * powf(NH * NH * (a2 - 1) + 1, 2));
   
   Color f{BRDF(fresnel * G * D * math::inverse(4 * NL * nv))}; // BRDF
@@ -40,8 +42,8 @@ PBR::shade(const vec3& N, // Normal
 Color
 PBR::specularReflectionColor(float cosPhi) const
 {
-  Color F0{_attrs.os};
-  float r = _attrs.r;
+  Color F0{(1 - attrs.m) * attrs_type::minOs * Color::white + attrs.m * attrs.os};
+  float r = attrs.r;
 
   float k1{-r + 1.f};
   float k2{-0.0275f * r + 0.0425f};
@@ -58,7 +60,8 @@ PBR::specularReflectionColor(float cosPhi) const
 inline Color
 PBR::BRDF(Color s) const
 {
-  Color fd{_attrs.od * math::inverse<float>(math::pi<float>)}; // Diffuse BRDF
+  Color od{(1 - attrs.m) * attrs.od}; // TODO: change?
+  Color fd{od * math::inverse<float>(math::pi<float>)}; // Diffuse BRDF
   Color fs{s.x, s.y, s.z, 1.0}; // Specular BRDF
   return fd + fs;
 }
@@ -125,12 +128,10 @@ PBR::fragmentShader()
 
     vec4 base = useVertexColors != 0 ? g_color :
     useTexture != 0 ? texture(sampler, g_uv) : material.Od;
-    p.Od = base; // (1 - m) * od before setting uniform
-    p.Os = material.Os; // (1-m)*smin + m*Os before setting uniform
+    p.Od = (1 - material.m) * base; // (1 - m) * od
+    p.Os = (1 - material.m) * minOs * vec4(1, 1, 1, 1) + material.m * material.Os; // (1-m)*smin + m*Os
     p.r = material.r;
     p.m = material.m;
-    return p;
-
     return p;
   }
 
