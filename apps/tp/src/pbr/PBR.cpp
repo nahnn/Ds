@@ -159,7 +159,7 @@ PBR::fragmentShader()
     if (type == 1)
       return true;
 
-    // SPOT
+    // SPOT (copy of cg/src/graphics/GLMeshRendererBase.cpp:214, kept as is)
     float DL = dot(lights[i].direction, L);
     return DL < 0 && lights[i].angle > radians(acos(DL));
   }
