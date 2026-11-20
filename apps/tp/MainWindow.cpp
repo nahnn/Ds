@@ -725,8 +725,7 @@ void MainWindow::inspectSweepObjWrite(SweepMeshProxy<float>& proxy)
 void MainWindow::inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMeshProxy<float>& proxy)
 {
   //only capped if not extruded and closed
-  //TODO: add closed verification
-  ImGui::BeginDisabled(proxy.genAttrs().isExtruded);
+  ImGui::BeginDisabled(proxy.genAttrs().isExtruded || !proxy.polyline().isClosed());
 
   if (ImGui::Checkbox("Capped", &attrs.capped))
     proxy.setSweepDirty();
