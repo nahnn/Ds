@@ -15,11 +15,21 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// UMaterialAttributes: attributes of the universal material
+// ===================
 struct UMaterialAttributes
 {
   // empty
 }; // UMaterialAttributes
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// UMaterial: universal material base class
+// =========
 class UMaterial : public Material
 {
 public:
@@ -41,7 +51,7 @@ public:
   UMaterial& operator =(UMaterial&&) noexcept = default;
 
   // -- Ray Tracing --
-  /// @brief returns the color given by the direct ilumination model 
+  /// returns the color given by the direct illumination model 
   virtual Color shade(const vec3&, const vec3&, const vec3&, const float, const float, const Color&) const = 0; // used in rt
 
   // Secondary Ray tracing
@@ -52,7 +62,7 @@ public:
   virtual Color specularReflectionColor(float) const = 0;
 
   // -- Shading Language --
-  /// @brief Returns the fragment shader code for a given material
+  /// Returns the fragment shader code for a given material
   virtual const char* shaderCode() const = 0;
 
 }; // UMaterial

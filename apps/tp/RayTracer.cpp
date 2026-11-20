@@ -377,7 +377,7 @@ RayTracer::shade(const Ray3f& ray,
 
   auto R = V - (2 * NV) * N; // reflection vector
   // Start with ambient lighting
-  auto m = static_cast<UMaterial*>(primitive->material()); // it will be ceartainly a umat
+  auto m = static_cast<UMaterial*>(primitive->material()); // it will certainly be a UMat
   Color color{};
   auto P = ray(hit.distance);
 

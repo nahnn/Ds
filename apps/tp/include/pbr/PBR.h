@@ -14,6 +14,10 @@ namespace cg
 { // begin namespace cg 
 
 
+/////////////////////////////////////////////////////////////////////
+//
+// PBRAttributes: attributes of the PBR material
+// =============
 struct PBRAttributes : public UMaterialAttributes
 {
 public:
@@ -56,6 +60,11 @@ private:
 
 }; // PBRAttributes
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// PBR: physically based rendering material
+// ===
 class PBR : public UMaterial
 {
 public:
@@ -92,7 +101,7 @@ public:
     return !operator==(other);
   }
 
-  //converts legacy Phong to PBR
+  // converts legacy Phong to PBR
   static PBR* toPBR(const Material&);
 
   Color shade(const vec3&, const vec3&, const vec3&, const float, const float, const Color&) const override;

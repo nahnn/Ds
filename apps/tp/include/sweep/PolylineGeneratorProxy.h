@@ -16,6 +16,11 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineGeneratorProxy: proxy for polyline generators
+// ======================
 template<IsReal R>
 class PolylineGeneratorProxy
 {

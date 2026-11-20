@@ -52,7 +52,7 @@ newPBR()
   auto& map = Assets::materials();
   auto mat = new PBR{Color{1.f, .71f, .29f}, Color{1.f, .71f, .29f}, 1.0f, 0.3f}; // gold
 
-  //name colision
+  //name collision
   int id = int(map.size());
   std::string name;
 
@@ -160,7 +160,7 @@ MainWindow::inspectMaterialPBR(SceneWindow& window, Primitive& primitive)
 
 void
 MainWindow::inspectMaterialPBR(Material& material)
-{ // TODO: generalizar pra UMat
+{ // TODO: generalize for UMat
 
   auto& mat = static_cast<PBR&>(material);
 

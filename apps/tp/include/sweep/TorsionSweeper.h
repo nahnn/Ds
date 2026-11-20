@@ -13,6 +13,11 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// TorsionSweeperLimits: limits of a torsion sweeper
+// ====================
 template<IsReal R>
 struct TorsionSweeperLimits: public PolylineSweeperLimits<R>
 {
@@ -37,6 +42,11 @@ struct TorsionSweeperLimits: public PolylineSweeperLimits<R>
 
 }; // TorsionSweeperLimits
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// TorsionSweeperAttrs: attributes of a torsion sweeper
+// ===================
 template<IsReal R>
 struct TorsionSweeperAttrs: public PolylineSweeperAttrs<R>
 {
@@ -51,6 +61,10 @@ struct TorsionSweeperAttrs: public PolylineSweeperAttrs<R>
 }; // TorsionSweeperAttrs
 
 
+/////////////////////////////////////////////////////////////////////
+//
+// TorsionSweeper: torsion sweeper
+// ==============
 template<IsReal R>
 class TorsionSweeper: public PolylineSweeper<R>
 {
@@ -79,7 +93,7 @@ public:
   {
     auto a = attr;
 
-    //clamp set base attributes
+    // clamp set base attributes
     this->clampSet(a);
 
     a.lv = std::clamp(a.lv, limits::MIN_LV, limits::MAX_LV);

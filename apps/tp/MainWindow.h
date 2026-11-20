@@ -46,7 +46,7 @@
 #include "include/sweep/SweepMeshProxy.h"
 #include "include/pbr/USceneEditor.h"
 
-//TODO: ver se precisa remover. Residual do repo original
+//TODO: check whether it needs to be removed. Residual from the original repo
 // namespace cg::graph
 // { // begin namespace cg::graph
 

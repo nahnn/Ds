@@ -21,9 +21,12 @@
 
 
 namespace cg::graph
-{
+{ // begin namespace cg::graph
 
-/// @brief SweepMeshProxy implementation.
+/////////////////////////////////////////////////////////////////////
+//
+// SweepMeshProxy: sweep mesh proxy implementation
+// ==============
 template<IsReal R>
 class SweepMeshProxy : public PrimitiveProxy
 {
@@ -52,13 +55,13 @@ public:
     return _polyGenProxy;
   }
 
-  /// @brief Current generatrix (built polyline)
+  /// Current generatrix (built polyline)
   const Polyline<R>& polyline() const
   {
     return _polyGenProxy.polyline();
   }
 
-  /// @brief Common attributes of the active polyline generator
+  /// Common attributes of the active polyline generator
   const PolylineAttrs<R>& genAttrs() const
   {
     return _polyGenProxy.activeGen().attributes();
@@ -103,7 +106,7 @@ public:
 
   Component* duplicate(const SceneObject*) const override
   {
-    //TODO
+    // TODO
     return nullptr;
   }
 
@@ -129,7 +132,7 @@ protected:
     PrimitiveProxy{*new TriangleMeshMapper{mesh}},
     _meshName{meshName}
   {
-    //do nothing
+    // do nothing
   }
 
   // Sweep method implemented in derived proxys
@@ -146,6 +149,11 @@ protected:
 
 }; // SweepMeshProxy
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// SpiralProxy: proxy for spiral sweep meshes
+// ===========
 template<IsReal R>
 class SpiralProxy : public SweepMeshProxy<R>
 {
@@ -186,6 +194,10 @@ private:
 };
 
 
+/////////////////////////////////////////////////////////////////////
+//
+// TorsionProxy: proxy for torsion sweep meshes
+// ============
 template<IsReal R>
 class TorsionProxy : public SweepMeshProxy<R>
 {
@@ -219,7 +231,7 @@ private:
   TorsionProxy(const TriangleMesh& mesh, const std::string& name): 
     SweepMeshProxy<R>{mesh, name} 
   {
-    //do nothing
+    // do nothing
   }
 
   TorsionSweeper<R> _sweeper;

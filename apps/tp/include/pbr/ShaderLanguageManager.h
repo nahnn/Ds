@@ -11,6 +11,11 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// ShaderLanguageManager: manages the shader language
+// =====================
 class ShaderLanguageManager
 {
 public:

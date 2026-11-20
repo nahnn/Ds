@@ -13,21 +13,35 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// RegularPolygonLimits: limits of transformations of a regular polygon
+// ====================
 template<IsReal R>
 struct RegularPolygonLimits: public PolylineLimits<R>
 {
   
 }; // RegularPolygonLimits
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// RegularPolygonAttrs: attributes of a regular polygon
+// ===================
 template<IsReal R>
 struct RegularPolygonAttrs: public PolylineAttrs<R>
 {
-  //no specific attributes
+  // no specific attributes
   bool operator ==(const RegularPolygonAttrs&) const = default;
   
 }; // RegularPolygonAttrs
 
 
+/////////////////////////////////////////////////////////////////////
+//
+// RegularPolygon: regular polygon polyline generator
+// ==============
 template<IsReal R>
 class RegularPolygon: public PolylineGenerator<R>
 {
@@ -58,7 +72,7 @@ public:
   /// sets the attributes
   void set(const PolylineAttrs<R>& attr) override
   {
-    //object slicing (inverse) sets base attrs
+    // object slicing (inverse) sets base attrs
     static_cast<PolylineAttrs<R>&>(_attr) = attr;
 
     this->clampSet(_attr);
@@ -72,7 +86,7 @@ private:
 }; // RegularPolygon
 
 
-//TODO: Alterar método para utilizar interface da polilinha, já que não deriva mais
+// TODO: change the method to use the polyline interface, since it no longer derives from it
 template<IsReal R>
 Polyline<R> RegularPolygon<R>::generate() const
 {
@@ -102,6 +116,6 @@ Polyline<R> RegularPolygon<R>::generate() const
   return polyline;
 }
 
-} //end namespace cg
+} // end namespace cg
 
 #endif // __RegularPolygon_h

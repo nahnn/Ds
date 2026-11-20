@@ -57,7 +57,7 @@ public:
 }; // ErrorMessageTableEntry
 
 //
-// Auxiliar function
+// Auxiliary function
 //
 const char* searchErrorMessage(ErrorMessageTableEntry*, int);
 

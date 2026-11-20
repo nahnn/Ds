@@ -16,6 +16,11 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// USceneEditor: scene editor for the universal material
+// ============
 class USceneEditor : public SceneEditor
 {
 public:

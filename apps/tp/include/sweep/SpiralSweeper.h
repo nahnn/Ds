@@ -13,11 +13,16 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// SpiralSweeperLimits: limits of a spiral sweeper
+// ===================
 template<IsReal R>
 struct SpiralSweeperLimits: public PolylineSweeperLimits<R>
 {
   // --- Initial Width ---
-  //real min is 2 * bx (depends on the polyline), checked in sweep()
+  // real min is 2 * bx (depends on the polyline), checked in sweep()
   static constexpr R MIN_WE_ABS = 0; // min we (abs)
   static constexpr R MAX_WE_ABS = 100; // max we (abs)
 
@@ -39,6 +44,11 @@ struct SpiralSweeperLimits: public PolylineSweeperLimits<R>
 
 }; // SpiralSweeperLimits
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// SpiralSweeperAttrs: attributes of a spiral sweeper
+// ==================
 template<IsReal R>
 struct SpiralSweeperAttrs: public PolylineSweeperAttrs<R>
 {
@@ -49,6 +59,11 @@ struct SpiralSweeperAttrs: public PolylineSweeperAttrs<R>
   R dw{2}; // width increment per revolution
 }; // SpiralSweeperAttrs
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// SpiralSweeper: spiral sweeper
+// =============
 template<IsReal R>
 class SpiralSweeper: public PolylineSweeper<R>
 {
@@ -67,7 +82,7 @@ public:
     set(attr);
   }
 
-  /// @brief Covariant: the specific attributes, instead of the common ones
+  /// Covariant: the specific attributes, instead of the common ones
   const attrs_type& attributes() const override
   {
     return _attr;
@@ -78,7 +93,7 @@ public:
   {
     auto a = attr;
 
-    //clamp set base attributes
+    // clamp set base attributes
     this->clampSet(a);
 
     a.we = std::clamp(a.we, limits::MIN_WE_ABS, limits::MAX_WE_ABS);
@@ -114,7 +129,7 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   const R we = math::max<R>(_attr.we, 2*bx);
   const auto de = (we - bx) / 2;
 
-  //auto intersection verifications
+  // auto intersection verifications
   const R re = (_attr.dh == 0 && _attr.dw == 0) ? math::min<R>(_attr.re, 0.99f) : _attr.re;
   const R dh = (re > 1 && _attr.dh > 0) ? math::max<R>(_attr.dh, by) : _attr.dh;
   const R dw = (re > 1 && _attr.dw > 0) ? math::max<R>(_attr.dw, bx) : _attr.dw;

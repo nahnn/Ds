@@ -13,6 +13,11 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// Phong: Phong material
+// =====
 class Phong : public UMaterial
 {
 public:

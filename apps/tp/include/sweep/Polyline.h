@@ -17,7 +17,11 @@
 namespace cg
 { // begin namespace cg
 
-/// @brief PolylineLimits: Represents the limits of transformations of a polyline
+
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineLimits: Represents the limits of transformations of a polyline
+// ==============
 template<IsReal R>
 struct PolylineLimits
 {
@@ -39,7 +43,11 @@ struct PolylineLimits
 
 }; // PolylineLimits
 
-/// @brief PolylineAttrs: Attributes common to all polyline generators
+
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineAttrs: Attributes common to all polyline generators
+// =============
 template<IsReal R>
 struct PolylineAttrs
 {
@@ -55,8 +63,10 @@ struct PolylineAttrs
 }; // PolylineAttrs
 
 
-/// @brief
+/////////////////////////////////////////////////////////////////////
+//
 // Polyline: Class that represents the discretization of a given curve.
+// ========
 template<IsReal R>
 class Polyline
 {
@@ -69,13 +79,13 @@ public:
   using bounds_type = Bounds3<R>;
   using limits = PolylineLimits<R>;
 
-  //CircularArc -> 41 * 2
+  // CircularArc -> 41 * 2
   static constexpr size_t MAX_LENGTH = 82;
 
-  /// @brief Default constructor
+  /// Default constructor
   constexpr Polyline() = default;
 
-  /// @brief Number of points currently stored
+  /// Number of points currently stored
   size_t length() const
   {
     return _length;
@@ -92,7 +102,7 @@ public:
     return _points;
   }
 
-  /// @brief Writable access; grows the length when writing past the end
+  /// Writable access; grows the length when writing past the end
   auto& operator [](size_t i)
   {
     assert(i < MAX_LENGTH);
@@ -161,7 +171,10 @@ private:
 template<IsReal R> using poly = Polyline<R>;
 
 
-/// @brief PolylineGenerator: Represents a base PolylineGenerator
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineGenerator: Represents a base PolylineGenerator
+// =================
 template<IsReal R>
 class PolylineGenerator
 {
@@ -174,11 +187,11 @@ public:
 
   virtual ~PolylineGenerator() = default;
 
-  //return attributes
+  // return attributes
   virtual const PolylineAttrs<R>& attributes() const = 0;
   virtual const PolylineAttrs<R>& attributes() = 0;
 
-  //Generates the polyline using the especif implemented method
+  // Generates the polyline using the especif implemented method
   virtual Polyline<R> generate() const = 0;
 
   virtual void set(const attrs_type& attr) = 0;

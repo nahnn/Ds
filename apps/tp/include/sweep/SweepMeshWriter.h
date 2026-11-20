@@ -16,6 +16,12 @@ namespace cg
 { // begin namespace cg
 
 // SweepMesWriter (copy of MeshWriter, just to not change cg/)
+
+
+/////////////////////////////////////////////////////////////////////
+//
+// SweepMeshWriter: writes sweep meshes to a file
+// ===============
 class SweepMeshWriter
 {
 public:

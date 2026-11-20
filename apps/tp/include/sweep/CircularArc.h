@@ -13,6 +13,11 @@
 namespace cg
 { // begin namespace cg
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// CircularArcLimits: limits of transformations of a circular arc
+// =================
 template<IsReal R>
 struct CircularArcLimits: public PolylineLimits<R>
 {
@@ -26,6 +31,11 @@ struct CircularArcLimits: public PolylineLimits<R>
 
 }; // CircularArcLimits
 
+
+/////////////////////////////////////////////////////////////////////
+//
+// CircularArcAttrs: attributes of a circular arc
+// ================
 template<IsReal R>
 struct CircularArcAttrs: public PolylineAttrs<R>
 {
@@ -37,6 +47,10 @@ struct CircularArcAttrs: public PolylineAttrs<R>
 }; // CircularArcAttrs
 
 
+/////////////////////////////////////////////////////////////////////
+//
+// CircularArc: circular arc polyline generator
+// ===========
 template<IsReal R>
 class CircularArc: public PolylineGenerator<R>
 {
@@ -67,12 +81,12 @@ public:
   /// sets the attributes
   void set(const PolylineAttrs<R>& attr) override
   {
-    //object slicing (inverse) sets base attrs
+    // object slicing (inverse) sets base attrs
     static_cast<PolylineAttrs<R>&>(_attr) = attr;
 
     this->clampSet(_attr);
 
-    //specific attrs
+    // specific attrs
     if (const auto* specific_attr = dynamic_cast<const attrs_type*>(&attr))
     {
       _attr.tc = std::clamp(specific_attr->tc, limits::MIN_THETAC_EXCLUSIVE + R(0.1), limits::MAX_THETAC);
@@ -101,7 +115,7 @@ private:
 }; // CircularArc
 
 
-//TODO: Alterar método para utilizar interface da polilinha, já que não deriva mais
+// TODO: change the method to use the polyline interface, since it no longer derives from it
 template<IsReal R>
 Polyline<R> CircularArc<R>::generate() const
 {

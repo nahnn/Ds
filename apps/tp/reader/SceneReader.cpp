@@ -283,7 +283,7 @@ SceneReader::Parser::parseMaterial()
     };
   else{
     material = PBR::toPBR(*legacy_mat);
-    //TODO: talvez tirar Warning
+    //TODO: maybe remove Warning
     printf("Warning: material '%s' uses legacy Phong properties; converted to PBR\n",
       name.c_str());
   }

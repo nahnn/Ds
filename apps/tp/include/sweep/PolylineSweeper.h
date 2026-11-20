@@ -14,7 +14,11 @@
 namespace cg
 { // begin namespace cg
 
-/// @brief PolylineSweeperLimits: Represents the limits of a base polyline sweeper
+
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineSweeperLimits: Represents the limits of a base polyline sweeper
+// =====================
 template<IsReal R>
 struct PolylineSweeperLimits
 {
@@ -22,7 +26,11 @@ struct PolylineSweeperLimits
 
 }; // PolylineSweeperLimits
 
-/// @brief PolylineSweeperAttrs: Attributes common to all polyline sweepers
+
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineSweeperAttrs: Attributes common to all polyline sweepers
+// ====================
 template<IsReal R>
 struct PolylineSweeperAttrs
 {
@@ -31,7 +39,10 @@ struct PolylineSweeperAttrs
 }; // PolylineSweeperAttrs
 
 
-/// @brief PolylineSweeper: Represents a base PolylineSweeper
+/////////////////////////////////////////////////////////////////////
+//
+// PolylineSweeper: Represents a base PolylineSweeper
+// ===============
 template<IsReal R>
 class PolylineSweeper
 {
@@ -46,7 +57,7 @@ public:
 
   virtual const attrs_type& attributes() const = 0;
 
-  //Sweep method
+  // Sweep method
   [[nodiscard]] virtual TriangleMesh* sweep(const polyline_type& polyline) const = 0;
 
   bool isCapped() const
@@ -60,7 +71,7 @@ protected:
     // do nothing (no common limits yet)
   }
 
-  /// @brief Caps are only valid for closed and non-extruded polylines
+  /// Caps are only valid for closed and non-extruded polylines
   bool hasCaps(const polyline_type& polyline) const
   {
     return isCapped() && polyline.isClosed() && !polyline.isExtruded();
@@ -78,7 +89,7 @@ inline void setTriangle(TriangleMesh::Triangle* t,
   t->setVertices(i, j, k);
 }
 
-/// @brief Given a triangle t changes the order of its vertices from (i, j,  k) to (j, i, k)
+/// Given a triangle t changes the order of its vertices from (i, j,  k) to (j, i, k)
 /// @param t 
 inline void sweepVertexOrder(TriangleMesh::Triangle* t)
 {

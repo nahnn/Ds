@@ -272,7 +272,7 @@ namespace
   inline bool isBlack(const Color& c) { return c == Color::black; }
 }
 
-//converts legacy Phong to PBR
+// converts legacy Phong to PBR
 PBR*
 PBR::toPBR(const Material& m)
 {

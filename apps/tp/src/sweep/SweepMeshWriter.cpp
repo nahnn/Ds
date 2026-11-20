@@ -13,7 +13,7 @@ namespace cg
 { // begin namespace cg
 
 namespace
-{ //begin namespace
+{ // begin namespace
 
 void writeMeshData(FILE* file, const TriangleMesh& mesh)
 {
@@ -50,7 +50,7 @@ void writeMeshData(FILE* file, const TriangleMesh& mesh)
         fprintf(file, "f %d %d %d\n", a, b, c);
     }
 
-    //no support for uv
+    // no support for uv
 }
 
 }
