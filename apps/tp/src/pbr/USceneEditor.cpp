@@ -6,6 +6,7 @@
 // Last revision: 17/11/2026
 
 #include "include/pbr/USceneEditor.h"
+#include "graphics/TriangleMeshMapper.h"
 
 namespace cg
 { // begin namespace cg
@@ -57,7 +58,7 @@ USceneEditor::beginRender()
   vp[2].set(0, 0, 1, 0);
   vp[3].set(v[0] + w, v[1] + h, 0, 0);
 
-  // putting the program in use and setting current program basic uniforms
+  // putting the program in use and setting vp dimentions, projection type and edge color
   _pbr.use();
   GLSL::Program::setUniformMat4(_viewportMatrixLoc, vp);
   GLSL::Program::setUniform(_projectionTypeLoc, (int)camera()->projectionType());
@@ -129,7 +130,10 @@ USceneEditor::renderActors()
 
     if (auto pbr = prim ? dynamic_cast<PBR*>(prim->material()) : nullptr)
     {
-      _pbrQueue.emplace_back(prim, pbr);
+      auto mode = renderMode();
+      if (auto tm = dynamic_cast<TriangleMeshMapper*>(mapper); tm && tm->useObjectRenderMode)
+        mode = tm->renderMode;
+      _pbrQueue.push_back({prim, pbr, mode});
       continue;
     }
 
@@ -150,11 +154,19 @@ USceneEditor::renderActors()
 
   // second pass: every primitive which was able to have its mat to be converted in PBR 
   _pbr.use();
-  for (auto [prim, pbr] : _pbrQueue)
-    drawPBR(*prim, *pbr);
+  for (auto [prim, pbr, mode] : _pbrQueue)
+  {
+    setPolygonMode(mode == Wireframe ? LINE : FILL);
+    drawPBR(*prim, *pbr, mode);
+  }
+
+  // base program
+  setPolygonMode(renderMode() == Wireframe ? LINE : FILL);
   restoreBaseProgram();
+
+  // draw bounds of primitives that have pbr mat
   if (flags.isSet(DrawBounds))
-    for (auto [prim, pbr] : _pbrQueue)
+    for (auto [prim, pbr, mode] : _pbrQueue)
     {
       setLineColor(boundsColor);
       drawBounds(prim->bounds());
@@ -162,7 +174,7 @@ USceneEditor::renderActors()
 }
 
 void 
-USceneEditor::drawPBR(const Primitive& p, const PBR& material)
+USceneEditor::drawPBR(const Primitive& p, const PBR& material, RenderMode mode)
 {
   auto mesh = p.tesselate();
   if (!mesh) return;
@@ -175,7 +187,7 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material)
   auto cam = camera();
   auto mv = cam->worldToCameraMatrix() * p.localToWorldMatrix();
 
-  // setting basic uniforms
+  // setting mv, mvp and normal matrix uniforms
   GLSL::Program::setUniformMat4(_mvMatrixLoc, mv);
   GLSL::Program::setUniformMat4(_mvpMatrixLoc, cam->projectionMatrix() * mv);
   GLSL::Program::setUniformMat3(_normalMatrixLoc, mat3f{cam->worldToCameraMatrix()} * p.normalMatrix());
@@ -183,7 +195,7 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material)
   // setting material uniforms
   setMaterial(material);
   // TODO: perhaps draw normals and bounds
-  GLSL::Program::setUniform(_hiddenLinesLoc, (int)(renderMode() == ShadedWithEdges));
+  GLSL::Program::setUniform(_hiddenLinesLoc, (int)(mode == ShadedWithEdges));
   GLSL::Program::setUniform(_useTextureLoc, 0);
   GLSL::Program::setUniform(_useVertexColorsLoc, (int)useVertexColors());
   glDrawElements(GL_TRIANGLES, mesh->triangleCount() * 3, GL_UNSIGNED_INT, nullptr);

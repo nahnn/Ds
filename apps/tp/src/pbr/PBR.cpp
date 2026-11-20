@@ -23,26 +23,28 @@ PBR::shade(const vec3& N, // Normal
   const Color& lc) const // light color
 {
   // calculating BRDF
-  Color os{(1 - attrs.m) * attrs_type::minOs * Color::white + attrs.m * attrs.os}; // TODO: change?
-  float k{powf(attrs.r + 1, 2) / 8}; // roughness constant
-  float alpha{powf(attrs.r, 2)}; // roughness constant
+  Color os{attrs.f0()}; // TODO: use only os instead?
+  float k{attrs.k()}; // roughness constant
+  float alpha{attrs.alpha()}; // roughness constant
   auto Hl = (L - V).versor();
+  float nl = math::max<float>(NL, 1e-4);
   float nv = math::max<float>(-NV, 1e-4);
-  Color fresnel = os + (Color::white - os) * powf(1 - L.dot(Hl), 5);
-  float G = NL * math::inverse(NL * (1 - k) + k)  * nv * math::inverse(nv * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
-  float NH = N.dot(Hl);
-  float a2 = powf(alpha, 2);
-  float D = a2 * math::inverse(math::pi<float> * powf(NH * NH * (a2 - 1) + 1, 2));
+  float nh = math::max<float>(N.dot(Hl), 1e-4);
+  float lh = math::max<float>(L.dot(Hl), 1e-4);
+  float a2 = math::max<float>(powf(alpha, 2), 1e-4);
+  Color fresnel = os + (Color::white - os) * powf(1 - lh, 5);
+  float G = nl * math::inverse(nl * (1 - k) + k)  * nv * math::inverse(nv * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
+  float D = a2 * math::inverse(math::pi<float> * powf(nh * nh * (a2 - 1) + 1, 2));
   
-  Color f{BRDF(fresnel * G * D * math::inverse(4 * NL * nv))}; // BRDF
+  Color f{BRDF(fresnel * G * D * math::inverse(4 * nl * nv))}; // BRDF
 
-  return lc * f * NL;
+  return lc * f * nl;
 }
 
 Color
 PBR::specularReflectionColor(float cosPhi) const
 {
-  Color F0{(1 - attrs.m) * attrs_type::minOs * Color::white + attrs.m * attrs.os};
+  Color F0{attrs.f0()};
   float r = attrs.r;
 
   float k1{-r + 1.f};
@@ -60,7 +62,7 @@ PBR::specularReflectionColor(float cosPhi) const
 inline Color
 PBR::BRDF(Color s) const
 {
-  Color od{(1 - attrs.m) * attrs.od}; // TODO: change?
+  Color od{attrs.diffuseColor()};
   Color fd{od * math::inverse<float>(math::pi<float>)}; // Diffuse BRDF
   Color fs{s.x, s.y, s.z, 1.0}; // Specular BRDF
   return fd + fs;
