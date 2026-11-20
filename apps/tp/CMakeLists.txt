@@ -89,7 +89,8 @@ if(TP_TESTS)
     reader/AbstractParser.cpp reader/Buffer.cpp reader/ErrorHandler.cpp
     reader/Expression.cpp reader/FileBuffer.cpp reader/ReaderBase.cpp
     reader/SceneReader.cpp reader/Scope.cpp)
-  foreach(t sweep_test pbr_test writer_test reader_test)
+  set(raytracer_test_SRCS RayTracer.cpp ${reader_test_SRCS})
+  foreach(t sweep_test pbr_test writer_test reader_test raytracer_test)
     add_executable(${t} tests/${t}.cpp ${${t}_SRCS})
     target_include_directories(${t} PRIVATE
       ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include)

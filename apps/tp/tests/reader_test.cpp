@@ -6,34 +6,15 @@
 // Last revision: 20/11/2026
 
 #include "tests/check.h"
-#include "reader/SceneReader.h"
+#include "tests/scene.h"
 #include "graph/CameraProxy.h"
 #include "graph/LightProxy.h"
-#include "graphics/GLGraphics3.h"
-#include <cstring>
-#include <filesystem>
-#include <fstream>
 
 using namespace cg;
+using namespace cg::test;
 
 namespace
 { // begin namespace
-
-// reads a scene from a temporary file; returns the reader (scene and materials)
-Reference<util::SceneReader>
-read(const char* text)
-{
-  auto path = std::filesystem::temp_directory_path() / "tp_reader_test.scn";
-
-  std::ofstream{path} << text;
-
-  Reference<util::SceneReader> reader = new util::SceneReader;
-
-  reader->setInput(path.string().c_str());
-  reader->execute();
-  std::filesystem::remove(path);
-  return reader;
-}
 
 bool
 fails(const char* text)
@@ -48,19 +29,6 @@ fails(const char* text)
     return true;
   }
   return false;
-}
-
-// component of type C of the top level object named name
-template <typename C>
-C*
-find(graph::Scene& scene, const char* name)
-{
-  for (auto&& o : scene.root()->children())
-    if (!std::strcmp(o.name(), name))
-      for (auto&& c : o.components())
-        if (auto p = dynamic_cast<C*>(&*c))
-          return p;
-  return nullptr;
 }
 
 PBR*
@@ -166,9 +134,7 @@ testErrors()
 int
 main()
 {
-  // default meshes, as in MainWindow::beginInitialize
-  Assets::initialize();
-  Assets::meshes()["Sphere"] = GLGraphics3::sphere();
+  initAssets();
   testMaterials();
   testLightsAndCamera();
   testSweeps();
