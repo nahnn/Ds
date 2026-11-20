@@ -3,7 +3,7 @@
 Este projeto estende o `cgdemo` com duas funcionalidades:
 
 1. **Sweep**: malhas geradas varrendo uma polilinha (geratriz) ao longo de uma espiral ou de uma torção.
-2. **PBR**: um material fisicamente baseado (Cook-Torrance) que substitui o Phong, tanto no editor (OpenGL) quanto no ray tracer.
+2. **PBR**: um material fisicamente baseado que substitui o Phong, tanto no editor (OpenGL) quanto no ray tracer.
 
 ---
 
