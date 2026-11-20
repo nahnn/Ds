@@ -1,0 +1,85 @@
+// OVERVIEW: pbr_grid.scn
+// ========
+// Test scene: grid of PBR spheres.
+// Roughness grows from left (0.05) to right (1); metallic grows from
+// bottom (0) to top (1).
+//
+// Editor: highlights go from small and sharp (left) to wide and dim
+// (right); the top row has no diffuse color and a gold tinted specular.
+// Ray tracing: the left spheres of the top rows reflect their neighbors;
+// rough spheres reflect almost nothing.
+
+include "../colors.inc"
+
+material "M0R0" { diffuse Gold specular Gold metallic 0 roughness 0.05 }
+material "M0R1" { diffuse Gold specular Gold metallic 0 roughness 0.25 }
+material "M0R2" { diffuse Gold specular Gold metallic 0 roughness 0.5 }
+material "M0R3" { diffuse Gold specular Gold metallic 0 roughness 0.75 }
+material "M0R4" { diffuse Gold specular Gold metallic 0 roughness 1 }
+material "M1R0" { diffuse Gold specular Gold metallic 0.25 roughness 0.05 }
+material "M1R1" { diffuse Gold specular Gold metallic 0.25 roughness 0.25 }
+material "M1R2" { diffuse Gold specular Gold metallic 0.25 roughness 0.5 }
+material "M1R3" { diffuse Gold specular Gold metallic 0.25 roughness 0.75 }
+material "M1R4" { diffuse Gold specular Gold metallic 0.25 roughness 1 }
+material "M2R0" { diffuse Gold specular Gold metallic 0.5 roughness 0.05 }
+material "M2R1" { diffuse Gold specular Gold metallic 0.5 roughness 0.25 }
+material "M2R2" { diffuse Gold specular Gold metallic 0.5 roughness 0.5 }
+material "M2R3" { diffuse Gold specular Gold metallic 0.5 roughness 0.75 }
+material "M2R4" { diffuse Gold specular Gold metallic 0.5 roughness 1 }
+material "M3R0" { diffuse Gold specular Gold metallic 0.75 roughness 0.05 }
+material "M3R1" { diffuse Gold specular Gold metallic 0.75 roughness 0.25 }
+material "M3R2" { diffuse Gold specular Gold metallic 0.75 roughness 0.5 }
+material "M3R3" { diffuse Gold specular Gold metallic 0.75 roughness 0.75 }
+material "M3R4" { diffuse Gold specular Gold metallic 0.75 roughness 1 }
+material "M4R0" { diffuse Gold specular Gold metallic 1 roughness 0.05 }
+material "M4R1" { diffuse Gold specular Gold metallic 1 roughness 0.25 }
+material "M4R2" { diffuse Gold specular Gold metallic 1 roughness 0.5 }
+material "M4R3" { diffuse Gold specular Gold metallic 1 roughness 0.75 }
+material "M4R4" { diffuse Gold specular Gold metallic 1 roughness 1 }
+
+scene
+{
+  environment
+  {
+    background DarkGray
+    ambient Gray
+  }
+
+  object "Camera"
+  {
+    transform { position <0, 0, 20> }
+    camera { perspective angle 45 }
+  }
+
+  object "Light"
+  {
+    transform { position <5, 10, 15> }
+    light { point color White }
+  }
+
+  object "M0R0" { transform { position <-5, -5, 0> } mesh "Sphere" material "M0R0" }
+  object "M0R1" { transform { position <-2.5, -5, 0> } mesh "Sphere" material "M0R1" }
+  object "M0R2" { transform { position <0, -5, 0> } mesh "Sphere" material "M0R2" }
+  object "M0R3" { transform { position <2.5, -5, 0> } mesh "Sphere" material "M0R3" }
+  object "M0R4" { transform { position <5, -5, 0> } mesh "Sphere" material "M0R4" }
+  object "M1R0" { transform { position <-5, -2.5, 0> } mesh "Sphere" material "M1R0" }
+  object "M1R1" { transform { position <-2.5, -2.5, 0> } mesh "Sphere" material "M1R1" }
+  object "M1R2" { transform { position <0, -2.5, 0> } mesh "Sphere" material "M1R2" }
+  object "M1R3" { transform { position <2.5, -2.5, 0> } mesh "Sphere" material "M1R3" }
+  object "M1R4" { transform { position <5, -2.5, 0> } mesh "Sphere" material "M1R4" }
+  object "M2R0" { transform { position <-5, 0, 0> } mesh "Sphere" material "M2R0" }
+  object "M2R1" { transform { position <-2.5, 0, 0> } mesh "Sphere" material "M2R1" }
+  object "M2R2" { transform { position <0, 0, 0> } mesh "Sphere" material "M2R2" }
+  object "M2R3" { transform { position <2.5, 0, 0> } mesh "Sphere" material "M2R3" }
+  object "M2R4" { transform { position <5, 0, 0> } mesh "Sphere" material "M2R4" }
+  object "M3R0" { transform { position <-5, 2.5, 0> } mesh "Sphere" material "M3R0" }
+  object "M3R1" { transform { position <-2.5, 2.5, 0> } mesh "Sphere" material "M3R1" }
+  object "M3R2" { transform { position <0, 2.5, 0> } mesh "Sphere" material "M3R2" }
+  object "M3R3" { transform { position <2.5, 2.5, 0> } mesh "Sphere" material "M3R3" }
+  object "M3R4" { transform { position <5, 2.5, 0> } mesh "Sphere" material "M3R4" }
+  object "M4R0" { transform { position <-5, 5, 0> } mesh "Sphere" material "M4R0" }
+  object "M4R1" { transform { position <-2.5, 5, 0> } mesh "Sphere" material "M4R1" }
+  object "M4R2" { transform { position <0, 5, 0> } mesh "Sphere" material "M4R2" }
+  object "M4R3" { transform { position <2.5, 5, 0> } mesh "Sphere" material "M4R3" }
+  object "M4R4" { transform { position <5, 5, 0> } mesh "Sphere" material "M4R4" }
+}
