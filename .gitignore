@@ -3,13 +3,17 @@
 x64/
 
 assets/
+cgdemo
+
 build/
 lib/
 
+*.vcxproj.user
+*.bin
+*.ini
 *.ilk
 *.pdb
 *.idb
-*.vcxproj.user
 *.exe
 *.iobj
 *.ipdb
