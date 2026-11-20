@@ -17,9 +17,6 @@
 namespace cg
 { // begin namespace cg
 
-using size_t = unsigned;
-
-
 /// @brief PolylineLimits: Represents the limits of transformations of a polyline
 template<IsReal R>
 struct PolylineLimits
@@ -179,6 +176,7 @@ public:
 
   //return attributes
   virtual const PolylineAttrs<R>& attributes() const = 0;
+  virtual const PolylineAttrs<R>& attributes() = 0;
 
   //Generates the polyline using the especif implemented method
   virtual Polyline<R> generate() const = 0;

@@ -6,8 +6,8 @@
 // Last revision: 30/10/2026
 
 
-#ifndef __MeshWriter_h
-#define __MeshWriter_h
+#ifndef __SweepMeshWriter_h
+#define __SweepMeshWriter_h
 
 #include "geometry/TriangleMesh.h"
 #include <string>
@@ -26,4 +26,4 @@ public:
 
 } // end namespace cg
 
-#endif // __MeshWriter_h
+#endif // __SweepMeshWriter_h
