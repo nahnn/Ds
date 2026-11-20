@@ -1,0 +1,11 @@
+// OVERVIEW: invalid_material.scn
+// ========
+// Test scene: reference to an undeclared material.
+//
+// Expected: the reader stops with "Could not find material 'None'" and the
+// current scene is kept.
+
+scene
+{
+  object "Sphere" { mesh "Sphere" material "None" }
+}

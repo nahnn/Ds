@@ -1,0 +1,11 @@
+// OVERVIEW: invalid_mesh.scn
+// ========
+// Test scene: reference to a mesh that is not in the assets.
+//
+// Expected: the reader stops with "Could not find mesh 'None'" and the
+// current scene is kept.
+
+scene
+{
+  object "Mesh" { mesh "None" }
+}

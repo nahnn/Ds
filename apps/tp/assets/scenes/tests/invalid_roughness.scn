@@ -1,0 +1,13 @@
+// OVERVIEW: invalid_roughness.scn
+// ========
+// Test scene: roughness out of [0.05, 1].
+//
+// Expected: the reader stops with "Invalid value for 'roughness'" and the
+// current scene is kept.
+
+material "Rough" { diffuse rgb(1, 0, 0) metallic 0 roughness 0.01 }
+
+scene
+{
+  object "Sphere" { mesh "Sphere" material "Rough" }
+}
