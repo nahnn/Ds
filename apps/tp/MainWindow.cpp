@@ -52,8 +52,16 @@ newPBR()
   auto& map = Assets::materials();
   auto mat = new PBR{Color{1.f, .71f, .29f}, Color{1.f, .71f, .29f}, 1.0f, 0.3f}; // gold
 
-  mat->setName("PBR %d", int(map.size()));
-  map.emplace(mat->name(), mat);
+  //name colision
+  int id = int(map.size());
+  std::string name;
+
+  do
+    name = "PBR " + std::to_string(id++);
+  while (map.contains(name));
+  
+  mat->setName("%s", name.c_str());
+  map.emplace(name, mat);
   return mat;
 }
 

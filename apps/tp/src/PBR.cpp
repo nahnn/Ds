@@ -263,4 +263,30 @@ PBR::fragmentShader()
 )glsl";
 }
 
+
+namespace
+{
+  inline float maxRGB(const Color& c) { return math::max(math::max(c.r, c.g), c.b); }
+  inline bool isBlack(const Color& c) { return c == Color::black; }
+}
+
+//converts legacy Phong to PBR
+PBR*
+PBR::toPBR(const Material& m)
+{
+  Color od = isBlack(m.diffuse) ? m.ambient : m.diffuse;
+  float metallic = math::min(1.f, maxRGB(m.specular));
+  Color os = isBlack(m.specular) ? m.spot : m.specular;
+  float roughness = powf(2.f / (m.shine + 2.f), .25f);
+
+  roughness = math::max(.05f, math::min(1.f, roughness));
+
+  auto pbr = new PBR{od, os, metallic, roughness};
+
+  pbr->setName("%s", m.name());
+  return pbr;
+}
+
+
+
 } // end namespace cg

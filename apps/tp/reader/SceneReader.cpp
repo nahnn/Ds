@@ -81,6 +81,7 @@ DEFINE_KEYWORD_TABLE(SceneReader::Parser, parser::Reader::Parser)
   KEYWORD("light", _COMPONENT, _LIGHT)
   KEYWORD("material", _MATERIAL, 0)
   KEYWORD("mesh", _COMPONENT, _MESH)
+  KEYWORD("metallic", _METALLIC, 0)
   KEYWORD("object", _OBJECT, 0)
   KEYWORD("parallel", _PARALLEL, 0)
   KEYWORD("perspective", _PERSPECTIVE, 0)
@@ -88,6 +89,7 @@ DEFINE_KEYWORD_TABLE(SceneReader::Parser, parser::Reader::Parser)
   KEYWORD("position", _POSITION, 0)
   KEYWORD("range", _RANGE, 0)
   KEYWORD("rotation", _ROTATION, 0)
+  KEYWORD("roughness", _ROUGHNESS, 0)
   KEYWORD("scale", _SCALE, 0)
   KEYWORD("scene", _SCENE, 0)
   KEYWORD("shine", _SHINE, 0)
@@ -169,11 +171,12 @@ SceneReader::Parser::declaration()
 }
 
 inline void
-SceneReader::Parser::parseMaterialProperties(Material& material)
+SceneReader::Parser::parseMaterialProperties(Material& material, PBRSpec& pbr_spec)
 {
   for (;;)
     switch (_token)
     {
+      //legacy Phong
       case _AMBIENT:
         advance();
         material.ambient = matchColor();
@@ -208,6 +211,23 @@ SceneReader::Parser::parseMaterialProperties(Material& material)
         else
           material.ior = ior;
         break;
+
+      //PBR
+      case _METALLIC:
+        advance();
+        if (auto v = matchFloat(); v < 0 || v > 1)
+          error(INVALID_VALUE_FOR, "metallic");
+        else
+          pbr_spec.metallic = v, pbr_spec.explicitPBR = true;
+        break;
+      case _ROUGHNESS:
+        advance();
+        if (auto v = matchFloat(); v < .05f || v > 1)
+          error(INVALID_VALUE_FOR, "roughness");
+        else
+          pbr_spec.roughness = v, pbr_spec.explicitPBR = true;
+      break;
+      
       default:
         return;
     }
@@ -225,10 +245,27 @@ SceneReader::Parser::parseMaterial()
     error(MATERIAL_ALREADY_DEFINED, name.c_str());
   match('{');
 
-  Reference<Material> material = new Material{Color::black};
+  Reference<Material> material;
+  Reference<Material> legacy_mat = new Material{Color::black};
+  PBRSpec pbr_spec;
 
-  parseMaterialProperties(*material);
+  parseMaterialProperties(*legacy_mat, pbr_spec);
   matchEndOfBlock();
+
+  if(pbr_spec.explicitPBR)
+    material = new PBR{
+      legacy_mat->diffuse,
+      legacy_mat->specular,
+      pbr_spec.metallic,
+      pbr_spec.roughness
+    };
+  else{
+    material = PBR::toPBR(*legacy_mat);
+    //TODO: talvez tirar Warning
+    printf("Warning: material '%s' uses legacy Phong properties; converted to PBR\n",
+      name.c_str());
+  }
+      
   material->setName(name.c_str());
   _reader->materials.emplace(name, material);
 }
@@ -507,8 +544,23 @@ SceneReader::Parser::parsePrimitiveMaterial(Primitive& primitive)
 
     if (auto material = _reader->findMaterial(name); material == nullptr)
       error(COULD_NOT_FIND_MATERIAL, name.c_str());
-    else
-      primitive.setMaterial(material);
+    else{
+      
+      const parser::String name{"Default PBR"};
+      auto m = _reader->findMaterial(name);
+
+      if (!m)
+      {
+        //Default PBR
+        auto pbr = new PBR{Color{.8f, .8f, .8f}, Color::white};
+
+        pbr->setName("%s", name.c_str());
+        _reader->materials.emplace(name, pbr);
+        m = pbr;
+      }
+      primitive.setMaterial(m);
+
+    }
   }
 }
 

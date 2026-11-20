@@ -13,6 +13,7 @@
 namespace cg
 { // begin namespace cg 
 
+
 struct PBRAttributes : public UMaterialAttributes
 {
 public:
@@ -85,6 +86,9 @@ public:
   {
     return !operator==(other);
   }
+
+  //converts legacy Phong to PBR
+  static PBR* toPBR(const Material&);
 
   Color shade(const vec3&, const vec3&, const vec3&, const float, const float, const Color&) const override;
   const char* shaderCode() const override;

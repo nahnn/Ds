@@ -35,6 +35,8 @@
 #include "graph/PrimitiveProxy.h"
 #include "graphics/Assets.h"
 #include "SceneWriter.h"
+#include "PBR.h"
+#include "SweepMeshProxy.h"
 
 namespace cg::util
 { // begin namespace cg::util
@@ -142,6 +144,18 @@ writePrimitive(SceneWriter& w, const TriangleMeshProxy& proxy)
     proxy.mapper()->primitive()->material()->name());
 }
 
+//support for sweep meshes (cannot derive from TriangleMeshProxy)
+template<IsReal R>
+void
+writePrimitiveSweeper(SceneWriter& w, const SweepMeshProxy<R>& sweep_proxy)
+{
+  w.writeLine("mesh \"%s\" material \"%s\"",
+    sweep_proxy.meshName(),
+    sweep_proxy.mapper()->primitive()->material()->name());
+
+  
+}
+
 } // end namespace
 
 inline void
@@ -181,14 +195,18 @@ SceneWriter::writeSceneObject(const SceneObject* object)
 inline void
 SceneWriter::writeMaterial(const Material& m)
 {
+  auto pbr = dynamic_cast<const PBR*>(&m);
+  Reference<PBR> converted;
+
+  //Conversion to PBR
+  if (!pbr)
+    pbr = (converted = PBR::toPBR(m)).get();
+
   beginBlock("material", m.name());
-  writeColor("ambient", m.ambient);
-  writeColor("diffuse", m.diffuse);
-  writeColor("spot", m.spot);
-  writeFloat("shine", m.shine);
-  writeColor("specular", m.specular);
-  writeColor("transparency", m.transparency);
-  writeFloat("ior", m.ior);
+  writeColor("diffuse", pbr->attrs.od);
+  writeColor("specular", pbr->attrs.os);
+  writeFloat("metallic", pbr->attrs.m);
+  writeFloat("roughness", pbr->attrs.r);
   endBlock();
 }
 
@@ -217,6 +235,10 @@ SceneWriter::WriteFunctionMap::WriteFunctionMap()
   SceneWriter::registerWriteFunction(writeCamera);
   SceneWriter::registerWriteFunction(writeLight);
   SceneWriter::registerWriteFunction(writePrimitive);
+
+  //support for Sweep
+  //TODO: support more types
+  SceneWriter::registerWriteFunction(writePrimitiveSweeper<float>);
 }
 
 } // end namespace cg::util

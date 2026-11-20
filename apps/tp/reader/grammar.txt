@@ -32,6 +32,8 @@ MaterialItem:
 | SPECULAR Color
 | IOR Float
 | TRANSPARENCY Color
+| METALLIC Float
+| ROUGHNESS Float
 
 Color:
   Expression
