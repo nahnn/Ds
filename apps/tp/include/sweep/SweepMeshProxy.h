@@ -110,9 +110,11 @@ public:
     return nullptr;
   }
 
+  // keeps the previous name if the new one is empty or has quotes
   void setMeshName(const std::string& name)
   {
-    _meshName = name;
+    if (!name.empty() && name.find('"') == std::string::npos)
+      _meshName = name;
   }
 
   bool saveOBJ() const
