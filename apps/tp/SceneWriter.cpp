@@ -37,6 +37,7 @@
 #include "SceneWriter.h"
 #include "include/pbr/PBR.h"
 #include "include/sweep/SweepMeshProxy.h"
+#include <map>
 
 namespace cg::util
 { // begin namespace cg::util
@@ -145,15 +146,105 @@ writePrimitive(SceneWriter& w, const TriangleMeshProxy& proxy)
 }
 
 //support for sweep meshes (cannot derive from TriangleMeshProxy)
-template<IsReal R>
-void
-writePrimitiveSweeper(SceneWriter& w, const SweepMeshProxy<R>& sweep_proxy)
-{
-  w.writeLine("mesh \"%s\" material \"%s\"",
-    sweep_proxy.meshName(),
-    sweep_proxy.mapper()->primitive()->material()->name());
+//the mesh is not written: only the attributes that regenerate it
+using GenType = PolylineGeneratorProxy<float>::GenType;
+using PolylineWriteFunction = void (*)(SceneWriter&, const PolylineAttrs<float>&);
 
-  
+void
+writePolylineBase(SceneWriter& w, const PolylineAttrs<float>& a)
+{
+  w.writeFloat("scale", a.sp);
+  w.writeFloat("rotation", a.tp);
+  if (a.isExtruded)
+    w.writeFloat("extrusion", a.ep);
+}
+
+void
+writeRegularPolygon(SceneWriter& w, const PolylineAttrs<float>& attrs)
+{
+  auto& a = static_cast<const RegularPolygonAttrs<float>&>(attrs);
+
+  w.writeLine("regularPolygon");
+  w.writeLine("points %d", a.np);
+  writePolylineBase(w, a);
+}
+
+void
+writeCircularArc(SceneWriter& w, const PolylineAttrs<float>& attrs)
+{
+  auto& a = static_cast<const CircularArcAttrs<float>&>(attrs);
+
+  w.writeLine("circularArc");
+  w.writeFloat("angle", a.tc);
+  w.writeLine("segments %d", a.nc);
+  if (a.isOpen)
+    w.writeLine("open");
+  writePolylineBase(w, a);
+}
+
+// generator type (enum) -> function that writes its attributes
+const std::map<GenType, PolylineWriteFunction>&
+polylineWriters()
+{
+  static const std::map<GenType, PolylineWriteFunction> writers
+  {
+    {GenType::RegularPolygon, writeRegularPolygon},
+    {GenType::CircularArc, writeCircularArc}
+  };
+
+  return writers;
+}
+
+// common header: <keyword> "name" material "m" { polyline { ... }
+template <typename P>
+void
+beginSweep(SceneWriter& w, const char* keyword, const P& proxy)
+{
+  w.writeLine("%s \"%s\" material \"%s\"",
+    keyword,
+    proxy.meshName(),
+    proxy.mapper()->primitive()->material()->name());
+  w.beginBlock();
+
+  auto& gen = proxy.polyGen();
+
+  w.beginBlock("polyline");
+  polylineWriters().at(gen.activeGenType())(w, gen.activeGen().attributes());
+  w.endBlock();
+}
+
+void
+writeSpiral(SceneWriter& w, const SpiralProxy<float>& proxy)
+{
+  beginSweep(w, "spiral", proxy);
+
+  auto& a = proxy.attr;
+
+  if (a.capped)
+    w.writeLine("capped");
+  w.writeFloat("width", a.we);
+  w.writeFloat("revolutions", a.re);
+  w.writeLine("subdivisions %d", a.nes);
+  w.writeFloat("heightIncrement", a.dh);
+  w.writeFloat("widthIncrement", a.dw);
+  w.endBlock();
+}
+
+void
+writeTorsion(SceneWriter& w, const TorsionProxy<float>& proxy)
+{
+  beginSweep(w, "torsion", proxy);
+
+  auto& a = proxy.attr;
+
+  if (a.capped)
+    w.writeLine("capped");
+  w.writeFloat("length", a.lv);
+  w.writeVec2("offset", vec2f{a.ow, a.oh});
+  w.writeLine("subdivisions %d", a.nsv);
+  w.writeVec2("scale", vec2f{a.sb, a.se});
+  w.writeFloat("rotation", a.rv);
+  w.endBlock();
 }
 
 } // end namespace
@@ -236,9 +327,9 @@ SceneWriter::WriteFunctionMap::WriteFunctionMap()
   SceneWriter::registerWriteFunction(writeLight);
   SceneWriter::registerWriteFunction(writePrimitive);
 
-  //support for Sweep
-  //TODO: support more types
-  SceneWriter::registerWriteFunction(writePrimitiveSweeper<float>);
+  //support for sweeps (the map uses the exact typeid: one function per concrete proxy)
+  SceneWriter::registerWriteFunction(writeSpiral);
+  SceneWriter::registerWriteFunction(writeTorsion);
 }
 
 } // end namespace cg::util

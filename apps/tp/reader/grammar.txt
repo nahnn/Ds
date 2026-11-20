@@ -119,9 +119,51 @@ Integer:
 
 Primitive:
   Mesh (MATERIAL STRING)?
+| Sweep
 
 Mesh:
 | MESH STRING
+
+Sweep:
+  SweepType STRING (MATERIAL STRING)?
+  "{"
+      Polyline
+      SweepItem*         // SpiralItem* or TorsionItem*, by SweepType
+  "}"
+
+SweepType:
+  SWEEP_SPIRAL
+| SWEEP_TORSION
+
+Polyline:
+  SWEEP_POLYLINE "{" (RegularPolygon | CircularArc) "}"
+
+RegularPolygon:
+  POLY_REGULAR_POLYGON (POLY_POINTS Integer | PolylineItem)*
+
+CircularArc:
+  POLY_CIRCULAR_ARC (ANGLE Float | ARC_SEGMENTS Integer | ARC_OPEN | PolylineItem)*
+
+PolylineItem:
+  SCALE Float
+| ROTATION Float
+| POLY_EXTRUSION Float
+
+SpiralItem:
+  SWEEP_CAPPED
+| SPIRAL_WIDTH Float
+| SPIRAL_REVOLUTIONS Float
+| SWEEP_SUBDIVISIONS Integer
+| SPIRAL_HEIGHT_INCREMENT Float
+| SPIRAL_WIDTH_INCREMENT Float
+
+TorsionItem:
+  SWEEP_CAPPED
+| LENGTH Float
+| TORSION_OFFSET Vec2
+| SWEEP_SUBDIVISIONS Integer
+| SCALE Vec2
+| ROTATION Float
 
 Expression:
   Term ("+" Term | "-" Term)*
