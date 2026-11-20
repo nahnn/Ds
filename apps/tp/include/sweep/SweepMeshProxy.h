@@ -104,12 +104,6 @@ public:
     _meshName = meshName;
   }
 
-  Component* duplicate(const SceneObject*) const override
-  {
-    // TODO
-    return nullptr;
-  }
-
   // keeps the previous name if the new one is empty or has quotes
   void setMeshName(const std::string& name)
   {
@@ -143,6 +137,15 @@ protected:
   void setMesh(const TriangleMesh& mesh)
   {
     mapper()->setMesh(mesh);
+  }
+
+  // copies the common state into a duplicate (as in TriangleMeshProxy)
+  Component* duplicateInto(SweepMeshProxy* np) const
+  {
+    np->_polyGenProxy = _polyGenProxy;
+    np->_dirtySweep = _dirtySweep;
+    np->mapper()->primitive()->setMaterial(mapper()->primitive()->material());
+    return np;
   }
 
   PolylineGeneratorProxy<R> _polyGenProxy;
@@ -183,6 +186,15 @@ protected:
   {
     _sweeper.set(attr);
     this->setMesh(*_sweeper.sweep(this->_polyGenProxy.polyline()));
+  }
+
+  Component* duplicate(const SceneObject*) const override
+  {
+    auto np = new SpiralProxy{*this->mapper()->mesh(), this->_meshName};
+
+    np->attr = attr;
+    np->_sweeper = _sweeper;
+    return this->duplicateInto(np);
   }
 
 private:
@@ -227,6 +239,15 @@ protected:
   {
     _sweeper.set(attr);
     this->setMesh(*_sweeper.sweep(this->_polyGenProxy.polyline()));
+  }
+
+  Component* duplicate(const SceneObject*) const override
+  {
+    auto np = new TorsionProxy{*this->mapper()->mesh(), this->_meshName};
+
+    np->attr = attr;
+    np->_sweeper = _sweeper;
+    return this->duplicateInto(np);
   }
 
 private:

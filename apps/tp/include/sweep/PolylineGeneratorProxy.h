@@ -43,7 +43,18 @@ public:
         add(GenType::RegularPolygon, "RegularPolygon", std::make_unique<RegularPolygon<R>>());
         add(GenType::CircularArc, "CircularArc", std::make_unique<CircularArc<R>>());
 
-        build();                                 
+        build();
+    }
+
+    // copies the state of every generator (used to duplicate sweep proxies)
+    PolylineGeneratorProxy& operator =(const PolylineGeneratorProxy& other)
+    {
+        for (auto& [type, entry] : _entries)
+            entry.generator->set(other._entries.at(type).generator->attributes());
+        _activeGenType = other._activeGenType;
+        _polyline = other._polyline;
+        _dirtyPoly = other._dirtyPoly;
+        return *this;
     }
 
     GenType activeGenType() const { 
