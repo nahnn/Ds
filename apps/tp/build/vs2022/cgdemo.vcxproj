@@ -23,6 +23,9 @@
     <ClCompile Include="..\..\reader\SceneReader.cpp" />
     <ClCompile Include="..\..\reader\Scope.cpp" />
     <ClCompile Include="..\..\SceneWriter.cpp" />
+    <ClCompile Include="..\..\src\pbr\PBR.cpp" />
+    <ClCompile Include="..\..\src\pbr\USceneEditor.cpp" />
+    <ClCompile Include="..\..\src\sweep\SweepMeshWriter.cpp" />
     <ClCompile Include="..\..\Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -87,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>.;../../../../cg/externals/include;../../../../cg/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../..;../../../../cg/externals/include;../../../../cg/include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -108,7 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>.;../../../../cg/externals/include;../../../../cg/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../..;../../../../cg/externals/include;../../../../cg/include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
