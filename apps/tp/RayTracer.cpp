@@ -376,7 +376,6 @@ RayTracer::shade(const Ray3f& ray,
     N.negate(), NV = -NV;
 
   auto R = V - (2 * NV) * N; // reflection vector
-  // Start with ambient lighting
   auto m = dynamic_cast<UMaterial*>(primitive->material());
 
   if (!m)
