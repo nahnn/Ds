@@ -1,6 +1,6 @@
 // OVERVIEW: SweepMeshWriter.cpp
 // ========
-// implementation for SweepMeshProxy.
+// Implementation for SweepMeshWriter.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
 // Last revision: 20/11/2026

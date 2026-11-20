@@ -17,6 +17,8 @@ tp/
 ├── src/pbr/         # PBR (BRDF + shader GLSL), USceneEditor
 ├── reader/          # SceneReader/grammar estendidos (sweep + PBR)
 ├── SceneWriter.cpp  # escrita de sweep + PBR
+├── Writer.*         # writer genérico (base do SceneWriter)
+├── Main.cpp         # ponto de entrada
 ├── RayTracer.*      # shading delegado ao material
 ├── MainWindow.*     # menus e inspetores novos
 └── assets/scenes/   # cenas de teste (test_*.scn)
@@ -38,7 +40,7 @@ PolylineGenerator ──generate()──▶ Polyline ──sweep()──▶ Tria
 
 ### 2.1 Polilinhas (geratriz)
 
-`include/sweep/Polyline.h`, `RegularPolygon.h`, `CircularArc.h`
+`include/sweep/Polyline.h`, `RegularPolygon.h`, `CircularArc.h`, `PolylineGeneratorProxy.h`
 
 - `Polyline<R>` guarda até 82 pontos, os limites (bounds), se é fechada e se é extrudada.
 - `PolylineGenerator<R>` é a base abstrata. `generate()` produz a polilinha e `transform()` aplica os atributos comuns (escala, rotação, extrusão).
@@ -89,7 +91,7 @@ classDiagram
 
 `include/sweep/PolylineSweeper.h`, `SpiralSweeper.h`, `TorsionSweeper.h`
 
-- `PolylineSweeper<R>` é a base abstrata. `sweep(polyline)` devolve uma `TriangleMesh`. A malha só recebe tampas (`capped`) quando a polilinha é fechada e não está extrudada.
+- `PolylineSweeper<R>` é a base abstrata. `sweep(polyline)` devolve uma `TriangleMesh`. A malha só recebe tampas quando o atributo `capped` está ligado (checkbox *Capped* na UI, palavra-chave `capped` no `.scn`), a polilinha é fechada e não está extrudada.
 - `SpiralSweeper` usa largura inicial `we`, revoluções `re`, subdivisões por volta `nes` e incrementos de altura `dh` e de largura `dw` por volta.
 - `TorsionSweeper` usa comprimento `lv`, offset `(ow, oh)`, subdivisões `nsv`, escalas inicial e final `(sb, se)` e torção `rv`.
 - Também seguem o padrão Attrs/Limits, com clamp dentro de `set()`.
@@ -150,8 +152,8 @@ classDiagram
 
 `include/sweep/SweepMeshWriter.h`, `src/sweep/SweepMeshWriter.cpp`
 
-- `SweepMeshWriter::writeOBJ` grava a malha em `assets/meshes/<nome>.obj`.
-- `isValidName` aceita só letras, dígitos, `_` e `-`. A UI mostra um popup de sucesso ou de erro.
+- `SweepMeshWriter::writeOBJ` grava a malha em `meshes/<nome>.obj`, dentro do diretório de assets da aplicação (`Application::assetFilePath`).
+- `isValidName` aceita só letras, dígitos, `_` e `-`, com no máximo 63 caracteres. A UI mostra um popup de sucesso ou de erro.
 
 ### 2.6 Material PBR
 
@@ -241,7 +243,7 @@ classDiagram
 ```
 spiral|torsion "nome" (material "m")? {
   polyline { regularPolygon ... | circularArc ... }
-  <itens do spiral ou do torsion>
+  <itens do spiral ou do torsion, incluindo `capped`>
 }
 ```
 
@@ -267,7 +269,7 @@ spiral|torsion "nome" (material "m")? {
 ## 3. Decisões de projeto
 
 | Decisão | Motivo |
-|---|---|
+| --- | --- |
 | Templates `<IsReal R>` no sweep | Mantém o padrão numérico da biblioteca `cg` |
 | Pares Attrs/Limits | Os mesmos limites servem ao clamp, aos sliders e ao parser |
 | Mapas `GenType → função` (UI e writer) | Um novo gerador de polilinha não exige mudar `if`/`switch` |

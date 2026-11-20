@@ -28,7 +28,8 @@
 // Source file for scene reader.
 //
 // Author: Paulo Pagliosa
-// Last revision: 01/11/2025
+// Updated By: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
+// Last revision: 20/11/2026
 
 #include "SceneReader.h"
 
@@ -249,7 +250,7 @@ SceneReader::Parser::parseMaterialProperties(Material& material, PBRSpec& pbr_sp
         else
           pbr_spec.roughness = v, pbr_spec.explicitPBR = true;
       break;
-      
+
       default:
         return;
     }
@@ -287,7 +288,7 @@ SceneReader::Parser::parseMaterial()
     printf("Warning: material '%s' uses legacy Phong properties; converted to PBR\n",
       name.c_str());
   }
-      
+
   material->setName(name.c_str());
   _reader->materials.emplace(name, material);
 }

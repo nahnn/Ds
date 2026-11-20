@@ -1,6 +1,6 @@
-// OVERVIEW: SweepMeshProxy.h
+// OVERVIEW: PolylineGeneratorProxy.h
 // ========
-// Class definition for SweepMeshProxy.
+// Class definition for PolylineGeneratorProxy.
 //
 // Authors: Augusto Dalal, João Pedro Sant' Ana de Carvalho, Nathan de Almeida Rezende
 // Last revision: 20/11/2026
