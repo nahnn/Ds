@@ -11,13 +11,15 @@
 // hexagon. The back row shows more turns, a taller spiral, a cone shaped
 // spiral and a coarse spiral.
 // Ray tracing: same meshes.
+// Save: File > Save writes test_roundtrip.scn (the scene name), which
+// must show the same objects when opened.
 
 include "colors.inc"
 
 material "Orange" { diffuse Orange specular White metallic 0 roughness 0.3 }
 material "Copper" { diffuse Copper specular Copper metallic 1 roughness 0.3 }
 
-scene
+scene "test_roundtrip"
 {
   environment
   {
