@@ -49,7 +49,6 @@ struct SpiralSweeperAttrs: public PolylineSweeperAttrs<R>
   R dw{2}; // width increment per revolution
 }; // SpiralSweeperAttrs
 
-//TODO: Resolver "WINDING"
 template<IsReal R>
 class SpiralSweeper: public PolylineSweeper<R>
 {
@@ -111,14 +110,22 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   const auto& points = poly.points();
 
   const R bx = poly.width();
+  const R by = poly.height();
   const R we = math::max<R>(_attr.we, 2*bx);
   const auto de = (we - bx) / 2;
-  const auto te = static_cast<R>(_attr.re * 360);
-  const size_t nre = math::max<size_t>(floor(_attr.re + R(.5)), 1) * static_cast<size_t>(_attr.nes);
+
+  //auto intersection verifications
+  const R re = (_attr.dh == 0 && _attr.dw == 0) ? math::min<R>(_attr.re, 0.99f) : _attr.re;
+  const R dh = (re > 1 && _attr.dh > 0) ? math::max<R>(_attr.dh, by) : _attr.dh;
+  const R dw = (re > 1 && _attr.dw > 0) ? math::max<R>(_attr.dw, bx) : _attr.dw;
+
+  const auto te = static_cast<R>(re * 360);
+  const size_t nre = math::max<size_t>(floor(re + R(.5)), 1) * static_cast<size_t>(_attr.nes);
+
   const size_t steps = nre + 1;
-  const auto deltaHeight = _attr.re * _attr.dh;
-  const auto deltaWidth = _attr.re * _attr.dw;
-  const R dw = deltaWidth / nre, dh = deltaHeight / nre;
+  const auto deltaHeight = re * dh;
+  const auto deltaWidth = re * dw;
+  const R step_dw = deltaWidth / nre, step_dh = deltaHeight / nre;
   const auto deltaAngle = te / nre;
 
   // initializing triangle mesh data
@@ -136,8 +143,8 @@ TriangleMesh* SpiralSweeper<R>::sweep(const Polyline<R>& poly) const
   for(size_t k = 0; k < steps; ++k)
   {
     auto roty = mat3{quat::eulerAngles(vec3{0, k * deltaAngle, 0})};
-    vec3 w{de + k * dw, 0, 0};
-    vec3 h{0, k * dh, 0};
+    vec3 w{de + k * step_dw, 0, 0};
+    vec3 h{0, k * step_dh, 0};
     for(size_t j = 0; j < L; ++j)
       data.vertices[k*L + j] = roty * (points[j] + w) + h;
   }
