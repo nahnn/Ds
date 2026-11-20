@@ -42,13 +42,13 @@ scene
 
   object "Spot"
   {
-    transform { position <5, 6, 0> rotation <-90, 0, 0> }
+    transform { position <5, 6, 0> rotation <90, 0, 0> }
     light { spot color Green angle 30 falloff 0 }
   }
 
   object "Directional"
   {
-    transform { rotation <-50, 30, 0> }
+    transform { rotation <50, 30, 0> }
     light { directional color White * 0.3 }
   }
 

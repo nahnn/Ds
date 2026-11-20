@@ -57,6 +57,12 @@ scene
     light { point color White }
   }
 
+  object "Directional Light"
+  {
+    transform { rotation <50, 30, 0> }
+    light { directional }
+  }
+
   object "M0R0" { transform { position <-5, -5, 0> } mesh "Sphere" material "M0R0" }
   object "M0R1" { transform { position <-2.5, -5, 0> } mesh "Sphere" material "M0R1" }
   object "M0R2" { transform { position <0, -5, 0> } mesh "Sphere" material "M0R2" }

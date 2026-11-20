@@ -33,9 +33,9 @@ scene
     camera { perspective angle 50 }
   }
 
-  object "Light"
+  object "Directional Light"
   {
-    transform { rotation <-50, 30, 0> }
+    transform { rotation <50, 30, 0> }
     light { directional }
   }
 

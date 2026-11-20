@@ -33,9 +33,9 @@ scene
     camera { parallel height 12 depth vec2(1, 100) }
   }
 
-  object "Light"
+  object "Directional Light"
   {
-    transform { rotation <-50, 30, 0> }
+    transform { rotation <50, 30, 0> }
     light { directional }
   }
 

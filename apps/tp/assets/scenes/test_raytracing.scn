@@ -2,7 +2,8 @@
 // ========
 // Test scene: ray tracing features.
 // Two mirrors face each other with a red sphere between them, over a
-// smooth dark floor; a point light casts shadows on the floor.
+// smooth dark floor; a point light and the default directional light
+// cast shadows on the floor.
 //
 // Editor: no reflections and no shadows (OpenGL shading only).
 // Ray tracing: the mirrors show a sequence of sphere images that ends when
@@ -41,6 +42,12 @@ scene
   {
     transform { position <3, 8, 5> }
     light { point }
+  }
+
+  object "Directional Light"
+  {
+    transform { rotation <50, 30, 0> }
+    light { directional }
   }
 
   object "Floor"

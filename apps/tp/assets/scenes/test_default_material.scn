@@ -26,6 +26,12 @@ scene
     light { point }
   }
 
+  object "Directional Light"
+  {
+    transform { rotation <50, 30, 0> }
+    light { directional }
+  }
+
   object "Sphere" { transform { position <-1.5, 0, 0> } mesh "Sphere" }
   object "Box" { transform { position <1.5, 0, 0> rotation <30, 45, 0> } mesh "Box" }
 }

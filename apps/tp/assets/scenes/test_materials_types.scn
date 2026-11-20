@@ -50,6 +50,12 @@ scene
     light { point color White }
   }
 
+  object "Directional Light"
+  {
+    transform { rotation <50, 30, 0> }
+    light { directional }
+  }
+
   object "Floor"
   {
     transform { position <0, -1, 0> scale vec3(20) }
