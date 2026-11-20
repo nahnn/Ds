@@ -50,6 +50,7 @@ class RayTracer: public Renderer
 {
 public:
   static constexpr auto minMinWeight = 0.001f;
+  static constexpr auto defaultMinWeight = 0.05f; // above dielectric F0 (0.04)
   static constexpr auto maxMaxRecursionLevel = 20u;
   static constexpr auto maxPixelSubdivisionLevel = 2u;
 

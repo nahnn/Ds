@@ -60,7 +60,7 @@ printElapsedTime(const char* s, Stopwatch::ms_time time)
 RayTracer::RayTracer(SceneBase& scene, Camera& camera):
   Renderer{scene, &camera},
   _maxRecursionLevel{6},
-  _minWeight{minMinWeight},
+  _minWeight{defaultMinWeight},
   _adaptivityDistance{16}
 {
   // do nothing

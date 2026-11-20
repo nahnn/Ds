@@ -86,7 +86,7 @@ private:
   Reference<RayTracer> _rayTracer;
   Reference<GLImage> _image;
   int _maxRecursionLevel{6};
-  float _minWeight{RayTracer::minMinWeight};
+  float _minWeight{RayTracer::defaultMinWeight};
 
   static MeshMap _defaultMeshes;
 
