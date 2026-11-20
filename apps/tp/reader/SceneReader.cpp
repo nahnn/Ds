@@ -589,7 +589,11 @@ SceneReader::Parser::matchMesh(const parser::String& name)
   else
   {
     proxy = makePrimitive(*mesh, name);
-    parsePrimitiveMaterial(*proxy->mapper()->primitive());
+
+    auto primitive = proxy->mapper()->primitive();
+
+    primitive->setMaterial(defaultPBR());
+    parsePrimitiveMaterial(*primitive);
   }
   return proxy;
 }

@@ -150,11 +150,8 @@ MainWindow::inspectMaterialPBR(SceneWindow& window, Primitive& primitive)
     ImGui::EndDragDropTarget();
   }
 
-  // guardrails
-  auto pbr = dynamic_cast<PBR*>(material);
-  if(!pbr)
-    SceneWindowBase::inspectMaterial(*material);
-
+  if (!dynamic_cast<PBR*>(material))
+    throw std::runtime_error("Only PBR materials are supported");
   inspectMaterialPBR(*material);
 }
 
@@ -223,6 +220,11 @@ MainWindow::beginInitialize()
   buildDefaultMeshes();
   Assets::initialize();
   Assets::meshes().insert(_defaultMeshes.begin(), _defaultMeshes.end());
+
+  // replace the legacy Phong default material by its PBR conversion
+  auto dm = Material::defaultMaterial();
+
+  Assets::materials()[dm->name()] = PBR::toPBR(*dm);
   _sceneFolder = AssetFolder::New("scenes/", ".scn");
 }
 
