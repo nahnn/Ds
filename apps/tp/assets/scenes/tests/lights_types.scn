@@ -1,0 +1,64 @@
+// OVERVIEW: lights_types.scn
+// ========
+// Test scene: one light of each type.
+// Point (red) over the left sphere, spot (green, 30 degrees) pointing down
+// at the right sphere and a dim white directional light over everything.
+//
+// Editor: red light fades with the distance from the left sphere; the spot
+// draws a green disc on the floor around the right sphere; the middle
+// sphere gets only the directional light.
+// Ray tracing: same lighting, with the shadows of the spheres on the floor.
+
+include "../colors.inc"
+
+material "Floor" { diffuse White specular White metallic 0 roughness 0.8 }
+material "Sphere" { diffuse White specular White metallic 0 roughness 0.4 }
+
+scene
+{
+  environment
+  {
+    background DarkGray
+    ambient DarkGray
+  }
+
+  object "Camera"
+  {
+    define pos <0, 8, 16>
+
+    transform
+    {
+      position pos
+      rotation axes(pos, <0, 1, 0>)
+    }
+    camera { perspective angle 45 }
+  }
+
+  object "Point"
+  {
+    transform { position <-5, 3, 2> }
+    light { point color Red falloff 1 }
+  }
+
+  object "Spot"
+  {
+    transform { position <5, 6, 0> rotation <-90, 0, 0> }
+    light { spot color Green angle 30 falloff 0 }
+  }
+
+  object "Directional"
+  {
+    transform { rotation <-50, 30, 0> }
+    light { directional color White * 0.3 }
+  }
+
+  object "Floor"
+  {
+    transform { position <0, -1, 0> scale vec3(20) }
+    mesh "Plane" material "Floor"
+  }
+
+  object "Left" { transform { position <-5, 0, 0> } mesh "Sphere" material "Sphere" }
+  object "Middle" { transform { position <0, 0, 0> } mesh "Sphere" material "Sphere" }
+  object "Right" { transform { position <5, 0, 0> } mesh "Sphere" material "Sphere" }
+}
