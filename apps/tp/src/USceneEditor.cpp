@@ -192,12 +192,10 @@ USceneEditor::drawPBR(const Primitive& p, const PBR& material)
 void
 USceneEditor::setMaterial(const PBR& mat)
 {
-  const auto& a = mat.attributes();
-
-  GLSL::Program::setUniformVec4(_OdLoc, a.od);
-  GLSL::Program::setUniformVec4(_OsLoc, a.os);
-  GLSL::Program::setUniform(_rLoc, a.r);
-  GLSL::Program::setUniform(_mLoc, a.m);
+  GLSL::Program::setUniformVec4(_OdLoc, mat.attrs.od);
+  GLSL::Program::setUniformVec4(_OsLoc, mat.attrs.os);
+  GLSL::Program::setUniform(_rLoc, mat.attrs.r);
+  GLSL::Program::setUniform(_mLoc, mat.attrs.m);
 }
 
 } // end namespace cg
