@@ -223,7 +223,7 @@ PBR::fragmentShader()
         float NH = max(dot(N, Hl), 1e-4);
         float k = pow(m.r + 1, 2) / 8;
         float alpha = pow(m.r, 2);
-        float a2 = max(pow(m.r, 4), 1e-6);
+        float a2 = max(pow(m.r, 4), 1e-4); // same floor as the CPU
         vec4 F = m.Os + (vec4(1,1,1,1) - m.Os) * pow(1 - LH, 5);
         float G = NL / (NL * (1 - k) + k) * NV / (NV * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
         float D = a2 / (PI * pow(NH * NH * (a2 - 1) + 1, 2));
