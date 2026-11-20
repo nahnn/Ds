@@ -27,16 +27,18 @@ PBR::shade(const vec3& N, // Normal
   float k{powf(attrs.r + 1, 2) / 8}; // roughness constant
   float alpha{powf(attrs.r, 2)}; // roughness constant
   auto Hl = (L - V).versor();
+  float nl = math::max<float>(NL, 1e-4);
   float nv = math::max<float>(-NV, 1e-4);
-  Color fresnel = os + (Color::white - os) * powf(1 - L.dot(Hl), 5);
-  float G = NL * math::inverse(NL * (1 - k) + k)  * nv * math::inverse(nv * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
-  float NH = N.dot(Hl);
-  float a2 = powf(alpha, 2);
-  float D = a2 * math::inverse(math::pi<float> * powf(NH * NH * (a2 - 1) + 1, 2));
+  float nh = math::max<float>(N.dot(Hl), 1e-4);
+  float lh = math::max<float>(L.dot(Hl), 1e-4);
+  float a2 = math::max<float>(powf(alpha, 2), 1e-4);
+  Color fresnel = os + (Color::white - os) * powf(1 - lh, 5);
+  float G = nl * math::inverse(nl * (1 - k) + k)  * nv * math::inverse(nv * (1 - k) + k); // G [0,1] w/ NL > 0 and NV > 0
+  float D = a2 * math::inverse(math::pi<float> * powf(nh * nh * (a2 - 1) + 1, 2));
   
-  Color f{BRDF(fresnel * G * D * math::inverse(4 * NL * nv))}; // BRDF
+  Color f{BRDF(fresnel * G * D * math::inverse(4 * nl * nv))}; // BRDF
 
-  return lc * f * NL;
+  return lc * f * nl;
 }
 
 Color
