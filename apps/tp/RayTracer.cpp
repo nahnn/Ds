@@ -33,7 +33,7 @@
 #include "graphics/Camera.h"
 #include "utils/Stopwatch.h"
 #include "RayTracer.h"
-#include "include/pbr/UMaterial.h"
+#include "include/pbr/PBR.h"
 #include <iostream>
 
 using namespace std;
@@ -421,7 +421,7 @@ RayTracer::shade(const Ray3f& ray,
 
   // Compute specular reflection
   auto Or = m->specularReflectionColor(-NV);
-  if (Or != Color::black)
+  if (Or != PBRAttributes::minOs)
   {
     weight *= maxRGB(Or);
     if (weight > _minWeight && level < _maxRecursionLevel)
