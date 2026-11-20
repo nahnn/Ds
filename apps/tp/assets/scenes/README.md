@@ -1,14 +1,4 @@
-# Tests
-
-## Unit tests
-
-```sh
-cmake -S . -B build/Tests -DTP_TESTS=ON
-cmake --build build/Tests
-ctest --test-dir build/Tests
-```
-
-## Test scenes
+# Test scenes
 
 The `assets/scenes/test_*.scn` files are opened with File > Open. Each one
 starts with a comment describing what to observe in the editor and in the

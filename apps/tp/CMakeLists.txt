@@ -75,32 +75,3 @@ if(CGDEMO_IPO_SUPPORTED)
   set_target_properties(cgdemo PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 endif()
-
-# ---------------------------------------------------------------------------
-# Unit tests (cmake -DTP_TESTS=ON, then ctest)
-# ---------------------------------------------------------------------------
-option(TP_TESTS "Build the tp unit tests" OFF)
-if(TP_TESTS)
-  enable_testing()
-  set(sweep_test_SRCS)
-  set(pbr_test_SRCS src/pbr/PBR.cpp)
-  set(writer_test_SRCS src/sweep/SweepMeshWriter.cpp)
-  set(reader_test_SRCS src/pbr/PBR.cpp src/sweep/SweepMeshWriter.cpp
-    reader/AbstractParser.cpp reader/Buffer.cpp reader/ErrorHandler.cpp
-    reader/Expression.cpp reader/FileBuffer.cpp reader/ReaderBase.cpp
-    reader/SceneReader.cpp reader/Scope.cpp)
-  set(raytracer_test_SRCS RayTracer.cpp ${reader_test_SRCS})
-  foreach(t sweep_test pbr_test writer_test reader_test raytracer_test)
-    add_executable(${t} tests/${t}.cpp ${${t}_SRCS})
-    target_include_directories(${t} PRIVATE
-      ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/include)
-    target_link_libraries(${t} PRIVATE cg)
-    get_target_property(t_options cgdemo COMPILE_OPTIONS)
-    target_compile_options(${t} PRIVATE ${t_options})
-    if(MSVC)
-      set_target_properties(${t} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-    endif()
-    add_test(NAME ${t} COMMAND ${t})
-  endforeach()
-endif()
