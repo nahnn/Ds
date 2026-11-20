@@ -81,6 +81,7 @@ DEFINE_KEYWORD_TABLE(SceneReader::Parser, parser::Reader::Parser)
   KEYWORD("light", _COMPONENT, _LIGHT)
   KEYWORD("material", _MATERIAL, 0)
   KEYWORD("mesh", _COMPONENT, _MESH)
+  KEYWORD("metallic", _METALLIC, 0)
   KEYWORD("object", _OBJECT, 0)
   KEYWORD("parallel", _PARALLEL, 0)
   KEYWORD("perspective", _PERSPECTIVE, 0)
@@ -88,6 +89,7 @@ DEFINE_KEYWORD_TABLE(SceneReader::Parser, parser::Reader::Parser)
   KEYWORD("position", _POSITION, 0)
   KEYWORD("range", _RANGE, 0)
   KEYWORD("rotation", _ROTATION, 0)
+  KEYWORD("roughness", _ROUGHNESS, 0)
   KEYWORD("scale", _SCALE, 0)
   KEYWORD("scene", _SCENE, 0)
   KEYWORD("shine", _SHINE, 0)
@@ -95,6 +97,24 @@ DEFINE_KEYWORD_TABLE(SceneReader::Parser, parser::Reader::Parser)
   KEYWORD("spot", _SPOT, 0)
   KEYWORD("transform", _TRANSFORM, 0)
   KEYWORD("transparency", _TRANSPARENCY, 0)
+
+  // sweep keywords (sweeps are primitives, like mesh)
+  KEYWORD("spiral", _COMPONENT, _SWEEP_SPIRAL)
+  KEYWORD("torsion", _COMPONENT, _SWEEP_TORSION)
+  KEYWORD("capped", _SWEEP_CAPPED, 0)
+  KEYWORD("polyline", _SWEEP_POLYLINE, 0)
+  KEYWORD("subdivisions", _SWEEP_SUBDIVISIONS, 0)
+  KEYWORD("circularArc", _POLY_CIRCULAR_ARC, 0)
+  KEYWORD("extrusion", _POLY_EXTRUSION, 0)
+  KEYWORD("points", _POLY_POINTS, 0)
+  KEYWORD("regularPolygon", _POLY_REGULAR_POLYGON, 0)
+  KEYWORD("open", _ARC_OPEN, 0)
+  KEYWORD("segments", _ARC_SEGMENTS, 0)
+  KEYWORD("heightIncrement", _SPIRAL_HEIGHT_INCREMENT, 0)
+  KEYWORD("revolutions", _SPIRAL_REVOLUTIONS, 0)
+  KEYWORD("width", _SPIRAL_WIDTH, 0)
+  KEYWORD("widthIncrement", _SPIRAL_WIDTH_INCREMENT, 0)
+  KEYWORD("offset", _TORSION_OFFSET, 0)
   END_KEYWORD_TABLE;
 
 DEFINE_ERROR_MESSAGE_TABLE(SceneReader::Parser, parser::Reader::Parser)
@@ -112,6 +132,10 @@ DEFINE_ERROR_MESSAGE_TABLE(SceneReader::Parser, parser::Reader::Parser)
     "Could not find material '%s'")
   ERROR_MESSAGE(COULD_NOT_PARSE_COMPONENT,
     "Could not parse component '%s'")
+  ERROR_MESSAGE(POLYLINE_EXPECTED,
+    "Polyline block expected")
+  ERROR_MESSAGE(POLYLINE_TYPE_EXPECTED,
+    "Polyline type ('regularPolygon' or 'circularArc') expected")
 END_ERROR_MESSAGE_TABLE;
 
 inline void
@@ -169,11 +193,12 @@ SceneReader::Parser::declaration()
 }
 
 inline void
-SceneReader::Parser::parseMaterialProperties(Material& material)
+SceneReader::Parser::parseMaterialProperties(Material& material, PBRSpec& pbr_spec)
 {
   for (;;)
     switch (_token)
     {
+      //legacy Phong
       case _AMBIENT:
         advance();
         material.ambient = matchColor();
@@ -208,6 +233,23 @@ SceneReader::Parser::parseMaterialProperties(Material& material)
         else
           material.ior = ior;
         break;
+
+      //PBR
+      case _METALLIC:
+        advance();
+        if (auto v = matchFloat(); v < 0 || v > 1)
+          error(INVALID_VALUE_FOR, "metallic");
+        else
+          pbr_spec.metallic = v, pbr_spec.explicitPBR = true;
+        break;
+      case _ROUGHNESS:
+        advance();
+        if (auto v = matchFloat(); v < .05f || v > 1)
+          error(INVALID_VALUE_FOR, "roughness");
+        else
+          pbr_spec.roughness = v, pbr_spec.explicitPBR = true;
+      break;
+      
       default:
         return;
     }
@@ -225,10 +267,27 @@ SceneReader::Parser::parseMaterial()
     error(MATERIAL_ALREADY_DEFINED, name.c_str());
   match('{');
 
-  Reference<Material> material = new Material{Color::black};
+  Reference<Material> material;
+  Reference<Material> legacy_mat = new Material{Color::black};
+  PBRSpec pbr_spec;
 
-  parseMaterialProperties(*material);
+  parseMaterialProperties(*legacy_mat, pbr_spec);
   matchEndOfBlock();
+
+  if(pbr_spec.explicitPBR)
+    material = new PBR{
+      legacy_mat->diffuse,
+      legacy_mat->specular,
+      pbr_spec.metallic,
+      pbr_spec.roughness
+    };
+  else{
+    material = PBR::toPBR(*legacy_mat);
+    //TODO: talvez tirar Warning
+    printf("Warning: material '%s' uses legacy Phong properties; converted to PBR\n",
+      name.c_str());
+  }
+      
   material->setName(name.c_str());
   _reader->materials.emplace(name, material);
 }
@@ -473,29 +532,6 @@ SceneReader::Parser::matchLight()
   }
 }
 
-inline Reference<graph::PrimitiveProxy>
-SceneReader::Parser::matchPrimitive(int type)
-{
-  if (type != _MESH)
-    return {};
-
-  auto name = matchString();
-
-  if (name.empty())
-    error(EMPTY_MESH_NAME);
-
-  Reference<graph::PrimitiveProxy> proxy;
-
-  if (auto mesh = Assets::loadMesh(name); nullptr == mesh)
-    error(COULD_NOT_FIND_MESH, name.c_str());
-  else
-  {
-    proxy = makePrimitive(*mesh, name);
-    parsePrimitiveMaterial(*proxy->mapper()->primitive());
-  }
-  return proxy;
-}
-
 void
 SceneReader::Parser::parsePrimitiveMaterial(Primitive& primitive)
 {
@@ -510,6 +546,282 @@ SceneReader::Parser::parsePrimitiveMaterial(Primitive& primitive)
     else
       primitive.setMaterial(material);
   }
+}
+
+Material*
+SceneReader::Parser::defaultPBR()
+{
+  const parser::String name{"Default PBR"};
+
+  if (auto m = _reader->findMaterial(name))
+    return m;
+
+  auto pbr = new PBR{Color{.8f, .8f, .8f}, Color::white};
+
+  pbr->setName("%s", name.c_str());
+  _reader->materials.emplace(name, pbr);
+  return pbr;
+}
+
+SceneReader::Parser::PrimitiveType
+SceneReader::Parser::primitiveType(int type)
+{
+  switch (type)
+  {
+    case _MESH:
+      return PRIMITIVE_BASE;
+    case _SWEEP_SPIRAL:
+    case _SWEEP_TORSION:
+      return PRIMITIVE_SWEEP;
+    default:
+      return PRIMITIVE_NONE;
+  }
+}
+
+// PRIMITIVE_BASE: mesh loaded from the assets
+inline Reference<graph::PrimitiveProxy>
+SceneReader::Parser::matchMesh(const parser::String& name)
+{
+  Reference<graph::PrimitiveProxy> proxy;
+
+  if (auto mesh = Assets::loadMesh(name); nullptr == mesh)
+    error(COULD_NOT_FIND_MESH, name.c_str());
+  else
+  {
+    proxy = makePrimitive(*mesh, name);
+    parsePrimitiveMaterial(*proxy->mapper()->primitive());
+  }
+  return proxy;
+}
+
+// PRIMITIVE_SWEEP: mesh generated by a sweep
+// common items of all polylines; returns true if one was consumed
+bool
+SceneReader::Parser::parsePolylineItem(PolylineAttrs<float>& a)
+{
+  switch (_token)
+  {
+    case _SCALE:
+      advance();
+      a.sp = matchFloat();
+      return true;
+    case _ROTATION:
+      advance();
+      a.tp = matchFloat();
+      return true;
+    case _POLY_EXTRUSION:
+      advance();
+      a.ep = matchFloat();
+      a.isExtruded = true;
+      return true;
+    default:
+      return false;
+  }
+}
+
+void
+SceneReader::Parser::parseRegularPolygon(RegularPolygonAttrs<float>& a)
+{
+  // _POLY_REGULAR_POLYGON
+  advance();
+  for (;;)
+    if (_token == _POLY_POINTS)
+    {
+      advance();
+      a.np = matchInteger();
+    }
+    else if (!parsePolylineItem(a))
+      return;
+}
+
+void
+SceneReader::Parser::parseCircularArc(CircularArcAttrs<float>& a)
+{
+  // _POLY_CIRCULAR_ARC
+  advance();
+  for (;;)
+    switch (_token)
+    {
+      case _ANGLE:
+        advance();
+        a.tc = matchFloat();
+        break;
+      case _ARC_SEGMENTS:
+        advance();
+        a.nc = matchInteger();
+        break;
+      case _ARC_OPEN:
+        advance();
+        a.isOpen = true;
+        break;
+      default:
+        if (!parsePolylineItem(a))
+          return;
+    }
+}
+
+void
+SceneReader::Parser::parsePolyline(graph::SweepMeshProxy<float>& proxy)
+{
+  if (_token != _SWEEP_POLYLINE)
+    error(POLYLINE_EXPECTED);
+  advance();
+  match('{');
+
+  auto& gen = proxy.polyGen();
+
+  if (_token == _POLY_REGULAR_POLYGON)
+  {
+    RegularPolygonAttrs<float> a;
+
+    parseRegularPolygon(a);
+    gen.setType(GenType::RegularPolygon);
+    gen.activeGen().set(a);
+  }
+  else if (_token == _POLY_CIRCULAR_ARC)
+  {
+    CircularArcAttrs<float> a;
+
+    parseCircularArc(a);
+    gen.setType(GenType::CircularArc);
+    // CircularArc::set gets tc, nc and isOpen by dynamic_cast
+    gen.activeGen().set(a);
+  }
+  else
+    error(POLYLINE_TYPE_EXPECTED);
+  // an item of another polyline type (e.g. 'points' in an arc) stops here
+  matchEndOfBlock();
+  proxy.setPolylineDirty();
+}
+
+void
+SceneReader::Parser::parseSweeperItems(graph::SpiralProxy<float>& proxy)
+{
+  auto& a = proxy.attr;
+
+  for (;;)
+    switch (_token)
+    {
+      case _SWEEP_CAPPED:
+        advance();
+        a.capped = true;
+        break;
+      case _SPIRAL_WIDTH:
+        advance();
+        a.we = matchFloat();
+        break;
+      case _SPIRAL_REVOLUTIONS:
+        advance();
+        a.re = matchFloat();
+        break;
+      case _SWEEP_SUBDIVISIONS:
+        advance();
+        a.nes = matchInteger();
+        break;
+      case _SPIRAL_HEIGHT_INCREMENT:
+        advance();
+        a.dh = matchFloat();
+        break;
+      case _SPIRAL_WIDTH_INCREMENT:
+        advance();
+        a.dw = matchFloat();
+        break;
+      default:
+        return;
+    }
+}
+
+void
+SceneReader::Parser::parseSweeperItems(graph::TorsionProxy<float>& proxy)
+{
+  auto& a = proxy.attr;
+
+  for (;;)
+    switch (_token)
+    {
+      case _SWEEP_CAPPED:
+        advance();
+        a.capped = true;
+        break;
+      case _LENGTH: // token of the base reader (function length)
+        advance();
+        a.lv = matchFloat();
+        break;
+      case _TORSION_OFFSET:
+      {
+        advance();
+
+        auto v = matchVec2();
+
+        a.ow = v.x;
+        a.oh = v.y;
+        break;
+      }
+      case _SWEEP_SUBDIVISIONS:
+        advance();
+        a.nsv = matchInteger();
+        break;
+      case _SCALE:
+      {
+        advance();
+
+        auto v = matchVec2();
+
+        a.sb = v.x;
+        a.se = v.y;
+        break;
+      }
+      case _ROTATION:
+        advance();
+        a.rv = matchFloat();
+        break;
+      default:
+        return;
+    }
+}
+
+template <typename P>
+Reference<graph::PrimitiveProxy>
+SceneReader::Parser::parseSweep(const parser::String& name)
+{
+  Reference<P> proxy{P::New(name.c_str())};
+  auto primitive = proxy->mapper()->primitive();
+
+  primitive->setMaterial(defaultPBR());
+  parsePrimitiveMaterial(*primitive);
+  match('{');
+  parsePolyline(*proxy);
+  parseSweeperItems(*proxy);
+  matchEndOfBlock();
+  // regenerates the polyline and the mesh (sweeper attrs are clamped here)
+  proxy->build();
+  return Reference<graph::PrimitiveProxy>{proxy.get()};
+}
+
+Reference<graph::PrimitiveProxy>
+SceneReader::Parser::matchSweep(int type, const parser::String& name)
+{
+  return type == _SWEEP_SPIRAL ?
+    parseSweep<graph::SpiralProxy<float>>(name) :
+    parseSweep<graph::TorsionProxy<float>>(name);
+}
+
+// single entry for primitives: the primitive type selects the rules
+inline Reference<graph::PrimitiveProxy>
+SceneReader::Parser::matchPrimitive(int type)
+{
+  auto primitive = primitiveType(type);
+
+  if (primitive == PRIMITIVE_NONE)
+    return {};
+
+  auto name = matchString();
+
+  if (name.empty())
+    error(EMPTY_MESH_NAME);
+  if (primitive == PRIMITIVE_SWEEP)
+    return matchSweep(type, name);
+  return matchMesh(name);
 }
 
 Reference<graph::Component>

@@ -33,7 +33,7 @@
 #include "graphics/Camera.h"
 #include "utils/Stopwatch.h"
 #include "RayTracer.h"
-#include "UMaterial.h"
+#include "include/pbr/UMaterial.h"
 #include <iostream>
 
 using namespace std;

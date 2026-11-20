@@ -25,9 +25,9 @@ add_executable(cgdemo
   reader/ReaderBase.cpp
   reader/SceneReader.cpp
   reader/Scope.cpp
-  src/SweepMeshWriter.cpp
-  src/PBR.cpp
-  src/USceneEditor.cpp
+  src/sweep/SweepMeshWriter.cpp
+  src/pbr/PBR.cpp
+  src/pbr/USceneEditor.cpp
 )
 
 target_include_directories(cgdemo PRIVATE

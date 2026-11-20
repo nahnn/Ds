@@ -36,7 +36,7 @@
 #include "SceneWriter.h"
 #include "MainWindow.h"
 #include "IconsFontAwesome7.h"
-#include "include/PBR.h"
+#include "include/pbr/PBR.h"
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -52,8 +52,16 @@ newPBR()
   auto& map = Assets::materials();
   auto mat = new PBR{Color{1.f, .71f, .29f}, Color{1.f, .71f, .29f}, 1.0f, 0.3f}; // gold
 
-  mat->setName("PBR %d", int(map.size()));
-  map.emplace(mat->name(), mat);
+  //name colision
+  int id = int(map.size());
+  std::string name;
+
+  do
+    name = "PBR " + std::to_string(id++);
+  while (map.contains(name));
+  
+  mat->setName("%s", name.c_str());
+  map.emplace(name, mat);
   return mat;
 }
 
@@ -631,7 +639,7 @@ void MainWindow::inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshPro
 
   inspectPolylineBase(attrs, proxy);
 
-  ImGui::Text("Regular Polygon Parameters");
+  ImGui::Text("Circular Arc Parameters");
   
   if (ImGui::SliderFloat("Angle", &attrs.tc, Limits::MIN_THETAC_EXCLUSIVE + 0.1f, Limits::MAX_THETAC))
     proxy.setPolylineDirty();
@@ -647,6 +655,7 @@ void MainWindow::inspectCircularArc(CircularArcAttrs<float>& attrs, SweepMeshPro
 // Generic Polyline Generatrix
 void MainWindow::inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy)
 {
+
   ImGui::SeparatorText("Material");
 
   //copied from SceneWindow inspectMapper() because of encapsulation problems
@@ -663,18 +672,22 @@ void MainWindow::inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& p
 
   ImGui::SeparatorText("Polyline");
 
-  int gen = static_cast<int>(proxy.activeGen); // indirection to not miss on big endian
-  if (ImGui::Combo("Generator", &gen, "Regular Polygon\0Circular Arc\0"))
+  //generic polyline inspect
+  auto& gen = proxy.polyGen();
+
+  if (ImGui::BeginCombo("Generator", gen.entries().at(gen.activeGenType()).name))
   {
-    proxy.activeGen = static_cast<SweepMeshProxy<float>::PolylineGeneratorType>(gen);
-    proxy.setPolylineDirty();
+    for (const auto& [type, entry] : gen.entries())
+      if (ImGui::Selectable(entry.name, type == gen.activeGenType()))
+      {
+        gen.setType(type);
+        proxy.setPolylineDirty();
+      }
+    ImGui::EndCombo();
   }
 
-  //Sets the actual polyline gen type
-  if (proxy.activeGen == SweepMeshProxy<float>::PolylineGeneratorType::RegularPolygon)
-    inspectRegularPolygon((RegularPolygonAttrs<float>&)proxy.genAttrs, proxy);
-  else
-    inspectCircularArc((CircularArcAttrs<float>&)proxy.genAttrs, proxy);
+  if (auto it = _polyGenInspectors.find(gen.activeGenType()); it != _polyGenInspectors.end())
+    it->second(gen, proxy);
 
   ImGui::Separator();
 }
@@ -711,7 +724,7 @@ void MainWindow::inspectSweeperBase(PolylineSweeperAttrs<float>& attrs, SweepMes
 {
   //only capped if not extruded and closed
   //TODO: add closed verification
-  ImGui::BeginDisabled(proxy.genAttrs.isExtruded);
+  ImGui::BeginDisabled(proxy.genAttrs().isExtruded);
 
   if (ImGui::Checkbox("Capped", &attrs.capped))
     proxy.setSweepDirty();
