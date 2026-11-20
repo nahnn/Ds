@@ -1,4 +1,4 @@
-// OVERVIEW: pbr_grid.scn
+// OVERVIEW: test_pbr_grid.scn
 // ========
 // Test scene: grid of PBR spheres.
 // Roughness grows from left (0.05) to right (1); metallic grows from
@@ -9,7 +9,7 @@
 // Ray tracing: the left spheres of the top rows reflect their neighbors;
 // rough spheres reflect almost nothing.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "M0R0" { diffuse Gold specular Gold metallic 0 roughness 0.05 }
 material "M0R1" { diffuse Gold specular Gold metallic 0 roughness 0.25 }

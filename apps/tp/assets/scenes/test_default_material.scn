@@ -1,4 +1,4 @@
-// OVERVIEW: default_material.scn
+// OVERVIEW: test_default_material.scn
 // ========
 // Test scene: meshes without material.
 // The reader assigns "Default PBR" to each of them.

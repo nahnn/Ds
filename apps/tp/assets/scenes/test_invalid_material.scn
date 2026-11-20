@@ -1,4 +1,4 @@
-// OVERVIEW: invalid_material.scn
+// OVERVIEW: test_invalid_material.scn
 // ========
 // Test scene: reference to an undeclared material.
 //

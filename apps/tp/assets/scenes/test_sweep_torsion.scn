@@ -1,4 +1,4 @@
-// OVERVIEW: sweep_torsion.scn
+// OVERVIEW: test_sweep_torsion.scn
 // ========
 // Test scene: torsion sweeps.
 // Front row: straight square prism (reference), twisted (rotation 1),
@@ -13,7 +13,7 @@
 // no caps.
 // Ray tracing: same meshes.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Teal" { diffuse rgb(0, 0.6, 0.6) specular White metallic 0 roughness 0.3 }
 material "Silver" { diffuse Silver specular Silver metallic 1 roughness 0.25 }

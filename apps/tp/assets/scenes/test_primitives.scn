@@ -1,4 +1,4 @@
-// OVERVIEW: primitives.scn
+// OVERVIEW: test_primitives.scn
 // ========
 // Test scene: meshes.
 // The five default meshes (Box, Sphere, Cylinder, Cone, Plane) and the
@@ -8,7 +8,7 @@
 // object and the "..." button lists every mesh of the assets.
 // Ray tracing: same meshes, including the f-16 triangles.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Gray" { diffuse VeryLightGray specular White metallic 0 roughness 0.5 }
 material "Steel" { diffuse Silver specular Silver metallic 1 roughness 0.35 }

@@ -1,4 +1,4 @@
-// OVERVIEW: camera_parallel.scn
+// OVERVIEW: test_camera_parallel.scn
 // ========
 // Test scene: parallel projection.
 // Rows of boxes going away from the camera, seen by a parallel camera with
@@ -8,7 +8,7 @@
 // rows stay parallel (no vanishing point).
 // Ray tracing: same image, rendered with parallel rays.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Red" { diffuse Red specular White metallic 0 roughness 0.4 }
 material "Green" { diffuse Green specular White metallic 0 roughness 0.4 }

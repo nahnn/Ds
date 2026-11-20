@@ -1,4 +1,4 @@
-// OVERVIEW: invalid_metallic.scn
+// OVERVIEW: test_invalid_metallic.scn
 // ========
 // Test scene: metallic out of [0, 1].
 //

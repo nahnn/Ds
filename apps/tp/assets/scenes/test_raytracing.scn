@@ -1,4 +1,4 @@
-// OVERVIEW: raytracing.scn
+// OVERVIEW: test_raytracing.scn
 // ========
 // Test scene: ray tracing features.
 // Two mirrors face each other with a red sphere between them, over a
@@ -10,7 +10,7 @@
 // the number of rays printed in the console); the sphere and the box cast
 // shadows; the floor reflects more toward the horizon (Fresnel).
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Mirror" { diffuse White specular White metallic 1 roughness 0.05 }
 material "Floor" { diffuse Gray specular White metallic 0 roughness 0.05 }

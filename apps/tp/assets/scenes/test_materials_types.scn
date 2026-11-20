@@ -1,4 +1,4 @@
-// OVERVIEW: materials_types.scn
+// OVERVIEW: test_materials_types.scn
 // ========
 // Test scene: every kind of material.
 // Top row: PBR dielectrics (plastic, rubber) and metals (gold, copper,
@@ -9,7 +9,7 @@
 // metals have no diffuse color and a highlight tinted by the metal.
 // Ray tracing: chrome and silver reflect the floor and the neighbors.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "PhongShiny" { ambient Red diffuse Red spot White shine 100 specular White }
 material "PhongMatte" { ambient Green diffuse Green spot Black shine 1 specular Black }

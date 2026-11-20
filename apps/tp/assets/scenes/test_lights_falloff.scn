@@ -1,4 +1,4 @@
-// OVERVIEW: lights_falloff.scn
+// OVERVIEW: test_lights_falloff.scn
 // ========
 // Test scene: falloff and range of point lights.
 // Four floor tiles, each lit by its own point light 2 units above it:
@@ -10,7 +10,7 @@
 // faster near the center (quadratic). The last tile is never fully dark.
 // Ray tracing: same result.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Floor" { diffuse White specular White metallic 0 roughness 1 }
 

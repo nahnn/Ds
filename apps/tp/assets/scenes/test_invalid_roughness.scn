@@ -1,4 +1,4 @@
-// OVERVIEW: invalid_roughness.scn
+// OVERVIEW: test_invalid_roughness.scn
 // ========
 // Test scene: roughness out of [0.05, 1].
 //

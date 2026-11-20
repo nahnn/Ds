@@ -1,4 +1,4 @@
-// OVERVIEW: invalid_mesh.scn
+// OVERVIEW: test_invalid_mesh.scn
 // ========
 // Test scene: reference to a mesh that is not in the assets.
 //

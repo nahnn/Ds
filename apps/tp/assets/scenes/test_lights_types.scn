@@ -1,4 +1,4 @@
-// OVERVIEW: lights_types.scn
+// OVERVIEW: test_lights_types.scn
 // ========
 // Test scene: one light of each type.
 // Point (red) over the left sphere, spot (green, 30 degrees) pointing down
@@ -9,7 +9,7 @@
 // sphere gets only the directional light.
 // Ray tracing: same lighting, with the shadows of the spheres on the floor.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Floor" { diffuse White specular White metallic 0 roughness 0.8 }
 material "Sphere" { diffuse White specular White metallic 0 roughness 0.4 }

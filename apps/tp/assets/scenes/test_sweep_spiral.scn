@@ -1,4 +1,4 @@
-// OVERVIEW: sweep_spiral.scn
+// OVERVIEW: test_sweep_spiral.scn
 // ========
 // Test scene: spiral sweeps.
 // Front row: closed square (capped), open arc, extruded hexagon (capped,
@@ -12,7 +12,7 @@
 // spiral and a coarse spiral.
 // Ray tracing: same meshes.
 
-include "../colors.inc"
+include "colors.inc"
 
 material "Orange" { diffuse Orange specular White metallic 0 roughness 0.3 }
 material "Copper" { diffuse Copper specular Copper metallic 1 roughness 0.3 }
