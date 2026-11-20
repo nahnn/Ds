@@ -1,6 +1,11 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 .vs/
 x64/
+
+assets/
+build/
+lib/
+
 *.ilk
 *.pdb
 *.idb
@@ -8,7 +13,6 @@ x64/
 *.exe
 *.iobj
 *.ipdb
-assets/
 *.aux
 *.bbl
 *.blg
