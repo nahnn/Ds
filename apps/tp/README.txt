@@ -5,7 +5,7 @@ Autores: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almei
 Parte 1: Todas as atividades realizadas
 Parte 2: Todas as atividades realizadas 
 
-link vídeo: 
+link vídeo: https://youtu.be/vkvUYztl1ZE
 ===================================================
 
 Requisitos Compilação
