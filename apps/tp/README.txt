@@ -1,7 +1,12 @@
-TP - Computacao Grafica 2026 (Parte 2) - Compilacao
+TP - Computacao Grafica 
+
+Parte 1: Todas as atividades realizadas
+Parte 2: Todas as atividades realizadas 
+
+link vídeo: 
 ===================================================
 
-Requisitos
+Requisitos Compilação
 ----------
 - CMake 3.18 ou superior e um compilador C++20.
 - Windows: Visual Studio (2022 ou mais recente).
