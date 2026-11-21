@@ -22,7 +22,7 @@ scene
 {
   environment
   {
-    background DarkGray
+    background rgb(0.761, 0.761, 0.761)
     ambient Gray
   }
 

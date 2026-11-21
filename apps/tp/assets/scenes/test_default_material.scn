@@ -10,7 +10,7 @@ scene
 {
   environment
   {
-    background rgb(0.025, 0.025, 0.025)
+    background rgb(0.761, 0.761, 0.761)
     ambient rgb(0.15, 0.15, 0.15)
   }
 
