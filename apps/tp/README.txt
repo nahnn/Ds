@@ -1,5 +1,7 @@
 TP - Computacao Grafica 
 
+Autores: Augusto Cesar Dalal, João Pedro San't Ana de Carvalho, Nathan de Almeida Rezende
+
 Parte 1: Todas as atividades realizadas
 Parte 2: Todas as atividades realizadas 
 
