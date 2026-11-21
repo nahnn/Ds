@@ -149,7 +149,7 @@ private:
   static void inspectGeneratrix(SceneWindow& window, SweepMeshProxy<float>& proxy);
 
   //to inspect PBR works
-  SceneEditor* makeEditor(SceneBase& scene) override { return new USceneEditor{scene}; }
+  cg::SceneEditor* makeEditor(SceneBase& scene) override { return new USceneEditor{scene}; }
   TriangleMeshProxy* makePrimitive(const TriangleMesh& mesh, const std::string& meshName);
   SceneObject* createPrimitiveObject(const TriangleMesh& mesh, const std::string& meshName);
   Material* createMaterial();

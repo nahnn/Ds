@@ -8,7 +8,7 @@
 #
 # Pressupõe a estrutura do Ds: este diretório em $/Ds/apps/tp e a biblioteca em $/Ds/cg.
 # Windows: requer GNU Make (ex.: winget install ezwinports.make, choco install make
-# ou mingw32-make), executado no PowerShell ou no cmd.
+# ou mingw32-make).
 
 CONFIG ?= Debug
 
@@ -20,17 +20,28 @@ endif
 TP_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 CG_DIR := $(abspath $(TP_DIR)/../../cg)
 
+# Confere a estrutura antes de qualquer comando (funciona em qualquer SO)
+ifeq ($(wildcard $(CG_DIR)/CMakeLists.txt),)
+  $(error Biblioteca cg nao encontrada em $(CG_DIR). Esta pasta deve estar em Ds/apps/tp)
+endif
+
 ifeq ($(OS),Windows_NT)
-  # Windows: os .bat precisam do cmd.exe
-  SHELL := cmd.exe
-  .SHELLFLAGS := /c
   PLATFORM := Windows
-  win = $(subst /,\,$(1))
-  BUILD_CG = call "$(call win,$(CG_DIR)/build.bat)" $(CONFIG)
-  BUILD_TP = call "$(call win,$(TP_DIR)/build.bat)" $(CONFIG)
-  RUN_TP = cd /d "$(call win,$(TP_DIR))" && cgdemo.exe
-  CLEAN_TP = if exist "$(call win,$(TP_DIR)/build)" rmdir /s /q "$(call win,$(TP_DIR)/build)"
-  CG_CHECK = if not exist "$(call win,$(CG_DIR)/build.bat)" (echo Erro: cg nao encontrado em $(call win,$(CG_DIR)) && exit /b 1)
+  ifneq ($(filter %msys %cygwin,$(MAKE_HOST)),)
+    # make do MSYS2/Cygwin/Git Bash (ex.: "Built for x86_64-pc-msys"): as receitas
+    # rodam em /bin/sh e abspath devolve caminhos POSIX (/c/Users/...). O sh executa
+    # .bat por esse caminho e converte para o formato do Windows sozinho.
+    BUILD_CG = "$(CG_DIR)/build.bat" $(CONFIG)
+    BUILD_TP = "$(TP_DIR)/build.bat" $(CONFIG)
+    EXE := $(TP_DIR)/cgdemo.exe
+  else
+    # make nativo do Windows (GnuWin32, ezwinports, mingw32-make): as receitas rodam
+    # pelo cmd.exe e abspath devolve C:/Users/...; troca / por \ para o cmd
+    win = $(subst /,\,$(1))
+    BUILD_CG = "$(call win,$(CG_DIR)/build.bat)" $(CONFIG)
+    BUILD_TP = "$(call win,$(TP_DIR)/build.bat)" $(CONFIG)
+    EXE := $(call win,$(TP_DIR)/cgdemo.exe)
+  endif
 else
   UNAME_S := $(shell uname -s 2>/dev/null)
   # Linux, macOS e outros Unix: build.sh (CMake; no macOS usa a GLFW de cg/externals)
@@ -42,9 +53,7 @@ else
   # bash explicito: o bit de execucao dos .sh pode se perder ao zipar/enviar
   BUILD_CG = bash "$(CG_DIR)/build.sh" $(CONFIG)
   BUILD_TP = bash "$(TP_DIR)/build.sh" $(CONFIG)
-  RUN_TP = cd "$(TP_DIR)" && ./cgdemo
-  CLEAN_TP = rm -rf "$(TP_DIR)/build"
-  CG_CHECK = test -f "$(CG_DIR)/build.sh" || { echo "Erro: cg nao encontrado em $(CG_DIR)"; exit 1; }
+  EXE := $(TP_DIR)/cgdemo
 endif
 
 .PHONY: all cg tp run clean info
@@ -57,15 +66,15 @@ info:
 	@echo tp: $(TP_DIR)
 
 cg:
-	@$(CG_CHECK)
 	$(BUILD_CG)
 
 tp: cg
 	$(BUILD_TP)
 
+# Rode a partir de apps/tp (ou com make -C apps/tp): o programa usa a pasta assets
 run: tp
-	$(RUN_TP)
+	"$(EXE)"
 
 # Apaga so o build do tp; o build do cg nao e nosso
 clean:
-	$(CLEAN_TP)
+	cmake -E rm -rf "$(TP_DIR)/build"
