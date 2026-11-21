@@ -42,6 +42,7 @@ target_link_libraries(cgdemo PRIVATE cg)
 # ---------------------------------------------------------------------------
 if(MSVC)
   target_compile_options(cgdemo PRIVATE /W3 /sdl /permissive-)
+  target_compile_definitions(cgdemo PRIVATE _CRT_SECURE_NO_WARNINGS)
   # RuntimeLibrary MultiThreaded(Debug)DLL (must match cg)
   set_target_properties(cgdemo PROPERTIES
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
