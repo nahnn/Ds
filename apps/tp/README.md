@@ -21,7 +21,7 @@ tp/
 ├── Main.cpp         # ponto de entrada
 ├── RayTracer.*      # shading delegado ao material
 ├── MainWindow.*     # menus e inspetores novos
-└── assets/scenes/   # cenas de teste (test_*.scn)
+└── assets/scenes/   # cenas de demonstração (demo_*.scn)
 ```
 
 O núcleo do `cgdemo` (`SceneWindow`, `SceneEditor`, `PrimitiveProxy`, `Material`, `RayTracer`) é reaproveitado. As extensões entram por herança e pelos pontos de registro que o framework já oferece (`registerInspectFunction`, `registerWriteFunction`, `makeEditor`).
@@ -262,7 +262,7 @@ spiral|torsion "nome" (material "m")? {
 ### 2.10 Build e testes
 
 - `CMakeLists.txt`: inclui os `.cpp` de `src/` e `include/` nos *include dirs*.
-- `assets/scenes/test_*.scn` são cenas de teste para PBR, luzes, ray tracing, sweeps e erros de parser. O roteiro manual está em `assets/scenes/README.md`.
+- `assets/scenes/demo_*.scn` são as cenas da apresentação (PBR, espiral, torção). O roteiro está em `assets/scenes/README.md`.
 
 ---
 
